@@ -36,7 +36,7 @@ export const CallIntent = z.object({
   kind: z.literal("call"),
   contract: z.string().min(2),
   method: z.string().min(1),
-  args: z.record(z.unknown()).default({}),
+  args: z.record(z.string(), z.unknown()).default({}),
   depositYocto: digits.default("0"),
   ...common,
 });
@@ -46,7 +46,7 @@ export const FORBIDDEN_BY_DEFAULT = ["sign_message", "add_key", "delete_key", "d
 
 export const OtherIntent = z.object({
   kind: z.enum(FORBIDDEN_BY_DEFAULT),
-  details: z.record(z.unknown()).default({}),
+  details: z.record(z.string(), z.unknown()).default({}),
   ...common,
 });
 

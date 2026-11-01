@@ -5,9 +5,9 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
+    "@phala/dcap-qvl": "0.7.0",
     "@sealed-intent/receipt": "workspace:*",
-    "zod": "3.25.76",
-    "@phala/dcap-qvl": "0.7.0"
+    "zod": "4.6.7"
   },
   "optionalDependencies": {
     "@defuse-protocol/one-click-sdk-typescript": "0.1.26"

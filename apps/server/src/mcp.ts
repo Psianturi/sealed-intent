@@ -68,7 +68,7 @@ server.registerTool(
     inputSchema: {
       contract: z.string(),
       method: z.string(),
-      args: z.record(z.unknown()).optional(),
+      args: z.record(z.string(), z.unknown()).optional(),
       depositYocto: z.string().optional(),
       purpose: z.string().optional(),
       taskText: z.string().optional(),
