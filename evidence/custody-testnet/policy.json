@@ -1,0 +1,61 @@
+{
+  "rules": {
+    "transaction_types": [
+      "transfer",
+      "call"
+    ],
+    "allowed_tokens": [
+      "native",
+      "nep141:wrap.testnet"
+    ],
+    "addresses": {
+      "mode": "whitelist",
+      "list": [
+        "sein-vendor-mvy1eh5f.testnet",
+        "sein-owner-mvy1eh5f.testnet",
+        "wrap.testnet"
+      ]
+    },
+    "limits": {
+      "per_transaction": {
+        "native": "1000000000000000000000000",
+        "nep141:wrap.testnet": "500000000000000000000000"
+      },
+      "daily": {
+        "*": "3000000000000000000000000"
+      }
+    },
+    "rate_limit": {
+      "max_per_hour": 60
+    }
+  },
+  "capabilities": {
+    "sign_message": {
+      "allowed": false
+    },
+    "raw_sign": {
+      "allowed": false
+    },
+    "swap": {
+      "allowed": false
+    },
+    "cross_chain_withdraw": {
+      "allowed": false
+    },
+    "limit_order": {
+      "allowed": false
+    },
+    "payment_check": {
+      "allowed": false
+    },
+    "confidential": {
+      "allowed": false
+    },
+    "evm_sign": {
+      "allowed": false
+    },
+    "solana_sign": {
+      "allowed": false
+    }
+  }
+}

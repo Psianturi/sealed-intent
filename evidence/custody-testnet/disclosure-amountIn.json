@@ -1,0 +1,8 @@
+{
+  "receiptId": "5e744519-921f-44c0-88a2-e4e4b8842021",
+  "field": "amountIn",
+  "opening": {
+    "value": "2000000000000000000000",
+    "salt": "a717fd8f9007456b2dbc17e778f98513"
+  }
+}

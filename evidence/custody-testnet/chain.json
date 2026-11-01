@@ -1,0 +1,8 @@
+{
+  "network": "testnet",
+  "registry": "sein-registry-mvy2i59w.testnet",
+  "wallet": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21",
+  "owner": "sein-owner-mvy1eh5f.testnet",
+  "operator": "sein-operator-mvy2i59w.testnet",
+  "agent": "agent-1"
+}

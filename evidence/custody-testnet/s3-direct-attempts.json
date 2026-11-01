@@ -1,0 +1,239 @@
+{
+  "ranAt": "2026-11-01T16:34:08.462Z",
+  "network": "testnet",
+  "wallet": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21",
+  "vendor": "sein-vendor-mvy1eh5f.testnet",
+  "attacker": "sein-attacker-mvy1eh5f.testnet",
+  "controller": "sein-owner-mvy1eh5f.testnet",
+  "passed": 18,
+  "total": 21,
+  "wNearMovedToAttackerYocto": "1000000000000000000000",
+  "rows": [
+    {
+      "name": "wrap 0.5 NEAR on the allowed contract",
+      "expect": "allowed",
+      "http": 200,
+      "txHash": "8HEieycW4jivAM1zTKeBpb6Q2VFYigTFS5M3we6p6F6x",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR to the allowed vendor",
+      "expect": "allowed",
+      "http": 200,
+      "txHash": "GkTt5yiTmRaiLKhHfK27ppG3pF3oEyYyBEYj7B6RuH1d",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Address 'sein-attacker-mvy1eh5f.testnet' is not in whitelist",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR above the per-transaction limit",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Per-transaction limit exceeded for native: 1100000000000000000000000 > 1000000000000000000000000",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the allowed vendor",
+      "expect": "allowed",
+      "http": 200,
+      "txHash": "En38MAzdHJ8se7wBwFCfq4WxFQTySQLJu27iguNtbUDm",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the attacker through the allowed token contract",
+      "expect": "refused",
+      "http": 200,
+      "txHash": "HBTv2LeGfkBYv1oJkRViystYD72Egabsa7j3JCA9CAwL",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": false,
+      "attackerWrapDelta": "1000000000000000000000",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR above the token limit to the vendor",
+      "expect": "refused",
+      "http": 200,
+      "txHash": "3Ps4C7AbfWRqPVBEuKfTLMnLopmQpmCfKKG5Eko6HUdd",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": false,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the attacker with ft_transfer_call",
+      "expect": "refused",
+      "http": 422,
+      "error": "onchain_tx_failed",
+      "message": "{\"CompilationError\":{\"CodeDoesNotExist\":{\"account_id\":\"sein-attacker-mvy1eh5f.testnet\"}}}",
+      "txHash": "7bWJPQrRhk8aSvaiPzaTwyM1qBL7cXUbCLYLLWTkyVie",
+      "outcome": "allowed",
+      "asExpected": false,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "call a contract that is not on the list",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Address 'guest-book.testnet' is not in whitelist",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "sign a NEP-413 message",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Capability for 'sign_message' is not enabled by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "delete the wallet and sweep to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'delete' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "intents withdraw to the attacker",
+      "expect": "refused",
+      "http": 503,
+      "error": "service_unavailable",
+      "message": "NEAR Intents are mainnet-only (no testnet solvers); unavailable on testnet",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "key holder plus another account replaces the policy",
+      "expect": "refused",
+      "error": "chain_refused",
+      "message": "Contract call failed: outlayer.testnet.store_wallet_policy - Smart contract panicked: panicked at src/wallet.rs:380:13:\nOnly the original controller (sein-owner-mvy1eh5f.testnet) can update this wallet policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "the wallet replaces its own policy through a call",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Address 'outlayer.testnet' is not in whitelist",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "another account deletes the policy",
+      "expect": "refused",
+      "error": "chain_refused",
+      "message": "Contract call failed: outlayer.testnet.delete_wallet_policy - Smart contract panicked: panicked at src/wallet.rs:557:9:\nOnly the controller (sein-owner-mvy1eh5f.testnet) can delete this wallet policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "a freeze-only key freezes the wallet",
+      "expect": "allowed",
+      "txHash": "75TwWcwY9bUnSGMzxTmXvKnZ73k1FSCW6NxHYxGLn2Zj",
+      "status": "frozen",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "frozen wallet: a payment that was allowed",
+      "expect": "refused",
+      "http": 403,
+      "error": "wallet_frozen",
+      "message": "Wallet is frozen by controller",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "the freeze-only key cannot unfreeze",
+      "expect": "refused",
+      "error": "chain_refused",
+      "message": "Server error",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "another account unfreezes",
+      "expect": "refused",
+      "error": "chain_refused",
+      "message": "Contract call failed: outlayer.testnet.unfreeze_wallet - Smart contract panicked: panicked at src/wallet.rs:527:9:\nOnly the controller (sein-owner-mvy1eh5f.testnet) can unfreeze this wallet",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "the controller unfreezes",
+      "expect": "allowed",
+      "txHash": "BgSzzwN46UP7w7scRr9KpUMAqZMMmWtTcwf8bc1m4F9e",
+      "status": "unfrozen",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "after unfreeze the allowed payment works again",
+      "expect": "allowed",
+      "http": 200,
+      "txHash": "mC1X6TMMp6MvLhtpodMW8WBHfF5TV7AMC9VbhKLY58w",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    }
+  ]
+}

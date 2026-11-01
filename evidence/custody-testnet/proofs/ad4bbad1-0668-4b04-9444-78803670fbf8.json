@@ -1,0 +1,28 @@
+{
+  "version": "sein/proof@1",
+  "receiptId": "ad4bbad1-0668-4b04-9444-78803670fbf8",
+  "network": "testnet",
+  "registry": "sein-registry-mvy2i59w.testnet",
+  "anchorIndex": 0,
+  "anchorTx": "CjmAwijPato9is1Kv7HD4Y2ey9HULJA778SXVB8DAhqb",
+  "root": "022b9a9bbc41c80c9ea84bfd49a82e2f483d93403686c4688df32f35ff5aaa60",
+  "leaf": "9141fc66a2b9c120140b7c94db98049900e34d443b70220eb26e7d10fa7bbbbf",
+  "path": [
+    {
+      "side": "left",
+      "hash": "523220b68f36fd91ac57d745562bf1a79498353db8abd711cd813773ae6521d4"
+    },
+    {
+      "side": "right",
+      "hash": "374ad579080a81f1d7b8781d78bab84f9f821a4ec562e7d7697c8a863b333381"
+    },
+    {
+      "side": "right",
+      "hash": "69e0f4f920fd561ecb0d28f8abafcfbbbf6572b93a3c63b95ce3f79258a1106b"
+    },
+    {
+      "side": "right",
+      "hash": "9f6f6eed50d68c2c85fff2a017ce619c63efed010bce3a7bbcbb0f971b44b968"
+    }
+  ]
+}

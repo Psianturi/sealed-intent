@@ -1,0 +1,97 @@
+{
+  "ranAt": "2026-11-01T17:24:41.726Z",
+  "network": "testnet",
+  "wallet": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21",
+  "passed": 7,
+  "total": 8,
+  "rows": [
+    {
+      "name": "wNEAR to the vendor through the listed token contract",
+      "expect": "allowed",
+      "http": 200,
+      "txHash": "3zBahmbp86vc6KZ2x1xdshdFSpxSVDKQBHKwyq4KqQ3H",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the attacker through the listed token contract",
+      "expect": "refused",
+      "http": 200,
+      "txHash": "9ooEoLUXEvWAPWEDyzoJgQBXoQrFBKkGxncEBtBDVF7x",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": false,
+      "attackerWrapDelta": "1000000000000000000000",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "attach more NEAR than the limit to the token contract",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Per-transaction limit exceeded for native: 100000000000000000000000 > 2000000000000000000000",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR to the vendor",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'transfer' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'transfer' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "call a contract that is not on the list",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Address 'guest-book.testnet' is not in whitelist",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "sign a NEP-413 message",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Capability for 'sign_message' is not enabled by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "delete the wallet and sweep to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'delete' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "receiptId": "5e744519-921f-44c0-88a2-e4e4b8842021",
+  "field": "tokenIn",
+  "opening": {
+    "value": "native",
+    "salt": "9f3f516d9681d287d5158865eae12d50"
+  }
+}

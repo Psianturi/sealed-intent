@@ -1,0 +1,8 @@
+{
+  "receiptId": "5e744519-921f-44c0-88a2-e4e4b8842021",
+  "field": "recipient",
+  "opening": {
+    "value": "sein-vendor-mvy1eh5f.testnet",
+    "salt": "3afe6c40965154d992189843cf5e342c"
+  }
+}

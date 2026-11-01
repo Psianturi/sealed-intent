@@ -1,0 +1,23 @@
+{
+  "version": "sealed-intent/execution@1",
+  "receiptId": "b578a91b-7b4f-47dd-8b03-efad33e91691",
+  "decisionId": "ffad6a4b-2c1f-4190-a489-0378d65742e2",
+  "kind": "transfer",
+  "status": "submitted",
+  "txHash": "jHfPVh1W5oC5TxFHcAwfLDTLcMNXwQM3MXB2Ggcwrci",
+  "network": "testnet",
+  "chain": {
+    "network": "testnet",
+    "signer": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21",
+    "receiver": "sein-owner-mvy1eh5f.testnet",
+    "blockHash": "DhSx4WUbaK3FaF3z7NURirbUsnPG5MXjQn8SJv7J6Rq6",
+    "final": true
+  },
+  "executedAt": "2026-11-01T17:09:17.867Z",
+  "approvedBy": "sein-owner-mvy1eh5f.testnet",
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "8a125df7a6e9a347d5acc4d28a2c00bdd663509099114ba8daffade1fe2d210a"
+  },
+  "signature": "cf60f8664287622b63393e18d0a42739b994f9a2b2e6acadc89f1076f5df60c514caeac2c35774046b2663817a5c85b4c7bcc066800f305f8ec3c2cb8f9ebe09"
+}

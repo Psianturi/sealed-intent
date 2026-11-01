@@ -1,0 +1,154 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "f6a1e7e9-1d74-4442-b7c3-bd0a07136c2f",
+  "issuedAt": "2026-11-01T17:12:08.045Z",
+  "verdict": "WARN",
+  "reasonCodes": [],
+  "warnCodes": [
+    "COUNTERPARTY_FIRST_CONTACT",
+    "RECIPIENT_NOT_ALLOWLISTED",
+    "TEE_SIGNAL_BLOCK"
+  ],
+  "public": {
+    "intentKind": "transfer",
+    "route": "public",
+    "mode": "live",
+    "network": "testnet",
+    "registeredAgent": "agent-1",
+    "budgetReservationId": "f673dae5-418a-41e4-8206-8057dec05e74"
+  },
+  "commitments": {
+    "agentId": "553b85af1d3511b0f917c07c0f861194f5f38d709fe34b9e7250f10d37b36aae",
+    "tokenIn": "f3646e28c21bd0a792d3778475a1c49248b1715b6e5ccdcf3fb978cd1efdfd8c",
+    "amountIn": "41ac225be3a0a7434e355bcdca871a3edd5a4f97f2f86f5d8902dbb66354722c",
+    "recipient": "ab8fe1ae5d3ac9d88aaa5d9db38fca51b0def89315d0040b5037529cea13ad50",
+    "taskText": "c996da938fa44f9a4f699c588a05952059fdff413c6d5a40c0a9b1cba9d24fbf",
+    "intent": "17837bacaefc3e4bbd8b0acba05348f251c82027d9ec78bbb816525d7bddc8ce"
+  },
+  "policyCommitment": "278259bdd28eddf3ee4acc26123b5923b71e65d5393a243559488f4cba079f5a",
+  "tee": {
+    "kind": "nearai-cloud",
+    "signatureKind": "provider_tee",
+    "model": "z-ai/glm-5.3-flash",
+    "chatId": "bcf48baca90f42fab7f10e3c96b805a6",
+    "text": "z-ai/glm-5.3-flash:600570ad3c947d42ac23a934d23c533dba2b7ff5ea7baa7e0c3899f4148c7d80:232b917fe5730d519e297262c0cae13f3b2d8d48d5bdb1a6b32a61a3431bb331",
+    "signature": "0x00c6491b1795cb7c779e7de6a5d6910c3af499e6ff83d802cb762898eb568b9d05a776ba10b81d36b43f02903ece7cf78f2f76d80d5b7ced10e1025afb6d53f31c",
+    "signingAddress": "0x3b753b4406613c5e70ae640508632b600424fa0c",
+    "signingAlgo": "ecdsa",
+    "requestHash": "600570ad3c947d42ac23a934d23c533dba2b7ff5ea7baa7e0c3899f4148c7d80",
+    "responseHash": "232b917fe5730d519e297262c0cae13f3b2d8d48d5bdb1a6b32a61a3431bb331",
+    "attestation": {
+      "nonce": "21aac331beaf767bc03345e9ad2db3a653497e5e7db45270ad3c206063476c5c",
+      "signingAddressMatched": true,
+      "quoteVerifiedLocally": true,
+      "tcbStatus": "UpToDate",
+      "measurements": {
+        "mrTd": "df4d77c857de652bd0fafa343a2026b51071ee03773d076d283abf1a7d36ff91ffa279ee4a617ac664f7e2a2c8d5891b",
+        "rtMr3": "e0f6c83eec48dfbfdb41d438a96783bcde1de18a1ac73705e2a8e24c2bc2051cbbf05ec0e856fed86498316a1b3e1bec",
+        "mrConfigId": "015f7ebd85cf1f480a118f75dd10fd0cb277e4ddbb23845f1c20d8ea0f1e87efa6000000000000000000000000000000"
+      },
+      "gatewaySigner": "0xb98a789cdc4817275f5155593ba73ef2a957e779",
+      "gpus": 8,
+      "tlsBound": true,
+      "checks": [
+        {
+          "name": "gateway: Intel TDX quote verified against Intel collateral",
+          "ok": true
+        },
+        {
+          "name": "gateway: TCB status accepted by policy",
+          "ok": true
+        },
+        {
+          "name": "gateway: TDX debug mode off",
+          "ok": true
+        },
+        {
+          "name": "gateway: signing identity has the right length",
+          "ok": true
+        },
+        {
+          "name": "gateway: TLS fingerprint matches the peer certificate",
+          "ok": true
+        },
+        {
+          "name": "gateway: report data binds the signer and our nonce",
+          "ok": true
+        },
+        {
+          "name": "gateway: echoed nonce matches",
+          "ok": true
+        },
+        {
+          "name": "gateway: MRCONFIGID matches the measured app_compose",
+          "ok": true
+        },
+        {
+          "name": "gateway: event log replays to RTMR3",
+          "ok": true
+        },
+        {
+          "name": "model: Intel TDX quote verified against Intel collateral",
+          "ok": true
+        },
+        {
+          "name": "model: TCB status accepted by policy",
+          "ok": true
+        },
+        {
+          "name": "model: TDX debug mode off",
+          "ok": true
+        },
+        {
+          "name": "model: signing identity has the right length",
+          "ok": true
+        },
+        {
+          "name": "model: report data binds the signer and our nonce",
+          "ok": true
+        },
+        {
+          "name": "model: echoed nonce matches",
+          "ok": true
+        },
+        {
+          "name": "model: MRCONFIGID matches the measured app_compose",
+          "ok": true
+        },
+        {
+          "name": "model: event log replays to RTMR3",
+          "ok": true
+        },
+        {
+          "name": "model: NVIDIA GPU evidence verified by NRAS",
+          "ok": true
+        },
+        {
+          "name": "response signer matches exactly one verified report",
+          "ok": true
+        },
+        {
+          "name": "signed text = model:sha256(request bytes):sha256(response bytes)",
+          "ok": true
+        },
+        {
+          "name": "report and prompt sent over one TLS connection whose certificate key the gateway quote binds",
+          "ok": true
+        }
+      ],
+      "note": "The TLS binding reaches the gateway enclave; the model enclave is covered by its own report and signature."
+    },
+    "signal": "block",
+    "signalCodes": [
+      "INTENT_QUOTE_MISMATCH",
+      "SOCIAL_ENGINEERING",
+      "POLICY_CONFLICT",
+      "SUSPICIOUS_TASK_TEXT"
+    ]
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "8a125df7a6e9a347d5acc4d28a2c00bdd663509099114ba8daffade1fe2d210a"
+  },
+  "signature": "7bda95e2b3850c48d60d5efb818e76a621e6da4dd445e9abd0fecf6d2ef4e6ede658e5c570eecb1624bdd31767ad3cc84c40ef3ec8d8a1298d60109d67102302"
+}

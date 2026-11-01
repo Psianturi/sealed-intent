@@ -1,0 +1,97 @@
+{
+  "ranAt": "2026-11-01T17:23:29.363Z",
+  "network": "testnet",
+  "wallet": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21",
+  "passed": 8,
+  "total": 8,
+  "rows": [
+    {
+      "name": "native NEAR to the allowed vendor",
+      "expect": "allowed",
+      "http": 200,
+      "txHash": "9q2dHoaif1Ys1d5Dr72qZiA8juGJH1ZdFrQrfKbZg5Gc",
+      "status": "success",
+      "outcome": "allowed",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Address 'sein-attacker-mvy1eh5f.testnet' is not in whitelist",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "native NEAR above the per-transaction limit",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Per-transaction limit exceeded for native: 600000000000000000000000 > 500000000000000000000000",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'call' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the vendor",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'call' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "wNEAR to the attacker with ft_transfer_call",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'call' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "sign a NEP-413 message",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Capability for 'sign_message' is not enabled by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    },
+    {
+      "name": "delete the wallet and sweep to the attacker",
+      "expect": "refused",
+      "http": 403,
+      "error": "policy_denied",
+      "message": "Transaction type 'delete' is not allowed by policy",
+      "outcome": "refused",
+      "asExpected": true,
+      "attackerWrapDelta": "0",
+      "attackerNativeDelta": "0"
+    }
+  ]
+}
