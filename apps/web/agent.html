@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent profile | SeIn</title>
+  <meta name="description" content="A public record of one AI agent: who owns it, whether it is active, and how many decisions SeIn made for it. No amounts, no receivers." />
+  <meta property="og:title" content="SeIn agent profile" />
+  <meta property="og:description" content="Who owns this agent, its status and its decisions. No amounts, no receivers." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="theme-color" content="#2747c4" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!--header:agent-->
+  <main>
+    <h1 class="page-title" id="title">Agent profile</h1>
+    <p class="lead">Read directly from the public registry on NEAR by this browser. It shows who owns the agent and how it behaved, never amounts or receivers.</p>
+    <div id="profile" aria-live="polite"><p class="note">Reading the registry…</p></div>
+    <!--footer:verify-->
+  </main>
+  <script type="module" src="/src/agent.ts"></script>
+</body>
+</html>

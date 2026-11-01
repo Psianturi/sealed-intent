@@ -18,11 +18,15 @@ function staticContent(): Plugin {
     transformIndexHtml(html) {
       const run = readRun("official");
       const lazy = readRun("official-lazy");
+      const flowPath = resolve(__dirname, "..", "..", "evidence", "custody-testnet", "s4-flow.json");
+      const flow = existsSync(flowPath) ? JSON.parse(readFileSync(flowPath, "utf8")) : undefined;
       const parts: Record<string, string> = {
+        ...(flow ? { "custody:found": String(flow.bypass.detectedSeconds), "custody:frozen": String(flow.bypass.frozenSeconds) } : {}),
         "mark:18": mark(18),
         "header:home": siteHeader("home"),
         "header:arena": siteHeader("arena"),
         "header:verify": siteHeader("verify"),
+        "header:agent": siteHeader("agent"),
         "footer:home": siteFooter("Not audited. Do not use with funds you cannot lose."),
         "footer:arena": siteFooter("Test tokens only. No real money moves in the Arena."),
         "footer:verify": siteFooter("Receipts are checked in your browser. Nothing is uploaded."),
@@ -64,6 +68,7 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         arena: resolve(__dirname, "arena.html"),
         verify: resolve(__dirname, "verify.html"),
+        agent: resolve(__dirname, "agent.html"),
       },
     },
   },

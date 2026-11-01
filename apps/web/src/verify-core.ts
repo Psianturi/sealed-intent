@@ -15,7 +15,7 @@ function sortDeep(value: unknown): unknown {
   }
   return out;
 }
-const canonical = (v: unknown) => JSON.stringify(sortDeep(v));
+export const canonical = (v: unknown) => JSON.stringify(sortDeep(v));
 const sha256Hex = (s: string) => bytesToHex(sha256(utf8ToBytes(s)));
 
 function recoverEip191(text: string, signatureHex: string): string {
@@ -30,7 +30,10 @@ function recoverEip191(text: string, signatureHex: string): string {
   return "0x" + bytesToHex(keccak_256(pub.slice(1)).slice(-20));
 }
 
-export interface Check { name: string; ok: boolean | "unchecked"; detail?: string }
+/** An opened value must hash to the commitment in the receipt. */
+export const matchesSeal = (commitment: string | undefined, opening: { value: unknown; salt?: string }) => !!commitment && commitment === sha256Hex(`${opening.salt}:${canonical(opening.value)}`);
+
+export interface Check { name: string; ok: boolean | "unchecked"; detail?: string; link?: string }
 
 export function verifyReceipt(r: Record<string, any>, trusted: string, disclosure?: Record<string, any>): { valid: boolean; checks: Check[] } {
   const checks: Check[] = [];

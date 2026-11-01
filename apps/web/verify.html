@@ -30,11 +30,11 @@
         <button class="btn primary big" id="sample">Try a real receipt</button>
         <label class="btn big">Choose a file<input type="file" id="file" accept="application/json" class="sr-only" /></label>
       </div>
-      <p class="note">The sample came from a real check on NEAR AI Cloud. No money moved.</p>
+      <p class="note">The sample is a real payment on NEAR testnet, checked by a real enclave. Test tokens only.</p>
     </div>
     <div id="out" aria-live="polite"></div>
     <div class="btns" id="try-more" hidden>
-      <button class="btn" id="open-field">Open one sealed field</button>
+      <button class="btn" id="open-field">Open the amount and the receiver</button>
       <button class="btn" id="tamper">Change the verdict and check again</button>
       <button class="btn" id="reset">Back to the original</button>
     </div>
@@ -50,7 +50,8 @@
         <li><strong>Who signed:</strong> confirmed only if you paste the key the operator published. Without it, this page says the key is unknown.</li>
         <li><strong>Enclave signature:</strong> the signed text must equal <code>model:sha256(request):sha256(response)</code> and recover to the signing address. Simulated enclaves are labelled and never count as attested.</li>
         <li><strong>Hardware evidence:</strong> the Intel and NVIDIA checks happen at decision time and are listed in the receipt. This page shows that record; it does not repeat them.</li>
-        <li><strong>Opened fields:</strong> an opened value must match its salted commitment.</li>
+        <li><strong>Opened fields:</strong> an opened value must match its salted commitment, and the transaction on chain.</li>
+        <li><strong>Registry:</strong> the signing key, the agent and the Merkle root of the receipts are read from the contract on NEAR by your browser. A receipt that was never anchored says so.</li>
       </ul>
     </details>
     <!--footer:verify-->

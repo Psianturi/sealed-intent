@@ -2,5 +2,15 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @sealed-intent/web build",
   "outputDirectory": "apps/web/dist",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/r/:id",
+      "destination": "/verify.html"
+    },
+    {
+      "source": "/a/:id",
+      "destination": "/agent.html"
+    }
+  ]
 }

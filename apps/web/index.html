@@ -34,7 +34,7 @@
           <a class="btn big" href="#how">How it works</a>
         </div>
         <p class="pitch">Signers check format. SeIn checks meaning.</p>
-        <p class="legend-status"><span class="ls"><span class="status live">Live</span> rules, receipts, enclave check</span><span class="ls"><span class="status sim">Simulated</span> the Arena's chain</span><span class="ls"><span class="status todo">Not yet</span> a real custody payment</span></p>
+        <p class="legend-status"><span class="ls"><span class="status live">Live</span> rules, receipts, enclave check, payments on testnet</span><span class="ls"><span class="status sim">Simulated</span> the Arena's chain</span><span class="ls"><span class="status todo">Not yet</span> a mainnet payment</span></p>
       </div>
       <div id="stage" class="stage" role="img" aria-label="Animation: messages reach an AI agent, its payments stop at the SeIn gate, five checks light up, and each one ends as ALLOW, WARN or BLOCK with a sealed receipt."></div>
     </section>
@@ -98,7 +98,7 @@
           <tbody>
             <tr><th scope="row">Policy: limits, allow-list</th><td>No. Generic reasons only</td><td>No. A commitment only</td><td>Yes, encrypted at rest</td><td>Only if the owner opens it</td><td>Inside the verified enclave</td><td>No</td></tr>
             <tr><th scope="row">The instruction</th><td>Yes, it is its own input</td><td>No</td><td>Encrypted at rest, then deleted</td><td>One field at a time</td><td>Inside the verified enclave</td><td>No</td></tr>
-            <tr><th scope="row">Amount and receiver</th><td>Yes, it asked for them</td><td>Not in the receipt. On chain once paid</td><td>Encrypted at rest, then deleted</td><td>One field at a time</td><td>Inside the verified enclave</td><td>Yes, to quote and sign</td></tr>
+            <tr><th scope="row">Amount and receiver</th><td>Yes, it asked for them</td><td>Not in the receipt. Public on chain once paid, for anyone who follows the transaction</td><td>Encrypted at rest, then deleted</td><td>One field at a time</td><td>Inside the verified enclave</td><td>Yes, to quote and sign</td></tr>
             <tr><th scope="row">Verdict and reasons</th><td>Yes, generic reasons</td><td>In the receipt, if published</td><td>Yes</td><td>Yes</td><td>Gives its opinion</td><td>No</td></tr>
             <tr><th scope="row">Wallet key</th><td>Never</td><td>Never</td><td>Never</td><td>Never</td><td>Never</td><td>Stays in the custody enclave</td></tr>
           </tbody>
@@ -143,11 +143,21 @@
     </section>
 
     <section>
+      <h2>Tested with real transactions</h2>
+      <p class="lead">On NEAR testnet, through real custody, with the real enclave. Test tokens only.</p>
+      <div class="cards three">
+        <article class="card"><h3>Two locks, each covering the other</h3><p>A careless owner approved a stranger, and custody refused. A tricked agent asked to pay tokens to a stranger, which custody alone would have let through, and SeIn refused.</p></article>
+        <article class="card"><h3>Money that skips SeIn gets caught</h3><p>We sent a payment straight to custody, around SeIn. SeIn noticed in <!--custody:found--> seconds, and the wallet was frozen on chain in <!--custody:frozen-->.</p></article>
+        <article class="card"><h3>Anyone can check</h3><p>Each decision is signed, written to the chain in a batch and tied to its transaction, while the amount stays sealed. <a href="/a/agent-1">See the live agent</a>.</p></article>
+      </div>
+    </section>
+
+    <section>
       <h2>What is real, what is simulated, what is not done</h2>
       <div class="honest">
-        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li></ul></div>
+        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li><li>Payments through OutLayer custody on NEAR testnet, each with a transaction anyone can look up.</li><li>A public registry on NEAR testnet: signing keys, agents and receipt batches.</li></ul></div>
         <div class="col"><span class="status sim">Simulated in the Arena</span><ul><li>The chain is a ledger, or local NEAR nodes with real token contracts. Both recordings match.</li><li>Quotes, the enclave opinion and custody are stand-ins there.</li><li>The agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled.</li></ul></div>
-        <div class="col"><span class="status todo">Not yet</span><ul><li>A real custody payment and a mainnet swap.</li><li>A live confidential route.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen key, a bug inside a token, a compromised SeIn host.</p></div>
+        <div class="col"><span class="status todo">Not yet</span><ul><li>A mainnet payment and swap.</li><li>A live confidential route.</li><li>A hosted service. Today the owner runs SeIn on their own machine.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen key, a bug inside a token, a compromised SeIn host.</p></div>
       </div>
     </section>
 

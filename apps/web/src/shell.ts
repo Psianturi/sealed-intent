@@ -9,6 +9,7 @@ const NAV: [string, string, string][] = [
   ["home", "/", "Overview"],
   ["arena", "/arena.html", "Arena"],
   ["verify", "/verify.html", "Verify"],
+  ["agent", "/a/agent-1", "Agent"],
   ["builders", "https://github.com/Psianturi/sealed-intent", "Builders"],
 ];
 

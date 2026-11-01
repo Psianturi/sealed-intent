@@ -316,3 +316,26 @@ label.btn { position: relative; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .btn:hover { transform: none; }
 }
+
+/* on-chain checks and agent profile */
+.check-list.chain { list-style: none; padding: 0; margin: 8px 0; }
+.check-list.chain li { display: flex; gap: 10px; align-items: baseline; padding: 6px 10px; border-radius: 8px; margin-bottom: 4px; }
+.check-list.chain li.yes { background: var(--allow-soft); }
+.check-list.chain li.no { background: var(--block-soft, #fde8e8); }
+.check-list.chain li.maybe { background: var(--sim-soft); }
+.check-list.chain .note { display: block; }
+.breaks { overflow-wrap: anywhere; }
+.tally { display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0 12px; }
+.tally > div { display: flex; align-items: center; gap: 8px; }
+.tally b { font-size: 24px; }
+.receipt-list { list-style: none; padding: 0; }
+.receipt-list li { border-top: 1px solid var(--line, #e5e7eb); }
+.receipt-list a { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 2px; text-decoration: none; }
+
+.receipt-list { margin-top: 8px; }
+#profile h2 { margin-top: 32px; }
+/* the logo already goes home, so the phone menu can drop Overview */
+@media (max-width: 480px) {
+  header.top nav a:first-child { display: none; }
+  header.top nav { gap: 12px; }
+}
