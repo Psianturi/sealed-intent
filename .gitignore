@@ -3,6 +3,8 @@ node_modules/
 dist/
 apps/web/public/replays/
 apps/web/public/samples/
+apps/web/public/receipts/
+apps/web/public/proofs/
 *.tsbuildinfo
 
 # runtime state (receipts, openings, ledgers, keys)
@@ -48,3 +50,6 @@ AGENTS.md
 .DS_Store
 Thumbs.db
 *.log
+
+# rust build output
+contracts/**/target/

@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "transaction_types": ["call"],
+    "allowed_tokens": ["native"],
+    "addresses": {
+      "mode": "whitelist",
+      "list": ["17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1"]
+    },
+    "limits": {
+      "per_transaction": { "native": "2000000000000000000000" },
+      "daily": { "native": "10000000000000000000000" }
+    },
+    "rate_limit": { "max_per_hour": 10 }
+  },
+  "capabilities": {
+    "sign_message": { "allowed": false },
+    "raw_sign": { "allowed": false },
+    "swap": { "allowed": false },
+    "cross_chain_withdraw": { "allowed": false },
+    "limit_order": { "allowed": false },
+    "payment_check": { "allowed": false },
+    "confidential": { "allowed": false },
+    "evm_sign": { "allowed": false },
+    "solana_sign": { "allowed": false }
+  }
+}
