@@ -72,7 +72,7 @@ describe("Preflight (offline)", () => {
     expect(d.verdict).toBe("WARN");
     expect(d.warnCodes).toEqual(expect.arrayContaining(["RECIPIENT_NOT_ALLOWLISTED", "COUNTERPARTY_FIRST_CONTACT", "COUNTERPARTY_NEW_ACCOUNT"]));
     expect((await env.preflight.execute(d.decisionId)).status).toBe("not_sent");
-    expect(env.preflight.approve(d.decisionId, "posma").ok).toBe(true);
+    expect(env.preflight.approve(d.decisionId, "owner").ok).toBe(true);
     expect((await env.preflight.execute(d.decisionId)).status).toBe("simulated");
     // second payment: no longer first contact
     const again = await env.preflight.evaluate({ agentId: "agent-1", intent: base({ recipient: DEMO_ACCOUNTS.newVendor }) });

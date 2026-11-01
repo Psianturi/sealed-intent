@@ -48,7 +48,7 @@ async function offlineDemo() {
     async review(d: { warnCodes: string[] }) {
       const ok = !d.warnCodes.includes("COUNTERPARTY_CODE_CHANGED");
       say(`[human] reviewing WARN: ${d.warnCodes.join(", ")} -> ${ok ? "APPROVE" : "REJECT"}`);
-      return ok ? "posma (demo approver)" : null;
+      return ok ? "owner (demo approver)" : null;
     },
   };
   const wallet = new SealedWallet(env.preflight, "treasury-agent", human, say);

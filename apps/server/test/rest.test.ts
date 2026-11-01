@@ -47,7 +47,7 @@ describe("REST server auth", () => {
     expect((await post("/v1/approve", { decisionId: d.decisionId, approver: "me" })).status).toBe(401);
     expect((await post("/v1/approve", { decisionId: d.decisionId, approver: "me" }, "agent-token")).status).toBe(401);
     expect((await json(post("/v1/execute", { decisionId: d.decisionId }, "agent-token"))).status).toBe("not_sent");
-    const approved = await post("/v1/approve", { decisionId: d.decisionId, approver: "posma" }, "owner-secret");
+    const approved = await post("/v1/approve", { decisionId: d.decisionId, approver: "owner" }, "owner-secret");
     expect(((await approved.json()) as Json).ok).toBe(true);
     const exec = await json(post("/v1/execute", { decisionId: d.decisionId }, "agent-token"));
     expect(exec.status).toBe("simulated");
