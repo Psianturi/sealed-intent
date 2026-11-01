@@ -1,11 +1,11 @@
 {
-  "runId": "sandbox-2026-11-01-a95a75de",
-  "createdAt": "2026-11-01T17:12:47.587Z",
+  "runId": "sandbox-2026-11-01-23d4e2f6",
+  "createdAt": "2026-11-01T17:45:06.824Z",
   "chain": "sandbox",
   "victim": "scripted",
   "approver": "strict",
   "policyHash": "4097017596e576aaed4dd147fa994c90270ecf7513674c822693b0889c8b789d",
-  "catalogHash": "f88564337745784ad0fba885f36bfb3723c808f61970bca7bdf7438218694503",
+  "catalogHash": "2dee8e7b66ff8232d9afddc8651a6bb4c10283d8ec00181439645bbb0917ffad",
   "seed": "default",
   "prices": {
     "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": {
@@ -39,5 +39,5 @@
     "rules": "REAL (the same code that runs live)"
   },
   "issuer": "1239690d8e6ee5dab4e1c08fe5c3d617f56528bf476cbace2a855806a652d614",
-  "signature": "cc932f78a8d0c19c0eaa527940f684552aea61146ee6bb0abc6bd9c679b515b377333ba5e7404a4b154d14dea521f74dc048bfc420c37d52fb7d06b8fd990f01"
+  "signature": "549755d0a4a97f336427354095b189ff1b045049a5ce7834206a04e1ed145bf0299e06191a5023a55a564f6bfa1821cd34287953354a779c236d7eca04d25e01"
 }
