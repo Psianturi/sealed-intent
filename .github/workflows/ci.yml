@@ -20,4 +20,5 @@ jobs:
       - run: pnpm verify out/receipts
       - run: pnpm arena:run
       - run: pnpm arena:verify
+      - run: pnpm arena:verify official-sandbox
       - run: pnpm web:build

@@ -204,6 +204,10 @@ Sealed Intent are by design: a stolen key, a forged verdict accepted by the sign
 lying RPC, and a token-contract bug. They are shown, not hidden. Test tokens only; quotes, the enclave opinion and
 custody are simulated stand-ins; the rules are the real code. The web replay is at https://sein-near.vercel.app/arena.html.
 
+A second recording, `replays/official-sandbox`, is the same 14 scenarios run on three real local NEAR nodes
+(`--chain sandbox`, nearcore 2.13.4). Its scoreboard is identical to the ledger run, line for line, and it verifies
+the same way (`pnpm arena:verify official-sandbox`). The web replay has a selector for either recording.
+
 The `--chain sandbox` adapter (`packages/arena/src/sandbox.ts`) deploys genuine wrap.near bytecode as the four
 tokens, creates every account under the sandbox root, and runs each scenario from a restored snapshot. The swap router
 and account age are simulated there; everything else is the node's own behaviour. `SEALED_SANDBOX_TESTS=1 pnpm test`

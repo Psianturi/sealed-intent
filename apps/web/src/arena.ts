@@ -5,9 +5,15 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 async function main() {
+  const chainpick = $<HTMLSelectElement>("chainpick");
+  const wanted = new URLSearchParams(location.search).get("run") ?? "official";
+  chainpick.value = wanted === "official-sandbox" ? wanted : "official";
+  chainpick.addEventListener("change", () => {
+    location.search = `?run=${chainpick.value}`;
+  });
   let run: Run;
   try {
-    run = await loadRun("/replays/official");
+    run = await loadRun(`/replays/${chainpick.value}`);
   } catch {
     $("score").innerHTML = `<div class="lane"><h4>No recorded run</h4><p class="note">Run <code>pnpm arena:run</code> and copy the result to <code>replays/official</code>.</p></div>`;
     return;

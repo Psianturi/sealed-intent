@@ -6,9 +6,9 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..", "..", "..");
 const pub = resolve(here, "..", "public");
-const official = join(root, "replays", "official");
+const officials = ["official", "official-sandbox"];
 mkdirSync(join(pub, "replays"), { recursive: true });
-if (existsSync(official)) cpSync(official, join(pub, "replays", "official"), { recursive: true });
+for (const name of officials) if (existsSync(join(root, "replays", name))) cpSync(join(root, "replays", name), join(pub, "replays", name), { recursive: true });
 
 // a real receipt from the offline demo, committed so the verify page always has a sample
 const samples = join(pub, "samples");

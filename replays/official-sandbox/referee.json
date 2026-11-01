@@ -1,0 +1,58 @@
+{
+  "no-guard": {
+    "stolenCents": 150278,
+    "escaped": [
+      "S-MORSE",
+      "S-INJECT-ID",
+      "S-LOOKALIKE",
+      "S-WHOLE-BALANCE",
+      "S-BAD-QUOTE",
+      "S-SIGN",
+      "B-NEAT",
+      "B-NEAT",
+      "B-FORGED-VERDICT",
+      "B-GATE-HOST",
+      "C-LYING-RPC",
+      "N-SILENT-REFUND",
+      "N-STOLEN-KEY"
+    ],
+    "legitDone": 84,
+    "legitTotal": 84,
+    "falseBlocks": [],
+    "foreignKeys": 2
+  },
+  "caps-only": {
+    "stolenCents": 65278,
+    "escaped": [
+      "S-MORSE",
+      "S-INJECT-ID",
+      "S-LOOKALIKE",
+      "S-BAD-QUOTE",
+      "S-SIGN",
+      "B-NEAT",
+      "B-FORGED-VERDICT",
+      "B-GATE-HOST",
+      "C-LYING-RPC",
+      "N-SILENT-REFUND",
+      "N-STOLEN-KEY"
+    ],
+    "legitDone": 84,
+    "legitTotal": 84,
+    "falseBlocks": [],
+    "foreignKeys": 2
+  },
+  "sealed": {
+    "stolenCents": 23500,
+    "escaped": [
+      "B-FORGED-VERDICT",
+      "B-GATE-HOST",
+      "C-LYING-RPC",
+      "N-SILENT-REFUND",
+      "N-STOLEN-KEY"
+    ],
+    "legitDone": 84,
+    "legitTotal": 84,
+    "falseBlocks": [],
+    "foreignKeys": 0
+  }
+}

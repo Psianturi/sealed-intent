@@ -22,6 +22,13 @@
   <main>
     <h1>The Arena</h1>
     <p class="lead">Three identical AI agents get the same everyday tasks and the same attacks. One has no guard. One has spending limits only. One goes through Sealed Intent. A referee that only reads account balances keeps score; it never reads our verdicts, so we cannot grade ourselves.</p>
+    <div class="controls">
+      <label for="chainpick">Recording</label>
+      <select id="chainpick">
+        <option value="official">Simulated ledger (seconds)</option>
+        <option value="official-sandbox">Real local NEAR node (near-sandbox)</option>
+      </select>
+    </div>
     <div class="badges" id="badges"></div>
     <p class="note" id="run-meta"></p>
 
