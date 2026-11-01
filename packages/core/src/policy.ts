@@ -4,7 +4,7 @@ import { z } from "zod";
 
 /**
  * The SECRET policy. The agent never sees it: it only receives a verdict and generic
- * reason codes, so it cannot probe for the exact limit and stay just under it.
+ * reason codes, which raises the cost of probing for the exact limit.
  * At rest the policy is encrypted (AES-256-GCM). Receipts carry a commitment to it.
  */
 export const Policy = z.object({

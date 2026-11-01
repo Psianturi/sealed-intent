@@ -69,6 +69,8 @@ export interface Disclosure {
 }
 
 export interface BuildReceiptInput {
+  /** chosen before the TEE call so the enclave's signed request names this receipt */
+  receiptId?: string;
   verdict: Verdict;
   reasonCodes: string[];
   warnCodes?: string[];
@@ -83,7 +85,7 @@ function signedPayload(r: Omit<Receipt, "signature">): string {
 }
 
 export function buildReceipt(input: BuildReceiptInput, issuer: IssuerKey): { receipt: Receipt; openings: PrivateOpenings } {
-  const receiptId = randomUUID();
+  const receiptId = input.receiptId ?? randomUUID();
   const commitments: Receipt["commitments"] = {};
   const openings: PrivateOpenings["openings"] = {};
   for (const field of PRIVATE_FIELDS) {
@@ -109,6 +111,43 @@ export function buildReceipt(input: BuildReceiptInput, issuer: IssuerKey): { rec
   };
   const receipt: Receipt = { ...unsigned, signature: signBytes(issuer, signedPayload(unsigned)) };
   return { receipt, openings: { receiptId, openings, policyOpening: policy.opening } };
+}
+
+/** Signed record that a decision was executed, naming the on-chain transaction. */
+export interface ExecutionReceipt {
+  version: "sealed-intent/execution@1";
+  receiptId: string;
+  decisionId: string;
+  kind: string;
+  status: string;
+  txHash?: string;
+  executedAt: string;
+  approvedBy?: string;
+  issuer: { alg: "ed25519"; publicKey: string };
+  signature: string;
+}
+
+export function buildExecutionReceipt(input: Omit<ExecutionReceipt, "version" | "receiptId" | "issuer" | "signature">, issuer: IssuerKey): ExecutionReceipt {
+  const unsigned: Omit<ExecutionReceipt, "signature"> = {
+    version: "sealed-intent/execution@1",
+    receiptId: randomUUID(),
+    ...input,
+    issuer: { alg: "ed25519", publicKey: issuer.publicKeyHex },
+  };
+  return { ...unsigned, signature: signBytes(issuer, canonicalJson(unsigned)) };
+}
+
+export function verifyExecutionReceipt(r: ExecutionReceipt, trustedIssuerKeys: string[] = []): { valid: boolean; issuerSignatureValid: boolean; trustedIssuer: boolean | "not-checked"; problems: string[] } {
+  const { signature, ...unsigned } = r;
+  const issuerSignatureValid = verifyBytes(r.issuer.publicKey, canonicalJson(unsigned), signature);
+  const problems: string[] = [];
+  if (!issuerSignatureValid) problems.push("issuer signature invalid (receipt was modified or forged)");
+  let trustedIssuer: boolean | "not-checked" = "not-checked";
+  if (trustedIssuerKeys.length) {
+    trustedIssuer = trustedIssuerKeys.includes(r.issuer.publicKey);
+    if (!trustedIssuer) problems.push("issuer key is not in the trusted list");
+  }
+  return { valid: issuerSignatureValid && trustedIssuer !== false, issuerSignatureValid, trustedIssuer, problems };
 }
 
 export function makeDisclosure(openings: PrivateOpenings, field: PrivateField | "policy"): Disclosure {

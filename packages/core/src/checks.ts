@@ -76,7 +76,7 @@ export function checkQuote(input: QuoteCheckInput): QuoteCheckResult {
   const route = req.confidentiality ?? "public";
   if (wantsPrivate && route === "public") block.push("ROUTE_NOT_CONFIDENTIAL");
 
-  // 8. value: priced with 1Click's token list, independent of the quote's own USD fields
+  // 8. value: priced with 1Click's token list rather than the quote's own USD fields (same provider; a second source is on the roadmap)
   const tIn = findToken(tokens, intent.tokenIn);
   const tOut = findToken(tokens, intent.tokenOut);
   let metrics: QuoteMetrics | undefined;

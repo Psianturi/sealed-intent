@@ -105,7 +105,7 @@ export async function signFixtureQuote(response: Omit<QuoteResponse, "signature"
 
 /** Knobs the red team uses to make the "market" misbehave. */
 export interface FixtureBehavior {
-  /** shave this much off minAmountOut (a bad route / rigged pool, like the Rhea exploit) */
+  /** shave this much off minAmountOut (a route through a thin or rigged pool) */
   minOutHaircutBps?: number;
   /** extra haircut only on the live (non-dry) quote: quote changed between check and execution */
   liveHaircutBps?: number;

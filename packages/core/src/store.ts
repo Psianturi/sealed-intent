@@ -24,6 +24,14 @@ export class ReceiptStore {
     return existsSync(path) ? (JSON.parse(readFileSync(path, "utf8")) as Receipt) : undefined;
   }
 
+  /** Raw TEE request and response bytes. Private: they contain the secret policy. */
+  saveTeeExchange(receiptId: string, exchange: { request: string; response: string }): string {
+    mkdirSync(join(this.sealedDir, "tee"), { recursive: true });
+    const path = join(this.sealedDir, "tee", `${receiptId}.json`);
+    writeFileSync(path, JSON.stringify(exchange), { mode: 0o600 });
+    return path;
+  }
+
   saveExecution(receiptId: string, record: unknown): string {
     mkdirSync(join(this.outDir, "executions"), { recursive: true });
     const path = join(this.outDir, "executions", `${receiptId}.json`);

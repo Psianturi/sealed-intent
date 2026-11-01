@@ -11,7 +11,7 @@ import { DatabaseSync } from "./sqlite";
  * pass, and together exceed the cap. Here every reservation runs inside a SQLite
  * `BEGIN IMMEDIATE` transaction, which takes the database write lock before
  * reading the totals. Requests are serialized across threads AND processes, so
- * the sum of reserved + committed spend can never exceed the limit.
+ * the sum of reserved + committed spend stays within the limit for one agent name.
  *
  * Lifecycle: reserve -> commit (executed) | release (blocked / failed / expired).
  */

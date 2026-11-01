@@ -13,15 +13,19 @@ import type { Policy } from "./policy";
  * The enclave is verified BEFORE the policy is sent. The LLM never decides alone.
  */
 export interface TeeCheckInput {
+  /** receipt id this opinion belongs to; it goes inside the signed request */
+  decisionId?: string;
   intent: DeclaredIntent;
   quote?: QuoteResponse;
   policy: Policy;
   injectionCodes: string[];
 }
 
+export type TeeOpinion = TeeEvidence & { raw?: { request: string; response: string } };
+
 export interface TeeChecker {
   readonly kind: TeeEvidence["kind"];
-  check(input: TeeCheckInput): Promise<TeeEvidence>;
+  check(input: TeeCheckInput): Promise<TeeOpinion>;
 }
 
 const SIGNAL_CODES = ["INTENT_QUOTE_MISMATCH", "SUSPICIOUS_TASK_TEXT", "SOCIAL_ENGINEERING", "POLICY_CONFLICT", "OTHER"];
@@ -36,6 +40,7 @@ export function buildTeePrompt(input: TeeCheckInput): { system: string; user: st
     JSON.stringify(SIGNAL_CODES),
   ].join("\n");
   const user = JSON.stringify({
+    DECISION_ID: input.decisionId ?? null,
     SECRET_POLICY: policy,
     DECLARED_INTENT: { ...intent, taskText: undefined },
     QUOTE: quote
@@ -107,7 +112,7 @@ export class NearAiCloudChecker implements TeeChecker {
     return { Authorization: `Bearer ${this.apiKey}`, Accept: "application/json", "Accept-Encoding": "identity", ...extra };
   }
 
-  async check(input: TeeCheckInput): Promise<TeeEvidence> {
+  async check(input: TeeCheckInput): Promise<TeeOpinion> {
     const tee = input.policy.tee;
     const nonce = randomBytes(32).toString("hex");
     const attUrl = new URL(`${this.baseUrl}/attestation/report`);
@@ -210,7 +215,7 @@ export class NearAiCloudChecker implements TeeChecker {
     };
     const v = verifyTeeEvidence(evidence);
     if (!v.textMatchesHashes || !v.signatureValid) throw new Error(`TEE evidence did not verify: ${v.problems.join("; ")}`);
-    return evidence;
+    return { ...evidence, raw: { request: requestBody, response: responseBytes.toString("utf8") } };
   }
 }
 
@@ -232,7 +237,7 @@ export class SimulatedTeeChecker implements TeeChecker {
     }
   }
 
-  async check(input: TeeCheckInput): Promise<TeeEvidence> {
+  async check(input: TeeCheckInput): Promise<TeeOpinion> {
     const { system, user } = buildTeePrompt(input);
     const model = "offline/rule-based-simulator";
     const requestBody = JSON.stringify({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }] });
@@ -257,6 +262,7 @@ export class SimulatedTeeChecker implements TeeChecker {
       attestation: { nonce: randomBytes(32).toString("hex"), signingAddressMatched: false, quoteVerifiedLocally: false, note: "offline demo: no attestation" },
       signal,
       signalCodes: codes,
+      raw: { request: requestBody, response: responseBody },
     };
   }
 }

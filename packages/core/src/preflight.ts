@@ -1,4 +1,5 @@
-import { buildReceipt, type IssuerKey, type Receipt, type TeeEvidence, type Verdict } from "@sealed-intent/receipt";
+import { randomUUID } from "node:crypto";
+import { buildExecutionReceipt, buildReceipt, type IssuerKey, type Receipt, type TeeEvidence, type Verdict } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
 import { checkCall, checkDryLiveDrift, checkQuote, checkTransfer, type QuoteMetrics } from "./checks";
 import { assessCounterparty, type CounterpartyDeps } from "./counterparty";
@@ -91,7 +92,8 @@ export class Preflight {
     const agentId = agent.data;
     const intent = parsed.data;
     const route: Receipt["public"]["route"] = policy.privatePurposes.includes(intent.purpose) ? `confidential-${policy.confidentialLevel}` : "public";
-    const base = { agentId, intent, route };
+    const decisionId = randomUUID();
+    const base = { agentId, intent, route, receiptId: decisionId };
 
     if (this.deps.freeze.state().frozen) {
       return this.finish({ ...base, verdict: "BLOCK", block: ["WALLET_FROZEN"], review: [], kind: intent.kind });
@@ -136,7 +138,9 @@ export class Preflight {
     let tee: TeeEvidence | undefined;
     if (this.deps.tee) {
       try {
-        tee = await this.deps.tee.check({ intent, quote: input.agentQuote ?? g.quote ?? g.dryQuote, policy, injectionCodes: scan.codes });
+        const { raw, ...evidence } = await this.deps.tee.check({ decisionId, intent, quote: input.agentQuote ?? g.quote ?? g.dryQuote, policy, injectionCodes: scan.codes });
+        tee = evidence;
+        if (raw) this.deps.store.saveTeeExchange(decisionId, raw);
         if (tee.signal === "block") (policy.tee.obeyBlockSignal ? g.block : g.review).add("TEE_SIGNAL_BLOCK");
         if (tee.signal === "warn") g.review.add("TEE_SIGNAL_WARN");
       } catch {
@@ -233,6 +237,7 @@ export class Preflight {
     agentId: string;
     kind: string;
     route: Receipt["public"]["route"];
+    receiptId?: string;
     quote?: QuoteResponse;
     live?: QuoteResponse;
     tee?: TeeEvidence;
@@ -251,6 +256,7 @@ export class Preflight {
     }
     const { receipt, openings } = buildReceipt(
       {
+        receiptId: args.receiptId,
         verdict: args.verdict,
         reasonCodes: args.block,
         warnCodes: args.review,
@@ -301,7 +307,7 @@ export class Preflight {
    * Execute an ALLOWed (or WARN + approved) decision. The budget stays spent unless the
    * executor says nothing left the wallet. If agentId is given it must match the decision.
    */
-  async execute(decisionId: string, agentId?: string): Promise<ExecutionResult & { decisionId: string }> {
+  async execute(decisionId: string, agentId?: string): Promise<ExecutionResult & { decisionId: string; executionReceiptId?: string }> {
     const peek = this.deps.pending.get(decisionId);
     if (!peek) return { decisionId, status: "not_sent", details: "unknown, blocked or already executed decision" };
     if (agentId !== undefined && peek.agentId !== agentId) return { decisionId, status: "not_sent", details: "decision belongs to another agent" };
@@ -339,7 +345,9 @@ export class Preflight {
     const counterparty = p.action.kind === "call" ? p.action.contract : p.action.kind === "transfer" ? p.action.recipient : p.action.quote.quoteRequest.recipient;
     if (result.status === "not_sent") this.deps.ledger.uncommit(p.reservationId);
     else if (result.status !== "unknown") this.deps.counterparty.memory.recordInteraction(p.agentId, counterparty);
-    this.deps.store.saveExecution(decisionId, { decisionId, agentId: p.agentId, kind: p.action.kind, at: new Date().toISOString(), approvedBy: p.approvedBy, ...result });
-    return { decisionId, ...result };
+    const record = buildExecutionReceipt({ decisionId, kind: p.action.kind, status: result.status, txHash: result.txHash, executedAt: new Date().toISOString(), approvedBy: p.approvedBy }, this.deps.issuer);
+    this.deps.store.save(record as never, { receiptId: record.receiptId, openings: {}, policyOpening: { value: null, salt: "" } });
+    this.deps.store.saveExecution(decisionId, { ...record, agentId: p.agentId, details: result.details });
+    return { decisionId, ...result, executionReceiptId: record.receiptId };
   }
 }

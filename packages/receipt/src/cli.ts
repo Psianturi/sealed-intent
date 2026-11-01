@@ -9,7 +9,7 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { verifyReceipt, type Disclosure, type Receipt } from "./receipt";
+import { verifyExecutionReceipt, verifyReceipt, type Disclosure, type ExecutionReceipt, type Receipt } from "./receipt";
 
 const args = process.argv.slice(2);
 const targets: string[] = [];
@@ -35,6 +35,14 @@ const files = targets.flatMap((t) =>
 let allValid = true;
 for (const file of files) {
   const receipt = JSON.parse(readFileSync(file, "utf8")) as Receipt;
+  if ((receipt as unknown as ExecutionReceipt).version === "sealed-intent/execution@1") {
+    const x = receipt as unknown as ExecutionReceipt;
+    const r = verifyExecutionReceipt(x, trusted);
+    allValid &&= r.valid;
+    console.log(`${r.valid ? "VALID  " : "INVALID"}  EXEC   ${x.receiptId}  decision=${x.decisionId}  status=${x.status}${x.txHash ? ` tx=${x.txHash}` : ""}${r.trustedIssuer === "not-checked" ? "  issuer=unchecked" : ""}`);
+    for (const p of r.problems) console.log(`         ! ${p}`);
+    continue;
+  }
   const mine = disclosures.filter((d) => d.receiptId === receipt.receiptId);
   const report = verifyReceipt(receipt, { disclosures: mine, trustedIssuerKeys: trusted });
   allValid &&= report.valid;
@@ -42,7 +50,7 @@ for (const file of files) {
     ? `tee=${report.tee.signatureValid && report.tee.textMatchesHashes ? "signature-ok" : "BAD"}${report.tee.simulated ? "(simulated)" : report.tee.attestationBound ? "+attested" : "+UNVERIFIED-ENCLAVE"}`
     : "tee=none";
   console.log(
-    `${report.valid ? "VALID  " : "INVALID"}  ${receipt.verdict.padEnd(5)}  ${receipt.receiptId}  ${tee}  reasons=[${receipt.reasonCodes.join(",")}]`,
+    `${report.valid ? "VALID  " : "INVALID"}  ${receipt.verdict.padEnd(5)}  ${receipt.receiptId}  ${tee}  reasons=[${receipt.reasonCodes.join(",")}]${report.trustedIssuer === "not-checked" ? "  issuer=unchecked (pass --trust <key>)" : ""}`,
   );
   for (const d of report.disclosures) {
     console.log(`         disclosed ${d.field}: ${d.matches ? JSON.stringify(d.value) : "DOES NOT MATCH"}`);

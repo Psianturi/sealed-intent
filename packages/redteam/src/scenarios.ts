@@ -77,7 +77,7 @@ export const SCENARIOS: Spec[] = [
   },
   {
     id: "rigged-route",
-    title: "Rigged route (Rhea-style)",
+    title: "Rigged route",
     attack: "the route returns 30% less than the reference price (crafted pool / bad slippage)",
     expected: "BLOCK",
     mustInclude: ["EXCESSIVE_VALUE_LOSS"],
