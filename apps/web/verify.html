@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify a receipt</title>
+  <meta name="description" content="Verify a Sealed Intent receipt in your browser: issuer signature, enclave signature, selective disclosure." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Sealed Intent</a>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/arena.html">Arena</a>
+      <a href="/verify.html" aria-current="page">Verify a receipt</a>
+      <a href="https://github.com/Psianturi/sealed-intent">Code</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Verify a receipt</h1>
+    <p class="lead">Everything runs in your browser. Nothing is uploaded. A receipt proves that a Sealed Intent instance signed a verdict, and (for live receipts) that an attested enclave signed the exact request and response it was asked about.</p>
+    <div class="controls">
+      <input type="file" id="file" accept="application/json" />
+      <button class="btn" id="sample">Load a sample receipt</button>
+      <label>Trusted issuer key (hex, optional) <input type="text" id="trust" class="mono" style="width:min(420px,100%)" placeholder="paste the operator's published ed25519 public key" /></label>
+    </div>
+    <textarea id="json" placeholder="paste a receipt JSON here"></textarea>
+    <div class="controls"><button class="btn primary" id="go">Verify</button>
+      <label>Disclosure file (optional) <input type="file" id="disclosure" accept="application/json" /></label></div>
+    <div id="out"></div>
+    <h2>What is checked</h2>
+    <ul>
+      <li><strong>Issuer signature:</strong> ed25519 over the canonical JSON of the receipt. Any edit, even one character, invalidates it.</li>
+      <li><strong>Issuer identity:</strong> only if you paste the key the operator published. Without it the receipt is self-signed by an unknown key and this page says so.</li>
+      <li><strong>Enclave signature:</strong> the signed text must equal <code>model:sha256(request):sha256(response)</code> and recover to the signing address. Offline-simulated receipts are labelled as such and never count as attested. Real receipts must carry a locally verified attestation; the Intel and NVIDIA checks themselves happen at decision time and are listed in the receipt.</li>
+      <li><strong>Disclosure:</strong> a disclosed field must match its salted commitment.</li>
+    </ul>
+    <footer>Built at NEAR HACKATHON, Nov 2026.</footer>
+  </main>
+  <script type="module" src="/src/verify.ts"></script>
+</body>
+</html>

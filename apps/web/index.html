@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sealed Intent</title>
+  <meta name="description" content="The check between an AI agent and its money on NEAR. The agent can ask; only Sealed Intent can let money move." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/">Sealed Intent</a>
+    <nav>
+      <a href="/" aria-current="page">Overview</a>
+      <a href="/arena.html">Arena</a>
+      <a href="/verify.html">Verify a receipt</a>
+      <a href="https://github.com/Psianturi/sealed-intent">Code</a>
+    </nav>
+  </header>
+  <main>
+    <h1>The check between an AI agent and its money on NEAR.</h1>
+    <p class="lead">The agent can ask. Only Sealed Intent can let money move, and only after checking what the money will do, who receives it, and whether the instruction came from an attacker. Every decision leaves a signed receipt that hides amounts and recipients.</p>
+    <p class="pitch">Signers check format. Sealed Intent checks meaning.</p>
+    <div class="btns">
+      <a class="btn primary" href="/arena.html">See the Arena</a>
+      <a class="btn" href="/verify.html">Verify a receipt</a>
+      <a class="btn" href="https://github.com/Psianturi/sealed-intent#try-it-in-60-seconds">Try it in 60 seconds</a>
+    </div>
+    <div class="badges">
+      <span class="badge real">RULES: REAL CODE</span>
+      <span class="badge real">1CLICK QUOTES: REAL (dry)</span>
+      <span class="badge real">TEE ATTESTATION: VERIFIED LOCALLY</span>
+      <span class="badge">OUTLAYER: NOT YET EXERCISED</span>
+      <span class="badge">MAINNET SWAP: NOT YET</span>
+    </div>
+
+    <h2>Why</h2>
+    <div class="cards">
+      <div class="card"><h4>Oct 2026</h4><div class="big bad">$6.3B</div><p class="sub">Binance hot wallets. A breached request path sent well-formed withdrawals, and the signer signed them because the format was valid. <a href="https://www.trmlabs.com/resources/blog/north-korea-steals-usd-6-36-billion-from-binance-in-the-largest-hack-in-history">TRM Labs</a></p></div>
+      <div class="card"><h4>May 2026</h4><div class="big bad">~$150K</div><p class="sub">Grok and Bankr. A prompt hidden in a message made an agent relay a transfer; a received NFT was treated as permission. <a href="https://oecd.ai/en/incidents/2026-05-04-4a73">OECD AI incidents</a></p></div>
+      <div class="card"><h4>Mar 2026</h4><div class="big bad">$50M → $36K</div><p class="sub">Aave / CoW. The slippage floor came from the bad quote itself, so the check passed. <a href="https://www.theblock.co/post/393621/aave-and-cow-swap-publish-dueling-post-mortems-after-50-million-defi-swap-disaster">The Block</a></p></div>
+    </div>
+    <p class="note">None of these victims used Sealed Intent, and we do not claim it would have saved them. The Arena replays their <em>patterns</em> against an agent on NEAR and shows what holds and what does not.</p>
+
+    <h2>What it checks</h2>
+    <table>
+      <thead><tr><th>Gate</th><th>What must be true</th><th>Else</th></tr></thead>
+      <tbody>
+        <tr><td>Quote</td><td>The NEAR Intents quote is signed by 1Click, names the declared asset, amount and recipient, and returns value close to the reference price.</td><td><span class="chip block">BLOCK</span></td></tr>
+        <tr><td>Counterparty</td><td>The receiver exists, is not on the shared blocklist, is not brand new, and its code has not changed since review.</td><td><span class="chip warn">WARN</span> or <span class="chip block">BLOCK</span></td></tr>
+        <tr><td>Action class</td><td>Only swaps, transfers and allow-listed contract methods. Adding keys, deploying code or signing messages for intents.near is refused and freezes the wallet.</td><td><span class="chip block">BLOCK</span></td></tr>
+        <tr><td>Budget</td><td>Per-transaction and daily caps, counted per agent identity that the server assigns. Unclear outcomes count as spent.</td><td><span class="chip block">BLOCK</span></td></tr>
+        <tr><td>Second opinion</td><td>An LLM inside a NEAR AI Cloud enclave reads the secret policy. The enclave is verified (Intel TDX, NVIDIA GPU) before the policy is sent. It can only make the verdict stricter.</td><td><span class="chip warn">WARN</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Proof</h2>
+    <p>The Arena runs three identical agents against the same tasks and the same attacks: one with no guard, one with spending caps only, one through Sealed Intent. A referee that reads only chain balances keeps score.</p>
+    <div id="score" class="score"><div class="lane"><h4>Loading the official run…</h4></div></div>
+    <p class="note" id="score-note"></p>
+    <div class="btns"><a class="btn primary" href="/arena.html">Open the Arena</a></div>
+
+    <h2>What is real and what is not</h2>
+    <div class="honest">
+      <ul>
+        <li><strong>Real:</strong> the rules are the same code that runs live; 1Click dry quotes and their signatures; NEAR AI Cloud attestation verified on our machine (Intel DCAP, NVIDIA NRAS); function-call key behaviour confirmed on a local NEAR node.</li>
+        <li><strong>Simulated in the official run:</strong> the chain (an in-memory ledger with NEP-141 rules), 1Click quotes (fixtures signed with a local key), the TEE opinion, custody. The victim is scripted and follows every message; there is no LLM in the loop.</li>
+        <li><strong>Not done yet:</strong> OutLayer execution, a mainnet swap, TLS binding to the gateway attestation, isolation of the Sealed Intent host from the agent.</li>
+        <li><strong>Will not be fixed by this project:</strong> a stolen key, a bug in a token contract, or a compromised Sealed Intent host. The Arena shows these as escapes on purpose.</li>
+      </ul>
+    </div>
+
+    <h2>Try it</h2>
+    <pre class="mono card">pnpm install
+pnpm demo          # the whole story, offline
+pnpm test          # 59 tests, including an 8-process race on the budget
+pnpm redteam       # 20 attack scenarios
+pnpm arena:run     # three lanes, 14 scenarios, referee from balances
+pnpm arena:verify  # recompute the score from the recorded balances</pre>
+
+    <footer>Built at NEAR HACKATHON, Nov 2026. MIT. Not audited: do not use with funds you cannot lose.</footer>
+  </main>
+  <script type="module" src="/src/landing.ts"></script>
+</body>
+</html>

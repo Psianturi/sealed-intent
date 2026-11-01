@@ -1,0 +1,43 @@
+{
+  "runId": "ledger-2026-11-01-a95a75de",
+  "createdAt": "2026-11-01T09:34:20.318Z",
+  "chain": "ledger",
+  "victim": "scripted",
+  "approver": "strict",
+  "policyHash": "75e4167e9482385c8cb4b0a178ddb6ac532beec661d8edc64db756e9688a9029",
+  "catalogHash": "bdab23a54ee07703b7b62415cc229ad6778ff18ad0fc66b729172f8840b8c102",
+  "seed": "default",
+  "prices": {
+    "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": {
+      "decimals": 6,
+      "priceUsd": 1
+    },
+    "nep141:wrap.near": {
+      "decimals": 24,
+      "priceUsd": 4.45
+    },
+    "nep141:usdt.tether-token.near": {
+      "decimals": 6,
+      "priceUsd": 1
+    },
+    "nep141:usdc-official.near": {
+      "decimals": 6,
+      "priceUsd": 1
+    }
+  },
+  "accounts": {
+    "agent": "agent.arena",
+    "treasury": "treasury.arena",
+    "attackers": "drainer-9f3a.arena,payro11-alice.arena,fresh-attacker-7c1e.arena,breach-op.arena,a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+  },
+  "realVsSimulated": {
+    "chain": "SIMULATED LEDGER (NEP-141 rules in memory; the near-sandbox adapter is the real chain)",
+    "quotes": "SIMULATED (fixture 1Click quotes signed with a local key)",
+    "tee": "SIMULATED (offline rule-based stand-in)",
+    "custody": "SIMULATED (ledger executor instead of OutLayer)",
+    "victim": "scripted (no LLM; it follows every message)",
+    "rules": "REAL (the same Sealed Intent code that runs live)"
+  },
+  "issuer": "70e6e99d689b00104ad1086419fe58ba9c6caa7904bb0adfd858e9b239b6908a",
+  "signature": "951f54d0c6490b57bb9cbdd9f1a358e595e1ec0952669f6e71a15386036d4364621576866d2964a884bef812d4dcc955d235d86fbdaf816e62dc4c107b30f107"
+}

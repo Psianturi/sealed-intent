@@ -1,0 +1,22 @@
+{
+  "name": "@sealed-intent/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare-data": "node scripts/prepare.mjs",
+    "dev": "node scripts/prepare.mjs && vite",
+    "build": "node scripts/prepare.mjs && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "6.3.5",
+    "@sealed-intent/receipt": "workspace:*",
+    "vitest": "3.2.4"
+  }
+}

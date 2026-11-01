@@ -1,6 +1,8 @@
 # dependencies and build
 node_modules/
 dist/
+apps/web/public/replays/
+apps/web/public/samples/
 *.tsbuildinfo
 
 # runtime state (receipts, openings, ledgers, keys)
