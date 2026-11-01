@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "allowedAssets": [
+    "nep141:wrap.near",
+    "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+    "nep141:usdt.tether-token.near"
+  ],
+  "allowedRecipients": [
+    "YOUR-ACCOUNT.near"
+  ],
+  "unknownRecipient": "warn",
+  "minAccountAgeDays": 30,
+  "ownAccounts": [
+    "YOUR-ACCOUNT.near"
+  ],
+  "maxLossBps": 300,
+  "perTxUsd": 5,
+  "hourlyUsd": 10,
+  "dailyUsd": 20,
+  "maxDeadlineSec": 900,
+  "slippageToleranceBps": 100,
+  "requireQuoteSignature": true,
+  "maxDryLiveDriftBps": 150,
+  "privatePurposes": [
+    "payroll"
+  ],
+  "confidentialLevel": "basic",
+  "injection": {
+    "block": true
+  },
+  "tee": {
+    "required": false,
+    "obeyBlockSignal": true
+  }
+}

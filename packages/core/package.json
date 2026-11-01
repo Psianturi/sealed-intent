@@ -1,0 +1,14 @@
+{
+  "name": "@sealed-intent/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@sealed-intent/receipt": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "optionalDependencies": {
+    "@defuse-protocol/one-click-sdk-typescript": "0.1.26"
+  }
+}

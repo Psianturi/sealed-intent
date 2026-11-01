@@ -1,0 +1,32 @@
+{
+  "name": "sealed-intent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A private preflight checker between AI agents and their money on NEAR Intents.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "demo": "tsx scripts/demo.ts",
+    "redteam": "tsx packages/redteam/src/cli.ts",
+    "verify": "tsx packages/receipt/src/cli.ts",
+    "disclose": "tsx packages/receipt/src/disclose-cli.ts",
+    "server": "tsx apps/server/src/rest.ts",
+    "mcp": "tsx apps/server/src/mcp.ts",
+    "policy:seal": "tsx scripts/seal-policy.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "4.20.3",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

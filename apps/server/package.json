@@ -1,0 +1,12 @@
+{
+  "name": "@sealed-intent/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.17.5",
+    "@sealed-intent/core": "workspace:*",
+    "@sealed-intent/receipt": "workspace:*",
+    "zod": "3.25.76"
+  }
+}
