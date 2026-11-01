@@ -9,9 +9,9 @@ Every decision produces a signed receipt that anyone can verify, without reveali
 
 Live site: https://sein-near.vercel.app (overview, Arena replay, receipt verifier). Built at NEAR HACKATHON (Nov 2026). Tracks: `security` (main), `privacy`, `agents`, `defi`.
 
-> **Status:** the checker, the receipts and the Arena run offline with no keys and no funds. Of the live path, real 1Click dry
-> quotes and a real NEAR AI Cloud check (Intel TDX, NVIDIA, TLS binding, signed answer; see [`evidence/tee`](evidence/tee)) have been exercised.
-> OutLayer execution, a mainnet swap and a live confidential route have not. See [Limits](#limits-read-this).
+> **Status:** the checker, the receipts and the Arena run offline with no keys and no funds. On NEAR testnet, payments ran through
+> real OutLayer custody with the real NEAR AI Cloud check, and each has a transaction anyone can look up; see [`evidence/custody-testnet`](evidence/custody-testnet).
+> A public registry holds the signing keys, agents and receipt batches. A mainnet payment, a swap and a live confidential route have not run yet, and the service is not hosted. See [Limits](#limits-read-this) and [SECURITY.md](SECURITY.md).
 
 ---
 
@@ -105,25 +105,38 @@ against a $50 cap (`packages/core/test/privacy.test.ts`):
 
 | The agent's starting guess | Requests before the wallet froze | What it learned |
 |---|---|---|
-| $10,000 | 6 | below $156 |
-| $1,000 | 8 | between $46.88 and $50.78 |
-| $200 | 7 | between $50.00 and $51.56 |
+| $10,000 | 3 | below $1,250 |
+| $1,000 | 3 | below $125 |
+| $200 | 4 | between $50.00 and $62.50 |
+| $60 | 5 | between $45.00 and $46.88 |
 
-So a fixed cap can be located within a few percent by a prober with a sensible guess, once, at the price of a frozen wallet
-and an owner who now knows. `secrecy.perTxJitterPct` redraws the effective cap every hour: at 50 the prober finds the draw,
+Only refusals count toward the freeze. So with no idea of the cap the prober learns very little, and with a good first guess
+it still gets within about 10%, once, at the price of a frozen wallet and an owner who now knows. The price of this rule: an
+honest agent that hits a limit three times in an hour also freezes the wallet until the owner looks. `secrecy.perTxJitterPct` redraws the effective cap every hour: at 50 the prober finds the draw,
 which leaves the real cap uncertain by about a third. It can also refuse honest payments near the cap, so it is off by default.
 
 ### Identity, approval and the kill switch
 
 - The agent's identity is assigned by the server: a bearer token maps to an agent name (`SEALED_AGENT_TOKENS`), and the budget is counted per that name. Whatever the agent writes in the request body is ignored.
 - Approving or rejecting a WARN, freezing and unfreezing need the **owner token** (`SEALED_OWNER_TOKEN`), which the agent never holds. Pending decisions live in SQLite, so a WARN raised through MCP can be approved through REST.
-- A forbidden action class, 20 BLOCKs within an hour, or 6 BLOCKs caused only by a spending cap (an agent probing for the exact limit) freezes the wallet until the owner lifts it. The freeze survives restarts.
+- A forbidden action class, 20 BLOCKs within an hour, or 3 BLOCKs caused only by a spending cap (an agent probing for the exact limit) freezes the wallet until the owner lifts it. The freeze survives restarts.
 - The budget is only given back when the executor reports that nothing left the wallet; an unclear outcome counts as spent. Spends are also counted: `velocity.maxTxPerHour` caps how many payments an agent may start per hour regardless of size.
 - A request that arrives without the task text that led to it cannot be screened for injection, so it is a WARN (`TASK_CONTEXT_MISSING`) until a human reads it. The screen covers English and Indonesian phrasings; the enclave opinion is the second filter.
 - A contract whose code changed since it was last seen stays flagged on every request, allow-listed or not, until the owner accepts the new code. Another agent's blocklist report only warns until the owner confirms it.
 - The chain is read from two RPC endpoints (`NEAR_RPC_URLS`); if they disagree about an account, the decision goes to a human (`RPC_DISAGREEMENT`).
 - A watcher compares the agent's account with what the owner last accepted (`SEALED_WATCH_ACCOUNTS`). A key or code that did not come through Sealed Intent freezes the wallet within one round; this is tested against a real local NEAR node.
 - The owner's tool: `pnpm owner status|pending|freeze|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>|watch-accept <account>` against the running REST server, with `SEALED_OWNER_TOKEN` from `.env`. `pending` shows the amount, the receiver, why it was flagged, and what a private route hides.
+
+- With `SEALED_OWNER_ACCOUNT` set, approving needs a wallet signature (NEP-413) over the decision and a hash of what the owner was shown, checked against the chain. A token is no longer enough, and the signature cannot be moved to another payment.
+- Agent tokens are stored as hashes and can be revoked at once (`pnpm owner agent-issue`, `agent-revoke`). An agent with a signing key must sign every request, so a stolen token alone is useless. Repeating an `Idempotency-Key` returns the first answer and acts once.
+
+### Every transaction must trace back to a decision
+
+Reconciliation compares what the custody account signed with what SeIn recorded, from three sources: an indexer, the custody log, and the key's nonce, which only the chain controls. A transaction with no receipt freezes SeIn and, with a freeze-only key, the custody wallet on chain. Measured on testnet: found in 62 seconds, frozen in 64, on a 60-second cycle.
+
+### Public checks
+
+`contracts/sein-registry` holds the receipt signing keys with their history, each agent's owner and status, a hash of its policy, and Merkle roots of receipts. Only an agent's owner can change it, and the operator can only add batches, in time order. `/r/<id>` and the Verify page check a receipt against the chain from the reader's browser: signature, registered key, batch on chain, registered agent, the transaction and its signer, and opened fields against the transaction. `/a/<id>` shows an agent's public record, with no amounts.
 
 ### Keeping the agent away from the money
 
@@ -209,7 +222,7 @@ pnpm demo --live --usd 1 --yes    # preflight + execute through OutLayer custody
 SEALED_MODE=live pnpm rest        # REST in live mode (binds 127.0.0.1); set SEALED_AGENT_TOKENS and SEALED_OWNER_TOKEN
 ```
 
-NEAR Intents has no testnet. Use a separate dev account and tiny amounts. Live mode refuses to start without `OUTLAYER_API_KEY` (set `SEALED_ALLOW_SIMULATED_EXECUTOR=1` for a preflight-only run), and the example policy requires a verified TEE opinion.
+NEAR Intents has no testnet, so swaps can only be tried on mainnet. Set `SEALED_NETWORK=testnet` and the testnet OutLayer host for transfers and calls. Store the custody policy before anything else: the first account to store one becomes its controller. Use a separate dev account and tiny amounts. Live mode refuses to start without `OUTLAYER_API_KEY` (set `SEALED_ALLOW_SIMULATED_EXECUTOR=1` for a preflight-only run), and the example policy requires a verified TEE opinion.
 
 ## The Arena: incident patterns replayed against three wallets
 
@@ -253,15 +266,21 @@ packages/core       preflight engine, 1Click client, checks, counterparty, budge
 packages/receipt    canonical JSON, commitments, ed25519 receipts, EIP-191 / TEE evidence check, verify + disclose CLIs
 packages/redteam    20 attack scenarios + report
 packages/arena      three-lane simulation: ledger and near-sandbox chains, incident catalog, referee, signed recordings
-apps/web            public site: overview, Arena replay, in-browser receipt verifier (Vite, static)
-apps/server         REST service, the agent's MCP bridge, the in-process MCP demo
+apps/web            public site: overview, Arena replay, receipt verifier with chain checks, agent profile (Vite, static)
+apps/server         REST gateway, the agent's MCP bridge, the in-process MCP demo
+contracts           sein-registry, the public record on NEAR (Rust)
 evidence/tee        a real NEAR AI Cloud check, with everything needed to recheck it
-scripts             demo, policy sealing, owner tool, live enclave check, isolation check
+evidence/custody-testnet  real testnet runs: custody alone, the whole path, a bypass caught
+scripts             demo, policy sealing, owner tool, custody and registry tools, live checks, isolation check, secret scan
 fixtures            example policy (offline fixtures live in packages/core/src/fixtures.ts)
 ```
 
 ## Limits (read this)
 
+- **Custody does not check tokens in plain contract calls.** OutLayer refuses native NEAR to a stranger, but once a token contract is on its list it signs any `ft_transfer` to anyone, for any amount. Tested live, see [`evidence/custody-testnet`](evidence/custody-testnet). SeIn reads the transfer and refuses it, and reconciliation catches one sent around SeIn, but a stolen custody key could move the token balance within one cycle. Hold native NEAR under the hardened policy, or keep token balances small.
+- **Not hosted yet.** The owner runs the gateway on their own machine. Registering an agent and approving from a web page need a hosted gateway and are command-line only today.
+- **Receipts seal, the chain does not.** A receipt hides the amount and receiver, but its transaction hash points to public data. Keep the link private if that matters, or use the confidential route.
+- **Reconciliation is after the fact.** It limits a bypass to one cycle, it does not prevent it. Its nonce check freezes the wallet on any transaction SeIn did not record, including one whose result it lost.
 - **Offline mode is a simulation.** Fixture quotes are signed with a local "manager" key and checked by the *same* SDK function used in live mode. The enclave is simulated and every receipt says `offline-simulated`.
 - **The TLS binding ends at the gateway enclave.** The prompt is readable inside the verified gateway and model enclaves. Encrypting it to the model key (NEAR AI's E2EE) is not done yet. Collateral for the Intel check comes from Phala's PCCS unless `SEALED_PCCS_URL` points at Intel. The NVIDIA token is accepted on NRAS's TLS, not validated locally.
 - **The Sealed Intent process itself is a trust point.** If the host running it is compromised, the checks are bypassed. Separate OS users stop an agent that is merely confined to its own user, not a root compromise. A second policy inside custody and a guard contract on chain are the answers; neither is in place yet.
@@ -277,7 +296,7 @@ fixtures            example policy (offline fixtures live in packages/core/src/f
 
 ## Roadmap
 
-Anchor receipt hashes on chain with a function-call key · Trezu / Sputnik DAO multisig for WARNs above a threshold ·
+Hosted gateway with wallet sign-in · run SeIn itself inside a TEE, so the operator cannot read it either · per-agent data keys with rotation · Trezu / Sputnik DAO multisig for WARNs above a threshold ·
 Agent API executor adapter · end-to-end encryption to the model key · indexer-backed account age · shared blocklist as a signed feed between instances · pay-per-check for other agents.
 
 ## Pre-hackathon code and attribution
