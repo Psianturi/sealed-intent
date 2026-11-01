@@ -16,15 +16,15 @@
       <a href="/">Overview</a>
       <a href="/arena.html">Arena</a>
       <a href="/verify.html" aria-current="page">Verify a receipt</a>
-      <a href="https://github.com/Psianturi/sealed-intent">Code</a>
+      <a href="https://github.com/Psianturi/sealed-intent">For builders</a>
     </nav>
   </header>
   <main>
     <h1>Verify a receipt</h1>
-    <p class="lead">Everything runs in your browser. Nothing is uploaded. A receipt proves that a Sealed Intent instance signed a verdict, and (for live receipts) that an attested enclave signed the exact request and response it was asked about.</p>
+    <p class="lead">Drop in a receipt and this page checks it right here in your browser; nothing is uploaded anywhere. A valid receipt means a Sealed Intent instance really made that decision and nobody changed it afterwards. The amount and the receiver stay sealed unless the owner opens one field for you.</p>
     <div class="controls">
       <input type="file" id="file" accept="application/json" />
-      <button class="btn" id="sample">Load a sample receipt</button>
+      <button class="btn primary" id="sample">Try with a sample receipt</button>
       <label>Trusted issuer key (hex, optional) <input type="text" id="trust" class="mono" style="width:min(420px,100%)" placeholder="paste the operator's published ed25519 public key" /></label>
     </div>
     <textarea id="json" placeholder="paste a receipt JSON here"></textarea>

@@ -14,14 +14,13 @@ async function main() {
   }
   const m = run.manifest;
   $("badges").innerHTML = [
-    `<span class="badge">CHAIN: ${esc(m.chain.toUpperCase())} · SIMULATED</span>`,
-    `<span class="badge">QUOTES: SIMULATED</span>`,
-    `<span class="badge">TEE: SIMULATED</span>`,
-    `<span class="badge real">RULES: REAL CODE</span>`,
-    `<span class="badge">VICTIM: ${esc(m.victim)}</span>`,
-    `<span class="badge">APPROVER: ${esc(m.approver)}</span>`,
+    `<span class="badge">CHAIN: SIMULATED LEDGER</span>`,
+    `<span class="badge">QUOTES AND ENCLAVE: SIMULATED</span>`,
+    `<span class="badge real">RULES: THE REAL CODE</span>`,
+    `<span class="badge">AGENT: SCRIPTED, FOLLOWS EVERY MESSAGE</span>`,
+    `<span class="badge">OWNER: ${m.approver === "strict" ? "READS BEFORE APPROVING" : "APPROVES EVERYTHING"}</span>`,
   ].join("");
-  $("run-meta").textContent = `Run ${m.runId}, recorded ${m.createdAt.slice(0, 10)}. Policy ${m.policyHash.slice(0, 12)}…, catalog ${m.catalogHash.slice(0, 12)}…, frozen before the run.`;
+  $("run-meta").textContent = `Recorded ${m.createdAt.slice(0, 10)}. The rules and the attack list were locked before the run; their fingerprints are in the builders' section at the bottom.`;
   $("score").innerHTML = renderScore(run);
   const n = run.outcomes.length;
   const t = run.totals;
@@ -35,7 +34,7 @@ async function main() {
         return `<td><span class="chip ${c.cls}">${esc(c.text)}</span></td>`;
       }).join("");
       const pat = o.scenario.pattern ? `<a href="${esc(o.scenario.pattern.source)}">${esc(o.scenario.pattern.incident)}</a>, ${esc(o.scenario.pattern.date)}` : `<span class="note">${esc(o.scenario.origin)}</span>`;
-      return `<tr class="clickable" data-id="${esc(o.scenario.id)}"><td><strong>${esc(o.scenario.title)}</strong><br><span class="note mono">${esc(o.scenario.id)} · ${esc(o.scenario.origin)}</span></td><td>${pat}</td>${cells}<td><span class="chip sim">${esc(o.scenario.expectedSealed)}</span></td></tr>`;
+      return `<tr class="clickable" data-id="${esc(o.scenario.id)}"><td><strong>${esc(o.scenario.title)}</strong><br><span class="note">${esc(o.scenario.summary)}</span></td><td>${pat}</td>${cells}<td><span class="chip sim">${esc(o.scenario.expectedSealed)}</span></td></tr>`;
     })
     .join("");
   tbody.querySelectorAll("tr").forEach((tr) => tr.addEventListener("click", () => openDrawer(run, tr.dataset.id!)));
@@ -45,7 +44,7 @@ async function main() {
     ? escaped.map((o) => `<li><strong>${esc(o.scenario.title)}</strong> (${usd(o.lanes.sealed.verdict.stolenCents)}): ${esc(o.scenario.summary)}</li>`).join("")
     : "<li>No attack moved funds to an attacker in this run.</li>";
   $("honesty").querySelector("tbody")!.innerHTML = Object.entries(m.realVsSimulated).map(([k, v]) => `<tr><td class="mono">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("");
-  $("repro").textContent = `git clone https://github.com/Psianturi/sealed-intent && cd sealed-intent\npnpm install\npnpm arena:run            # re-run the catalog on the simulated ledger\npnpm arena:verify official  # recompute this run's score from its recorded balances\n# manifest hashes: policy ${m.policyHash}\n#                  catalog ${m.catalogHash}`;
+  $("repro").innerHTML = `Clone <a href="https://github.com/Psianturi/sealed-intent">the repository</a>, run <code>pnpm arena:run</code> to replay the catalog and <code>pnpm arena:verify official</code> to recompute this score from the recorded balances. Run <code>${esc(m.runId)}</code>, policy <code>${esc(m.policyHash.slice(0, 16))}…</code>, catalog <code>${esc(m.catalogHash.slice(0, 16))}…</code>.`;
 
   const pick = $<HTMLSelectElement>("pick");
   pick.innerHTML = run.outcomes.map((o) => `<option value="${esc(o.scenario.id)}">${esc(o.scenario.title)}</option>`).join("");
@@ -55,25 +54,25 @@ async function main() {
   pick.addEventListener("change", () => draw(current(), true));
   $("play").addEventListener("click", () => draw(current(), false));
   $("skip").addEventListener("click", () => draw(current(), true));
-  draw(featured, true);
+  draw(featured, reduced);
 }
 
 /** Vault corridor: tokens leave the vault, pass the gates, and either land with the attacker or stay home. */
 function draw(o: Outcome, instant: boolean) {
   $("scenario-summary").textContent = `${o.scenario.summary}${o.scenario.cannotReplicate ? ` Not replicated: ${o.scenario.cannotReplicate}` : ""}`;
   const gates = ["Quote", "Receiver", "Action", "Budget", "Sign"];
-  const laneY = (i: number) => 70 + i * 90;
+  const laneY = (i: number) => 100 + i * 90;
   const attacks = (l: LaneId) => o.lanes[l].results.filter((r) => r.phase === "attack");
-  const svg = `<svg class="corridor" viewBox="0 0 760 320" role="img" aria-label="${esc(o.scenario.title)}: what each lane did">
+  const svg = `<svg class="corridor" viewBox="0 0 760 350" role="img" aria-label="${esc(o.scenario.title)}: what each lane did">
     <text x="16" y="28" font-size="14" font-weight="600" fill="var(--ink)">${esc(o.scenario.title)}</text>
-    <text x="16" y="46" font-size="11" fill="var(--muted)">${esc(o.scenario.pattern ? `pattern from ${o.scenario.pattern.incident}, ${o.scenario.pattern.date}` : o.scenario.origin)}</text>
+    <text x="16" y="46" font-size="11" fill="var(--muted)">${esc(o.scenario.pattern ? `pattern from ${o.scenario.pattern.incident}, ${o.scenario.pattern.date}` : "hypothetical pattern")}</text>
     ${LANES.map((l, i) => {
       const y = laneY(i);
       const v = o.lanes[l].verdict;
       const label = v.stolenCents > 0 ? `lost ${usd(v.stolenCents)}` : v.foreignKeys.length ? "attacker key added" : cell(o, l).text;
       const gateMarks = l === "sealed" ? gates.map((g, k) => `<rect x="${250 + k * 70 - 2}" y="${y - 16}" width="4" height="32" rx="2" fill="var(--line)" data-gate="${k}"/><text x="${250 + k * 70}" y="${y + 30}" font-size="10" text-anchor="middle" fill="var(--muted)">${g}</text>`).join("") : l === "caps-only" ? `<rect x="${250 + 3 * 70 - 2}" y="${y - 16}" width="4" height="32" rx="2" fill="var(--line)" data-gate="3"/><text x="${250 + 3 * 70}" y="${y + 30}" font-size="10" text-anchor="middle" fill="var(--muted)">Caps</text>` : "";
       return `<g data-lane="${l}">
-        <text x="16" y="${y - 24}" font-size="12" font-weight="600" fill="var(--ink)">${LANE_NAMES[l]}</text>
+        <text x="16" y="${y + 4}" font-size="12" font-weight="600" fill="var(--ink)">${l === "caps-only" ? "Limits only" : LANE_NAMES[l]}</text>
         <rect x="120" y="${y - 18}" width="56" height="36" rx="6" fill="none" stroke="var(--line)"/><text x="148" y="${y + 4}" font-size="11" text-anchor="middle" fill="var(--muted)">Vault</text>
         <line x1="176" y1="${y}" x2="600" y2="${y}" stroke="var(--line)" stroke-width="2"/>
         ${gateMarks}
@@ -84,6 +83,7 @@ function draw(o: Outcome, instant: boolean) {
     }).join("")}
   </svg>`;
   $("corridor").innerHTML = svg;
+  narrate(o, instant || reduced);
   if (instant || reduced) {
     for (const l of LANES) {
       const v = o.lanes[l].verdict;
@@ -97,6 +97,49 @@ function draw(o: Outcome, instant: boolean) {
     return;
   }
   LANES.forEach((l, i) => animateLane(o, l, laneY(i), attacks(l)));
+}
+
+/** Plain-language steps, lit one by one while the animation runs. */
+function narrate(o: Outcome, instant: boolean) {
+  const steps = o.events
+    .filter((e) => e.type !== "decision" || e.lane === "sealed")
+    .filter((e) => !(e.type === "inbox" && e.summary.startsWith("[L-")))
+    .slice(0, 8)
+    .map((e) => {
+      const who = e.lane === "attacker" ? (e.type === "inbox" ? "message" : e.type === "tool" ? "compromised tool" : e.type === "path" ? "breached path" : "attacker") : e.lane === "chain" ? "on chain" : e.lane === "human" ? "owner" : "Sealed Intent";
+      const r = e.result;
+      const text = e.lane === "sealed" && r ? `${r.verdict}${r.codes.length ? ": " + plain(r.codes) : ""}${r.executed ? ", money moved" : r.verdict === "BLOCK" ? ", nothing left the wallet" : r.error ? ", " + r.error : ""}` : e.summary;
+      return { who, text };
+    });
+  const list = $("narration");
+  list.innerHTML = steps.map((s) => `<li><span class="who">${esc(s.who)}</span>${esc(s.text)}</li>`).join("");
+  const items = [...list.querySelectorAll("li")];
+  if (instant) items.forEach((li) => li.classList.add("on"));
+  else items.forEach((li, i) => setTimeout(() => li.classList.add("on"), 500 + i * 650));
+}
+
+const WORDS: Record<string, string> = {
+  COUNTERPARTY_BLOCKLISTED: "receiver is on the shared blocklist",
+  PROMPT_INJECTION_SUSPECTED: "the instruction looks like a trick",
+  TEE_SIGNAL_BLOCK: "the enclave agrees it is unsafe",
+  RECIPIENT_NOT_ALLOWLISTED: "receiver is not a known partner",
+  COUNTERPARTY_NEW_ACCOUNT: "receiver account is brand new",
+  COUNTERPARTY_FIRST_CONTACT: "never paid before",
+  COUNTERPARTY_NOT_FOUND: "receiver does not exist",
+  COUNTERPARTY_CODE_CHANGED: "the contract's code changed",
+  LOOKALIKE_ASSET: "look-alike token",
+  EXCESSIVE_VALUE_LOSS: "the route loses too much value",
+  ABOVE_PER_TX_LIMIT: "above the per-payment limit",
+  HOURLY_BUDGET_EXCEEDED: "hourly budget used up",
+  DAILY_BUDGET_EXCEEDED: "daily budget used up",
+  ACTION_CLASS_FORBIDDEN: "this kind of action is never allowed",
+  WALLET_FROZEN: "the wallet is frozen",
+  METHOD_NOT_ALLOWED: "that contract method is not approved",
+  CONTRACT_NOT_ALLOWED: "that contract is not approved",
+  DRY_LIVE_DRIFT: "the quote changed before execution",
+};
+function plain(codes: string[]): string {
+  return [...new Set(codes)].map((c) => WORDS[c] ?? c.toLowerCase().replace(/_/g, " ")).join(", ");
 }
 
 function gateFor(results: { codes: string[]; verdict: string }[]): number {

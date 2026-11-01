@@ -1,15 +1,19 @@
-import { loadRun, renderScore, type LaneId } from "./arena-data";
+import { loadRun, renderScore, usd } from "./arena-data";
+import { mountFlow, mountHero, mountReceipt } from "./hero";
+
+mountHero(document.getElementById("hero-anim")!);
+mountFlow(document.getElementById("flow")!);
+mountReceipt(document.getElementById("receipt-anim")!);
 
 const el = document.getElementById("score")!;
 const note = document.getElementById("score-note")!;
 loadRun("/replays/official")
   .then((run) => {
     el.innerHTML = renderScore(run);
-    const lanes: LaneId[] = ["no-guard", "caps-only", "sealed"];
-    const n = run.outcomes.length;
     const t = run.totals;
-    note.textContent = `${n} scenarios, ${t.sealed.legitTotal} legit tasks per lane, test tokens on a simulated ledger. Escaped through Sealed Intent: ${t.sealed.escaped.length} of ${n}, all of them attacks that bypass the checker by design. ${lanes.map((l) => `${l}: $${(t[l].stolenCents / 100).toFixed(2)} lost`).join(" · ")}.`;
+    const n = run.outcomes.length;
+    note.textContent = `${n} attack scenarios, each mixed with ${t.sealed.legitTotal / n} everyday tasks. The unguarded agent lost ${usd(t["no-guard"].stolenCents)}, the one with spending limits ${usd(t["caps-only"].stolenCents)}, the one behind Sealed Intent ${usd(t.sealed.stolenCents)}, while finishing every legitimate task. The ${t.sealed.escaped.length} that got through are attacks no checker can stop: a stolen key, a bug in a token contract, a compromised checker, a lying data source. Test tokens; no real money.`;
   })
   .catch(() => {
-    el.innerHTML = `<div class="lane"><h4>No recorded run</h4><p class="note">Run <code>pnpm arena:run</code> and copy the result to <code>replays/official</code>.</p></div>`;
+    el.innerHTML = `<div class="lane"><h4>The official run is not available right now.</h4></div>`;
   });

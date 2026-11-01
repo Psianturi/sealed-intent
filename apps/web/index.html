@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sealed Intent</title>
-  <meta name="description" content="The check between an AI agent and its money on NEAR. The agent can ask; only Sealed Intent can let money move." />
+  <meta name="description" content="A guard that checks every payment an AI agent wants to make on NEAR before the money moves. The agent can ask; only Sealed Intent can let money move." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
@@ -16,71 +16,99 @@
       <a href="/" aria-current="page">Overview</a>
       <a href="/arena.html">Arena</a>
       <a href="/verify.html">Verify a receipt</a>
-      <a href="https://github.com/Psianturi/sealed-intent">Code</a>
+      <a href="https://github.com/Psianturi/sealed-intent">For builders</a>
     </nav>
   </header>
   <main>
-    <h1>The check between an AI agent and its money on NEAR.</h1>
-    <p class="lead">The agent can ask. Only Sealed Intent can let money move, and only after checking what the money will do, who receives it, and whether the instruction came from an attacker. Every decision leaves a signed receipt that hides amounts and recipients.</p>
-    <p class="pitch">Signers check format. Sealed Intent checks meaning.</p>
-    <div class="btns">
-      <a class="btn primary" href="/arena.html">See the Arena</a>
-      <a class="btn" href="/verify.html">Verify a receipt</a>
-      <a class="btn" href="https://github.com/Psianturi/sealed-intent#try-it-in-60-seconds">Try it in 60 seconds</a>
-    </div>
-    <div class="badges">
-      <span class="badge real">RULES: REAL CODE</span>
-      <span class="badge real">1CLICK QUOTES: REAL (dry)</span>
-      <span class="badge real">TEE ATTESTATION: VERIFIED LOCALLY</span>
-      <span class="badge">OUTLAYER: NOT YET EXERCISED</span>
-      <span class="badge">MAINNET SWAP: NOT YET</span>
-    </div>
+    <section class="hero">
+      <div>
+        <h1>Your AI agent can ask for money. It can't take it.</h1>
+        <p class="lead">Sealed Intent sits between an AI agent and its wallet on NEAR. Every payment the agent wants to make is checked first: is the deal real, who gets the money, was the agent tricked, is it within budget. Only then does the money move, and every decision leaves a sealed receipt.</p>
+        <p class="pitch">Signers check format. Sealed Intent checks meaning.</p>
+        <div class="btns">
+          <a class="btn primary" href="/arena.html">Watch attacks fail in the Arena</a>
+          <a class="btn" href="#how">How it works</a>
+        </div>
+      </div>
+      <div id="hero-anim" class="hero-anim" aria-label="Animation: an agent receives messages, money goes through gates, bad payments are stopped"></div>
+    </section>
 
-    <h2>Why</h2>
-    <div class="cards">
-      <div class="card"><h4>Oct 2026</h4><div class="big bad">$6.3B</div><p class="sub">Binance hot wallets. A breached request path sent well-formed withdrawals, and the signer signed them because the format was valid. <a href="https://www.trmlabs.com/resources/blog/north-korea-steals-usd-6-36-billion-from-binance-in-the-largest-hack-in-history">TRM Labs</a></p></div>
-      <div class="card"><h4>May 2026</h4><div class="big bad">~$150K</div><p class="sub">Grok and Bankr. A prompt hidden in a message made an agent relay a transfer; a received NFT was treated as permission. <a href="https://oecd.ai/en/incidents/2026-05-04-4a73">OECD AI incidents</a></p></div>
-      <div class="card"><h4>Mar 2026</h4><div class="big bad">$50M → $36K</div><p class="sub">Aave / CoW. The slippage floor came from the bad quote itself, so the check passed. <a href="https://www.theblock.co/post/393621/aave-and-cow-swap-publish-dueling-post-mortems-after-50-million-defi-swap-disaster">The Block</a></p></div>
-    </div>
-    <p class="note">None of these victims used Sealed Intent, and we do not claim it would have saved them. The Arena replays their <em>patterns</em> against an agent on NEAR and shows what holds and what does not.</p>
+    <section>
+      <h2>The problem, in one picture</h2>
+      <p class="lead">An AI agent with a wallet is like a new employee handed the company card. It works fast and never sleeps, but it can be fooled, it can mistype an address, and it can take a bad price without noticing. Unlike a person, it does all of this in seconds, and on a blockchain nothing can be undone.</p>
+      <div class="cards three">
+        <div class="card story"><div class="ico">✉</div><h3>It gets tricked</h3><p>A message that looks like it comes from the boss says "send everything to this account now." Agents have paid attackers this way. <span class="src">Grok and Bankr, May 2026, about $150K reported.</span></p></div>
+        <div class="card story"><div class="ico">⇄</div><h3>It takes a bad deal</h3><p>A swap route that returns a fraction of the real value can still pass a slippage check, because the check trusts the same bad quote. <span class="src">Aave / CoW, March 2026: $50M became about $36K.</span></p></div>
+        <div class="card story"><div class="ico">⌘</div><h3>Its request path gets hijacked</h3><p>Well-formed withdrawal requests get signed because they look right, not because they are right. <span class="src">Binance, October 2026, about $6.3B.</span></p></div>
+      </div>
+      <p class="note">These happened to exchanges, protocols and people, not to Sealed Intent users. We do not claim it would have saved them. The <a href="/arena.html">Arena</a> replays their patterns against an agent on NEAR and shows what holds and what does not.</p>
+    </section>
 
-    <h2>What it checks</h2>
-    <table>
-      <thead><tr><th>Gate</th><th>What must be true</th><th>Else</th></tr></thead>
-      <tbody>
-        <tr><td>Quote</td><td>The NEAR Intents quote is signed by 1Click, names the declared asset, amount and recipient, and returns value close to the reference price.</td><td><span class="chip block">BLOCK</span></td></tr>
-        <tr><td>Counterparty</td><td>The receiver exists, is not on the shared blocklist, is not brand new, and its code has not changed since review.</td><td><span class="chip warn">WARN</span> or <span class="chip block">BLOCK</span></td></tr>
-        <tr><td>Action class</td><td>Only swaps, transfers and allow-listed contract methods. Adding keys, deploying code or signing messages for intents.near is refused and freezes the wallet.</td><td><span class="chip block">BLOCK</span></td></tr>
-        <tr><td>Budget</td><td>Per-transaction and daily caps, counted per agent identity that the server assigns. Unclear outcomes count as spent.</td><td><span class="chip block">BLOCK</span></td></tr>
-        <tr><td>Second opinion</td><td>An LLM inside a NEAR AI Cloud enclave reads the secret policy. The enclave is verified (Intel TDX, NVIDIA GPU) before the policy is sent. It can only make the verdict stricter.</td><td><span class="chip warn">WARN</span></td></tr>
-      </tbody>
-    </table>
+    <section id="how">
+      <h2>How it works</h2>
+      <p class="lead">The agent never holds the key. It sends a request; Sealed Intent runs five checks and answers with a traffic light.</p>
+      <div id="flow" class="flow"></div>
+      <div class="cards">
+        <div class="card"><h3>1 · Is the deal real?</h3><p>The quote from NEAR Intents must be genuinely signed, name exactly the token, amount and receiver the agent declared, and return value close to the reference price. A look-alike token or a route that loses 26% is refused.</p></div>
+        <div class="card"><h3>2 · Who gets the money?</h3><p>Known partner, brand-new account, an account that does not exist, a contract whose code changed, or an address on a shared blocklist. New or unknown receivers go to a human first.</p></div>
+        <div class="card"><h3>3 · Is this even a payment?</h3><p>Only swaps, transfers and approved contract calls are allowed. Adding a key, deploying code or signing a message that moves funds is refused and freezes the wallet until the owner looks.</p></div>
+        <div class="card"><h3>4 · Was the agent tricked?</h3><p>The instruction text is screened for "ignore your rules" patterns, and a second opinion comes from an AI running in a sealed hardware enclave that is verified before it sees anything. The AI can only make a decision stricter, never looser.</p></div>
+        <div class="card"><h3>5 · Is it within budget?</h3><p>Per-payment and daily limits, counted per agent by the server, so an agent cannot rename itself for a fresh budget. If the outcome of a payment is unclear, it counts as spent.</p></div>
+        <div class="card light"><h3>Then: a traffic light</h3><p><span class="chip allow">ALLOW</span> the money moves through custody. <span class="chip warn">WARN</span> a human decides first; the agent cannot approve itself. <span class="chip block">BLOCK</span> nothing leaves the wallet.</p></div>
+      </div>
+    </section>
 
-    <h2>Proof</h2>
-    <p>The Arena runs three identical agents against the same tasks and the same attacks: one with no guard, one with spending caps only, one through Sealed Intent. A referee that reads only chain balances keeps score.</p>
-    <div id="score" class="score"><div class="lane"><h4>Loading the official run…</h4></div></div>
-    <p class="note" id="score-note"></p>
-    <div class="btns"><a class="btn primary" href="/arena.html">Open the Arena</a></div>
+    <section>
+      <h2>Sealed receipts: proof without exposure</h2>
+      <div class="split">
+        <div>
+          <p class="lead">Every decision produces a receipt that anyone can check, but that reveals nothing private. The verdict and the reasons are visible. The amount, the receiver and the instruction are replaced by sealed commitments.</p>
+          <ul>
+            <li><strong>Edit one character</strong> and the receipt becomes invalid.</li>
+            <li><strong>An auditor needs one fact?</strong> The owner opens that one field, and the receipt proves it matches.</li>
+            <li><strong>Live receipts</strong> also carry the enclave's signature over the exact question it was asked, verified against Intel and NVIDIA hardware evidence.</li>
+          </ul>
+          <div class="btns"><a class="btn" href="/verify.html">Verify a receipt yourself</a></div>
+        </div>
+        <div id="receipt-anim" class="receipt-anim" aria-label="Illustration of a sealed receipt"></div>
+      </div>
+    </section>
 
-    <h2>What is real and what is not</h2>
-    <div class="honest">
-      <ul>
-        <li><strong>Real:</strong> the rules are the same code that runs live; 1Click dry quotes and their signatures; NEAR AI Cloud attestation verified on our machine (Intel DCAP, NVIDIA NRAS); function-call key behaviour confirmed on a local NEAR node.</li>
-        <li><strong>Simulated in the official run:</strong> the chain (an in-memory ledger with NEP-141 rules), 1Click quotes (fixtures signed with a local key), the TEE opinion, custody. The victim is scripted and follows every message; there is no LLM in the loop.</li>
-        <li><strong>Not done yet:</strong> OutLayer execution, a mainnet swap, TLS binding to the gateway attestation, isolation of the Sealed Intent host from the agent.</li>
-        <li><strong>Will not be fixed by this project:</strong> a stolen key, a bug in a token contract, or a compromised Sealed Intent host. The Arena shows these as escapes on purpose.</li>
-      </ul>
-    </div>
+    <section>
+      <h2>Proof: the Arena</h2>
+      <p class="lead">Three identical agents get the same tasks and the same attacks. One has no guard. One has spending limits only, which is what most agent wallets ship. One goes through Sealed Intent. A referee that only reads balances keeps score; it never reads our verdicts.</p>
+      <div id="score" class="score"><div class="lane"><h4>Loading the official run…</h4></div></div>
+      <p class="note" id="score-note"></p>
+      <div class="btns"><a class="btn primary" href="/arena.html">Open the Arena</a></div>
+    </section>
 
-    <h2>Try it</h2>
-    <pre class="mono card">pnpm install
-pnpm demo          # the whole story, offline
-pnpm test          # 59 tests, including an 8-process race on the budget
-pnpm redteam       # 20 attack scenarios
-pnpm arena:run     # three lanes, 14 scenarios, referee from balances
-pnpm arena:verify  # recompute the score from the recorded balances</pre>
+    <section>
+      <h2>Where it fits</h2>
+      <div class="cards three">
+        <div class="card"><h3>Any agent</h3><p>Agents talk to Sealed Intent through a standard tool interface (MCP) or a plain web API. They get a verdict and generic reasons, never the secret policy or its thresholds.</p></div>
+        <div class="card"><h3>NEAR custody and Intents</h3><p>Approved payments are signed inside a custody enclave (OutLayer), and swaps settle through NEAR Intents. The agent never touches a key.</p></div>
+        <div class="card"><h3>The owner stays in charge</h3><p>Only the owner's token can approve a WARN, freeze or unfreeze the wallet. A freeze survives restarts.</p></div>
+      </div>
+    </section>
 
-    <footer>Built at NEAR HACKATHON, Nov 2026. MIT. Not audited: do not use with funds you cannot lose.</footer>
+    <section>
+      <h2>What is real today, and what is not</h2>
+      <div class="honest">
+        <ul>
+          <li><strong>Real:</strong> the rules shown here are the same code that runs live; quotes from NEAR Intents and their signatures; hardware attestation of the AI enclave verified on our own machine; key behaviour confirmed on a local NEAR node.</li>
+          <li><strong>Simulated in the Arena:</strong> the chain is an in-memory ledger with real NEAR token rules; quotes, the enclave opinion and custody are stand-ins; the agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled, not whether it can be.</li>
+          <li><strong>Not done yet:</strong> a real custody execution and a mainnet swap; binding the network connection to the enclave; isolating the Sealed Intent host from the agent.</li>
+          <li><strong>Out of reach by design:</strong> a stolen key, a bug inside a token contract, or a compromised Sealed Intent host. The Arena shows these as escapes on purpose.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="builders">
+      <h2>For builders</h2>
+      <p>Open source, MIT. The repository has a sixty-second offline demo, the test suite, the red-team catalog and the Arena recorder. <a href="https://github.com/Psianturi/sealed-intent">Read the code on GitHub</a>.</p>
+    </section>
+
+    <footer>Built at NEAR HACKATHON, November 2026. Not audited. Do not use with funds you cannot lose.</footer>
   </main>
   <script type="module" src="/src/landing.ts"></script>
 </body>

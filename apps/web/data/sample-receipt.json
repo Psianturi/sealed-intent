@@ -1,0 +1,64 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "493a78bf-90e7-4602-a38a-dff8d6aad7c2",
+  "issuedAt": "2026-11-01T08:56:14.037Z",
+  "verdict": "BLOCK",
+  "reasonCodes": [
+    "COUNTERPARTY_BLOCKLISTED",
+    "PROMPT_INJECTION_SUSPECTED",
+    "TEE_SIGNAL_BLOCK"
+  ],
+  "warnCodes": [
+    "COUNTERPARTY_FIRST_CONTACT",
+    "COUNTERPARTY_NEW_ACCOUNT",
+    "RECIPIENT_NOT_ALLOWLISTED"
+  ],
+  "public": {
+    "intentKind": "swap",
+    "route": "public",
+    "mode": "offline",
+    "quote": {
+      "correlationId": "7c7d52b850bfe42d9bcae7704f381d96",
+      "signatureVerified": true,
+      "dry": false
+    }
+  },
+  "commitments": {
+    "agentId": "1a052529f50d90a32569809d08240dc52463905f8a7702e5ccf9100a2de75473",
+    "tokenIn": "3ba3e0d0efda7f8cd7d6bcbfb8e9ea96a4d93b07296ea29e517e1b288c7bb2a6",
+    "tokenOut": "b954b8073b8449ad7ec173533375e950a8d4056637fa6192e37c7573d8e6b4ab",
+    "amountIn": "36b00689ac6b1774fcd4e1788a28e45ea4e1e4697e89e20306bb4c093d096060",
+    "minAmountOut": "c6ff37feb742999820fcf18b7bc2ef4ad465c55faa28157df6b455f1aa601aad",
+    "recipient": "db36867fb888c952ebcd5490d5b869c2b8439419f6f71b169dba54935b137ca0",
+    "refundTo": "89b17b7a24710b8ef67141e341e2b587b0a2d258cad3c95647bf7a2df563714b",
+    "depositAddress": "e6ce15d113b707f59f3def4b304dc03d386d257a7c2f0d11e37883c32828e44d",
+    "taskText": "2c13b23d00a79169e9ae135f927a9608a7188c406cabe0b36940c4fb2e3f1407"
+  },
+  "policyCommitment": "8549cec4b9388257b364cc507c8c408f23458d0d3691920723e7c1a927c57456",
+  "tee": {
+    "kind": "offline-simulated",
+    "signatureKind": "provider_tee",
+    "model": "offline/rule-based-simulator",
+    "requestHash": "0d894c7e8132f7f186f9d848485a7a9bbe15f8ed2856616b01dadd3a2f296955",
+    "responseHash": "a74a67d08125b118e91e94c4bd559503c0ca2ae9896106b238ba7c2ad4b6f3aa",
+    "text": "offline/rule-based-simulator:0d894c7e8132f7f186f9d848485a7a9bbe15f8ed2856616b01dadd3a2f296955:a74a67d08125b118e91e94c4bd559503c0ca2ae9896106b238ba7c2ad4b6f3aa",
+    "signature": "0xff3280e3e41372684b70b61f6ff771be449252b39f81b35a121b4f8947442ce422451d66fd8138b9b8538af90c36d3daa6df3870470f72e448622752c6b331ac1c",
+    "signingAddress": "0x3ca34564c1f1753da298e7da21417bb46f5541be",
+    "signingAlgo": "ecdsa",
+    "attestation": {
+      "nonce": "4d150408b4392c29251a5253860ca647781e72967cc85a4ec4d99ad345c08281",
+      "signingAddressMatched": false,
+      "quoteVerifiedLocally": false,
+      "note": "offline demo: no attestation"
+    },
+    "signal": "block",
+    "signalCodes": [
+      "SUSPICIOUS_TASK_TEXT"
+    ]
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "70e6e99d689b00104ad1086419fe58ba9c6caa7904bb0adfd858e9b239b6908a"
+  },
+  "signature": "52175e9dfbf43f21dac6631d973d78c15ff733bd3986f3e09bedc90020003a7e5fff2801a644cb37e85f58ac25b1100b75b274b56430a6fbdd746976e782d40c"
+}

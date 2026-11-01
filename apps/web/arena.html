@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sealed Intent Arena</title>
-  <meta name="description" content="Three identical agents, the same tasks and attacks, a referee that only reads chain balances." />
+  <meta name="description" content="Three identical AI agents, the same tasks and attacks, a referee that only reads chain balances. Watch which attacks get stopped." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
@@ -16,44 +16,45 @@
       <a href="/">Overview</a>
       <a href="/arena.html" aria-current="page">Arena</a>
       <a href="/verify.html">Verify a receipt</a>
-      <a href="https://github.com/Psianturi/sealed-intent">Code</a>
+      <a href="https://github.com/Psianturi/sealed-intent">For builders</a>
     </nav>
   </header>
   <main>
-    <h1>Sealed Intent Arena</h1>
-    <p class="lead">Three identical agents. Same tasks, same attacks. A referee that only reads chain state.</p>
+    <h1>The Arena</h1>
+    <p class="lead">Three identical AI agents get the same everyday tasks and the same attacks. One has no guard. One has spending limits only. One goes through Sealed Intent. A referee that only reads account balances keeps score; it never reads our verdicts, so we cannot grade ourselves.</p>
     <div class="badges" id="badges"></div>
     <p class="note" id="run-meta"></p>
 
-    <h2 id="score-h">Scoreboard</h2>
+    <h2>Scoreboard</h2>
     <div id="score" class="score"></div>
     <p class="note" id="summary"></p>
 
     <h2>Watch a scenario</h2>
+    <p class="note">Pick an attack. Money leaves the vault; gates light green or red; what gets past the last gate lands with the attacker. The referee counts only what actually moved.</p>
     <div class="controls">
       <label for="pick">Scenario</label>
       <select id="pick"></select>
-      <button class="btn" id="play">Play</button>
-      <button class="btn" id="skip">Skip to result</button>
-      <span class="note" id="play-note">Every motion comes from one recorded event. Time is compressed.</span>
+      <button class="btn primary" id="play">Play</button>
+      <button class="btn" id="skip">Show result</button>
     </div>
     <div id="corridor"></div>
     <p class="note" id="scenario-summary"></p>
+    <ol class="narration" id="narration"></ol>
 
     <h2>All scenarios</h2>
-    <p class="note">Click a row for what happened, the evidence and the raw events. "Expected" is what we predicted for the Sealed Intent lane before running; it is shown so you can judge us, the referee never reads it.</p>
-    <table id="scenarios"><thead><tr><th>Scenario</th><th>Pattern</th><th>No guard</th><th>Caps only</th><th>Sealed Intent</th><th>Expected</th></tr></thead><tbody></tbody></table>
+    <p class="note">Each one follows the pattern of a real incident, replayed against an agent on NEAR. Click a row for the story, the evidence and what could not be replicated. "Expected" is what we predicted for Sealed Intent before running, so you can judge us; the referee never reads it.</p>
+    <table id="scenarios"><thead><tr><th>Attack</th><th>Pattern from</th><th>No guard</th><th>Limits only</th><th>Sealed Intent</th><th>Expected</th></tr></thead><tbody></tbody></table>
 
-    <h2>Escaped through Sealed Intent</h2>
+    <h2>What got past Sealed Intent</h2>
+    <p class="note">Shown on purpose. These are the attacks a checker in front of the wallet cannot stop by itself.</p>
     <ul id="escaped"></ul>
 
     <h2>What is real and what is simulated</h2>
     <table id="honesty"><tbody></tbody></table>
-    <p class="note">Patterns from real incidents are not replicas: initial access, the victims' signers, the chains involved and the sums are not reproduced. Each scenario lists what cannot be replicated.</p>
+    <p class="note">Patterns are not replicas: how the real attackers got in, the victims' signing systems, the chains involved and the sums are not reproduced.</p>
 
-    <h2>Reproduce</h2>
-    <pre class="mono card" id="repro"></pre>
-    <footer>Built at NEAR HACKATHON, Nov 2026. Test tokens only; no real funds move in the Arena.</footer>
+    <details class="dev"><summary>For builders: reproduce this run</summary><p id="repro"></p></details>
+    <footer>Built at NEAR HACKATHON, November 2026. Test tokens only; no real money moves in the Arena.</footer>
   </main>
   <aside class="drawer" id="drawer" aria-hidden="true"></aside>
   <script type="module" src="/src/arena.ts"></script>
