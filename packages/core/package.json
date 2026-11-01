@@ -6,7 +6,8 @@
   "exports": "./src/index.ts",
   "dependencies": {
     "@sealed-intent/receipt": "workspace:*",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "@phala/dcap-qvl": "0.7.0"
   },
   "optionalDependencies": {
     "@defuse-protocol/one-click-sdk-typescript": "0.1.26"

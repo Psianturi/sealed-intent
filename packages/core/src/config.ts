@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadOrCreateIssuerKey } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
@@ -46,7 +46,19 @@ export interface Built {
   memory: CounterpartyMemory;
 }
 
+/** Reads .env from the working directory when present. Values already in the environment win. */
+export function loadEnv(path = ".env"): void {
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
+    if (!m || line.trim().startsWith("#")) continue;
+    const value = m[2]!.replace(/^(["'])(.*)\1$/, "$2");
+    if (process.env[m[1]!] === undefined && value !== "") process.env[m[1]!] = value;
+  }
+}
+
 export function buildPreflight(opts: BuildOptions): Built {
+  loadEnv();
   const home = opts.home ?? ".sealed";
   const issuer = loadOrCreateIssuerKey(join(home, "issuer.pem"));
   const store = new ReceiptStore(opts.outDir ?? "out", home);
@@ -95,11 +107,17 @@ export function buildPreflight(opts: BuildOptions): Built {
     freeze,
     issuer,
     store,
-    executor: process.env.OUTLAYER_API_KEY ? new OutLayerExecutor(oneclick) : new SimulatedExecutor(),
+    executor: liveExecutor(oneclick),
     counterparty: { blocklist, chain: new RpcChainReader(), memory },
     tee: process.env.NEARAI_API_KEY ? new NearAiCloudChecker() : undefined,
   });
   return { preflight, ledger, pending, freeze, oneclick, blocklist, memory };
+}
+
+function liveExecutor(oneclick: HttpOneClickClient): Executor {
+  if (process.env.OUTLAYER_API_KEY) return new OutLayerExecutor(oneclick);
+  if (process.env.SEALED_ALLOW_SIMULATED_EXECUTOR === "1") return new SimulatedExecutor();
+  throw new Error("live mode needs OUTLAYER_API_KEY (or SEALED_ALLOW_SIMULATED_EXECUTOR=1 for a preflight-only run)");
 }
 
 export function newPolicyKey(): string {

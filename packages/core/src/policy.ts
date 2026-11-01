@@ -33,6 +33,12 @@ export const Policy = z.object({
     required: z.boolean(),
     /** if the private TEE check says "block", block (true) or only record it (false) */
     obeyBlockSignal: z.boolean(),
+    /** Intel TCB statuses the enclave may report */
+    acceptedTcbStatuses: z.array(z.string()).default(["UpToDate"]),
+    /** refuse models without verified NVIDIA GPU evidence */
+    requireGpu: z.boolean().default(true),
+    /** accept a response signed by the gateway instead of the model enclave */
+    allowGatewaySignature: z.boolean().default(false),
   }),
   /** Action classes the agent may request. Anything in "never" is refused and freezes the wallet. */
   actions: z

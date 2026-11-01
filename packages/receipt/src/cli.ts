@@ -39,7 +39,7 @@ for (const file of files) {
   const report = verifyReceipt(receipt, { disclosures: mine, trustedIssuerKeys: trusted });
   allValid &&= report.valid;
   const tee = report.tee
-    ? `tee=${report.tee.signatureValid && report.tee.textMatchesHashes ? "signature-ok" : "BAD"}${report.tee.simulated ? "(simulated)" : ""}${report.tee.attestationBound ? "+attested" : ""}`
+    ? `tee=${report.tee.signatureValid && report.tee.textMatchesHashes ? "signature-ok" : "BAD"}${report.tee.simulated ? "(simulated)" : report.tee.attestationBound ? "+attested" : "+UNVERIFIED-ENCLAVE"}`
     : "tee=none";
   console.log(
     `${report.valid ? "VALID  " : "INVALID"}  ${receipt.verdict.padEnd(5)}  ${receipt.receiptId}  ${tee}  reasons=[${receipt.reasonCodes.join(",")}]`,

@@ -83,7 +83,7 @@ export const DEMO_POLICY: Policy = {
   privatePurposes: ["payroll"],
   confidentialLevel: "basic",
   injection: { block: true },
-  tee: { required: false, obeyBlockSignal: true },
+  tee: { required: false, obeyBlockSignal: true, acceptedTcbStatuses: ["UpToDate"], requireGpu: true, allowGatewaySignature: false },
   actions: { allowed: ["swap", "transfer", "call"], never: ["sign_message", "add_key", "delete_key", "deploy", "delete_account", "stake"] },
   contracts: { [DEMO_ACCOUNTS.pool]: { methods: ["deposit", "claim"], maxDepositYocto: "1000000000000000000000000" } },
   freeze: { onForbiddenAction: true, maxBlocksPerHour: 20 },

@@ -151,7 +151,7 @@ export function verifyReceipt(
   let tee: TeeCheckResult | undefined;
   if (receipt.tee) {
     tee = verifyTeeEvidence(receipt.tee);
-    if (!tee.signatureValid || !tee.textMatchesHashes) problems.push(...tee.problems.filter((p) => !p.startsWith("simulated")));
+    if (!tee.signatureValid || !tee.textMatchesHashes || (!tee.simulated && !tee.attestationBound)) problems.push(...tee.problems.filter((p) => !p.startsWith("simulated")));
   }
 
   const disclosures = (opts.disclosures ?? []).map((d) => {
@@ -165,6 +165,7 @@ export function verifyReceipt(
     return { field: d.field, matches, value: matches ? d.opening.value : undefined };
   });
 
-  const valid = issuerSignatureValid && trustedIssuer !== false && (!tee || (tee.signatureValid && tee.textMatchesHashes)) && disclosures.every((d) => d.matches);
+  const teeOk = !tee || (tee.signatureValid && tee.textMatchesHashes && (tee.simulated || tee.attestationBound));
+  const valid = issuerSignatureValid && trustedIssuer !== false && teeOk && disclosures.every((d) => d.matches);
   return { valid, issuerSignatureValid, trustedIssuer, tee, disclosures, problems };
 }

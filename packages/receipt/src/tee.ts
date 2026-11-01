@@ -26,8 +26,12 @@ export interface TeeEvidence {
     nonce: string;
     /** signing_address of the response matched the attested report fetched BEFORE the completion */
     signingAddressMatched: boolean;
-    /** Intel TDX / NVIDIA quote verified locally (dcap-qvl). Not done in this MVP; see README. */
+    /** Intel TDX quote verified locally with dcap-qvl, and GPU evidence with NVIDIA NRAS */
     quoteVerifiedLocally: boolean;
+    tcbStatus?: string;
+    measurements?: { mrTd: string; rtMr3: string; mrConfigId: string };
+    gatewaySigner?: string;
+    gpus?: number;
     /** Human-readable list of what WAS checked (the "Verified" panel). */
     checks?: { name: string; ok: boolean }[];
     note?: string;
@@ -73,13 +77,14 @@ export function verifyTeeEvidence(e: TeeEvidence): TeeCheckResult {
     problems.push(`signature check failed: ${(err as Error).message}`);
   }
   if (!signatureValid) problems.push("signature does not match signing address");
-  if (!e.attestation.signingAddressMatched) problems.push("signing address not bound to an attestation report");
+  const attestationBound = e.attestation.signingAddressMatched && e.attestation.quoteVerifiedLocally;
   if (e.kind === "offline-simulated") problems.push("simulated enclave (offline demo), not a real TEE");
+  else if (!attestationBound) problems.push("signer not bound to a locally verified attestation report");
 
   return {
     textMatchesHashes,
     signatureValid,
-    attestationBound: e.attestation.signingAddressMatched,
+    attestationBound,
     simulated: e.kind === "offline-simulated",
     problems,
   };

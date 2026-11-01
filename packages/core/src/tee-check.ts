@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { expectedSignedText, sha256Hex, signEip191, verifyTeeEvidence, type TeeEvidence } from "@sealed-intent/receipt";
+import { checkGpuEvidence, checkNearReport, type NearReport, type QuoteVerifier, type ReportCheck } from "./attestation";
 import type { DeclaredIntent } from "./intent";
 import type { QuoteResponse } from "./oneclick";
 import type { Policy } from "./policy";
@@ -9,8 +10,7 @@ import type { Policy } from "./policy";
 /**
  * Private second opinion: an LLM inside a TEE reads the secret policy, the intent,
  * the quote and the untrusted task text, and answers allow / warn / block.
- * The operator keeps the raw bytes; the receipt only carries their hashes plus
- * the enclave's signature. The LLM never decides alone: it is one signal.
+ * The enclave is verified BEFORE the policy is sent. The LLM never decides alone.
  */
 export interface TeeCheckInput {
   intent: DeclaredIntent;
@@ -66,17 +66,41 @@ function parseSignal(content: string): { signal: TeeEvidence["signal"]; codes: s
   }
 }
 
-/** Real check against NEAR AI Cloud (OpenAI-compatible API + attestation + response signatures). */
+export interface NearAiOptions {
+  apiKey?: string;
+  model?: string;
+  baseUrl?: string;
+  signingAlgo?: "ecdsa" | "ed25519";
+  fetch?: typeof fetch;
+  verifyQuote?: QuoteVerifier;
+}
+
+/**
+ * Real check against NEAR AI Cloud. Order matters:
+ *  1. fetch the attestation report with a fresh nonce
+ *  2. verify the gateway quote and every model report (Intel DCAP, nonce and signer binding,
+ *     measurements, GPU evidence through NVIDIA NRAS); refuse before anything is sent otherwise
+ *  3. send the completion, keeping the exact bytes
+ *  4. fetch the response signature and require a provider_tee signer that matches exactly one verified model report
+ * Not covered: TLS connection binding to the gateway (a proxy relaying genuine reports could read the prompt).
+ */
 export class NearAiCloudChecker implements TeeChecker {
   readonly kind = "nearai-cloud" as const;
+  private readonly apiKey: string;
+  private readonly model: string;
+  private readonly baseUrl: string;
+  private readonly signingAlgo: "ecdsa" | "ed25519";
+  private readonly fetch: typeof fetch;
+  private readonly verifyQuote?: QuoteVerifier;
 
-  constructor(
-    private readonly apiKey = process.env.NEARAI_API_KEY ?? "",
-    private readonly model = process.env.NEARAI_MODEL ?? "",
-    private readonly baseUrl = process.env.NEARAI_BASE_URL ?? "https://cloud-api.near.ai/v1",
-    private readonly signingAlgo: "ecdsa" | "ed25519" = "ecdsa",
-  ) {
-    if (!apiKey || !model) throw new Error("NEARAI_API_KEY and NEARAI_MODEL are required for the NEAR AI Cloud check");
+  constructor(opts: NearAiOptions = {}) {
+    this.apiKey = opts.apiKey ?? process.env.NEARAI_API_KEY ?? "";
+    this.model = opts.model ?? process.env.NEARAI_MODEL ?? "";
+    this.baseUrl = opts.baseUrl ?? process.env.NEARAI_BASE_URL ?? "https://cloud-api.near.ai/v1";
+    this.signingAlgo = opts.signingAlgo ?? "ecdsa";
+    this.fetch = opts.fetch ?? fetch;
+    this.verifyQuote = opts.verifyQuote;
+    if (!this.apiKey || !this.model) throw new Error("NEARAI_API_KEY and NEARAI_MODEL are required for the NEAR AI Cloud check");
   }
 
   private headers(extra: Record<string, string> = {}): Record<string, string> {
@@ -84,22 +108,30 @@ export class NearAiCloudChecker implements TeeChecker {
   }
 
   async check(input: TeeCheckInput): Promise<TeeEvidence> {
-    // 1. fresh attestation BEFORE the completion, bound to our nonce
+    const tee = input.policy.tee;
     const nonce = randomBytes(32).toString("hex");
     const attUrl = new URL(`${this.baseUrl}/attestation/report`);
     attUrl.search = new URLSearchParams({ signing_algo: this.signingAlgo, nonce, model: this.model, provider: "near" }).toString();
-    const attRes = await fetch(attUrl, { headers: this.headers({ "x-no-aliasing": "true" }) });
+    const attRes = await this.fetch(attUrl, { headers: this.headers({ "x-no-aliasing": "true" }) });
     if (!attRes.ok) throw new Error(`attestation report HTTP ${attRes.status}`);
-    const att = (await attRes.json()) as {
-      gateway_attestation?: { signing_address?: string; signing_algo?: string; request_nonce?: string };
-      model_attestations?: { signing_address?: string; signing_algo?: string }[];
-    };
-    const modelSigners = (att.model_attestations ?? []).filter((m) => m.signing_address);
-    if (modelSigners.length === 0) throw new Error("attestation report has no model_attestations");
-    const nonceEchoed = att.gateway_attestation?.request_nonce === nonce;
-    if (!nonceEchoed) throw new Error("attestation report did not echo our nonce (stale or replayed report)");
+    const att = (await attRes.json()) as { gateway_attestation?: NearReport; model_attestations?: NearReport[] };
 
-    // 2. the completion; keep the exact request and response bytes
+    // 2. verify everything before the secret policy leaves this process
+    if (!att.gateway_attestation) throw new Error("attestation report has no gateway_attestation");
+    const gateway = await checkNearReport(att.gateway_attestation, nonce, { acceptedTcbStatuses: tee.acceptedTcbStatuses, verifyQuote: this.verifyQuote });
+    if (!gateway.ok) throw new Error(`gateway attestation rejected: ${gateway.problems.join("; ")}`);
+    const candidates = att.model_attestations ?? [];
+    if (candidates.length === 0) throw new Error("attestation report has no model_attestations");
+    const verifiedModels: { report: NearReport; check: ReportCheck; gpus?: number }[] = [];
+    for (const report of candidates) {
+      const check = await checkNearReport(report, nonce, { acceptedTcbStatuses: tee.acceptedTcbStatuses, verifyQuote: this.verifyQuote });
+      if (!check.ok) throw new Error(`model attestation rejected: ${check.problems.join("; ")}`);
+      const gpu = await checkGpuEvidence(report, nonce, this.fetch);
+      if (tee.requireGpu && !gpu.ok) throw new Error(`GPU attestation rejected: ${gpu.problems.join("; ")}`);
+      verifiedModels.push({ report, check, gpus: gpu.ok ? gpu.gpus : undefined });
+    }
+
+    // 3. the completion; keep the exact request and response bytes
     const { system, user } = buildTeePrompt(input);
     const requestBody = JSON.stringify({
       model: this.model,
@@ -109,7 +141,7 @@ export class NearAiCloudChecker implements TeeChecker {
         { role: "user", content: user },
       ],
     });
-    const compRes = await fetch(`${this.baseUrl}/chat/completions`, {
+    const compRes = await this.fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
       headers: this.headers({ "Content-Type": "application/json", "x-no-aliasing": "true" }),
       body: requestBody,
@@ -119,12 +151,10 @@ export class NearAiCloudChecker implements TeeChecker {
     const completion = JSON.parse(responseBytes.toString("utf8")) as { id: string; choices: { message: { content: string } }[] };
     const parsed = parseSignal(completion.choices[0]?.message.content ?? "");
 
-    // 3. the enclave's signature over sha256(request):sha256(response)
+    // 4. the enclave's signature over sha256(request):sha256(response)
     let sig: { text?: string; signature?: string; signing_address?: string; signing_algo?: string; signature_kind?: string } | undefined;
     for (let attempt = 0; attempt < 6 && !sig?.signature; attempt++) {
-      const res = await fetch(`${this.baseUrl}/signature/${encodeURIComponent(completion.id)}?signing_algo=${this.signingAlgo}`, {
-        headers: this.headers(),
-      });
+      const res = await this.fetch(`${this.baseUrl}/signature/${encodeURIComponent(completion.id)}?signing_algo=${this.signingAlgo}`, { headers: this.headers() });
       if (res.status === 404) {
         await new Promise((r) => setTimeout(r, 750 * (attempt + 1)));
         continue;
@@ -135,16 +165,16 @@ export class NearAiCloudChecker implements TeeChecker {
       sig = body;
     }
     if (!sig?.signature || !sig.text || !sig.signing_address) throw new Error("no response signature available");
-    if (sig.signature_kind !== "provider_tee" && sig.signature_kind !== "gateway") {
-      throw new Error(`unknown signature_kind ${String(sig.signature_kind)}`);
-    }
+    if (sig.signature_kind !== "provider_tee" && sig.signature_kind !== "gateway") throw new Error(`unknown signature_kind ${String(sig.signature_kind)}`);
+    if (sig.signature_kind === "gateway" && !tee.allowGatewaySignature) throw new Error("response was signed by the gateway, not by the model enclave");
 
-    const signingAddressMatched =
-      sig.signature_kind === "provider_tee"
-        ? modelSigners.filter(
-            (m) => m.signing_address?.toLowerCase() === sig!.signing_address!.toLowerCase() && (m.signing_algo ?? this.signingAlgo) === this.signingAlgo,
-          ).length === 1
-        : att.gateway_attestation?.signing_address?.toLowerCase() === sig.signing_address.toLowerCase();
+    const signer = sig.signing_address.toLowerCase();
+    const signerMatches = (r: NearReport) => r.signing_address.toLowerCase() === signer && r.signing_algo === this.signingAlgo;
+    const matched = sig.signature_kind === "provider_tee" ? verifiedModels.filter((m) => signerMatches(m.report)) : [];
+    const gatewayMatched = sig.signature_kind === "gateway" && signerMatches(att.gateway_attestation);
+    const signingAddressMatched = matched.length === 1 || gatewayMatched;
+    if (!signingAddressMatched) throw new Error("response signer does not match exactly one verified attestation report");
+    const bound = matched[0]?.check ?? gateway;
 
     const evidence: TeeEvidence = {
       kind: "nearai-cloud",
@@ -160,15 +190,20 @@ export class NearAiCloudChecker implements TeeChecker {
       attestation: {
         nonce,
         signingAddressMatched,
-        quoteVerifiedLocally: false,
+        quoteVerifiedLocally: true,
+        tcbStatus: bound.tcbStatus,
+        measurements: bound.measurements,
+        gatewaySigner: gateway.signer,
+        gpus: matched[0]?.gpus,
         checks: [
-          { name: "fresh nonce echoed by the attestation report", ok: nonceEchoed },
-          { name: "model attestation present for the requested model", ok: modelSigners.length > 0 },
-          { name: "response signer matches the attested signing address", ok: signingAddressMatched },
+          ...gateway.checks.map((c) => ({ name: `gateway: ${c.name}`, ok: c.ok })),
+          ...bound.checks.map((c) => ({ name: `model: ${c.name}`, ok: c.ok })),
+          { name: "model: NVIDIA GPU evidence verified by NRAS", ok: matched[0]?.gpus !== undefined },
+          { name: "response signer matches exactly one verified report", ok: signingAddressMatched },
           { name: "signed text = model:sha256(request bytes):sha256(response bytes)", ok: true },
-          { name: "Intel TDX / NVIDIA quote verified locally", ok: false },
+          { name: "TLS connection bound to the gateway attestation", ok: false },
         ],
-        note: "TDX/GPU quote not verified locally in this MVP; check it at cloud.near.ai/verify or with nearai-cloud-verifier",
+        note: "TLS connection binding is not implemented: a proxy relaying genuine reports could read the prompt.",
       },
       signal: parsed.signal,
       signalCodes: parsed.codes,

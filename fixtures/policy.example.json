@@ -29,8 +29,11 @@
     "block": true
   },
   "tee": {
-    "required": false,
-    "obeyBlockSignal": true
+    "required": true,
+    "obeyBlockSignal": true,
+    "acceptedTcbStatuses": ["UpToDate"],
+    "requireGpu": true,
+    "allowGatewaySignature": false
   },
   "actions": {
     "allowed": ["swap", "transfer", "call"],
