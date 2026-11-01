@@ -11,6 +11,10 @@
  *   pnpm owner accept-code <account>      accept a contract's current code after COUNTERPARTY_CODE_CHANGED
  *   pnpm owner confirm-blocklist <account>
  *   pnpm owner watch-accept <account>     accept the account's keys and code as they are now
+ *   pnpm owner reconcile-accept           accept the wallet's transaction history as it is now
+ *   pnpm owner approve-signed <decisionId> [reject]   sign with the owner wallet key (SEALED_OWNER_NEAR_KEY)
+ *   pnpm owner agent-issue <agentId> [agentKeyHex]    prints a new token once
+ *   pnpm owner agent-revoke <agentId>
  *
  * Needs SEALED_OWNER_TOKEN (printed by `pnpm rest` when not set) and optionally SEALED_REST_URL.
  */
@@ -60,6 +64,31 @@ try {
       break;
     case "watch-accept":
       console.log(JSON.stringify(await call("POST", "/v1/watch/accept", { account: need("account", args[0]) }), null, 2));
+      break;
+    case "approve-signed": {
+      const { approvalMessage, APPROVAL_RECIPIENT, reviewHash } = await import("@sealed-intent/core");
+      const { Near, generateNonce } = await import("near-kit");
+      const decisionId = need("decisionId", args[0]);
+      const action = args[1] === "reject" ? "reject" : "approve";
+      const accountId = need("SEALED_OWNER_ACCOUNT", process.env.SEALED_OWNER_ACCOUNT);
+      const review = ((await call("GET", "/v1/pending")) as { decisionId: string }[]).find((r) => r.decisionId === decisionId);
+      if (!review) throw new Error("that decision is not waiting for you");
+      console.log("You are signing for:", JSON.stringify(review, null, 2));
+      const near = new Near({ network: { networkId: process.env.SEALED_NETWORK === "testnet" ? "testnet" : "mainnet", rpcUrl: process.env.NEAR_RPC_URL ?? "https://free.rpc.fastnear.com" }, privateKey: need("SEALED_OWNER_NEAR_KEY", process.env.SEALED_OWNER_NEAR_KEY) as `ed25519:${string}`, defaultSignerId: accountId });
+      const nonce = generateNonce();
+      const s = await near.signMessage({ message: approvalMessage(action, decisionId, reviewHash(review as never)), recipient: APPROVAL_RECIPIENT, nonce }, { signerId: accountId });
+      const signed = { action, decisionId, accountId, publicKey: s.publicKey, signature: s.signature, nonce: Buffer.from(nonce).toString("base64") };
+      console.log(JSON.stringify(await call("POST", `/v1/${action}`, { decisionId, signed }), null, 2));
+      break;
+    }
+    case "agent-issue":
+      console.log(JSON.stringify(await call("POST", "/v1/agents/issue", { agentId: need("agentId", args[0]), agentKey: args[1] }), null, 2));
+      break;
+    case "agent-revoke":
+      console.log(JSON.stringify(await call("POST", "/v1/agents/revoke", { agentId: need("agentId", args[0]) }), null, 2));
+      break;
+    case "reconcile-accept":
+      console.log(JSON.stringify(await call("POST", "/v1/reconcile/accept"), null, 2));
       break;
     case "approve":
     case "reject":

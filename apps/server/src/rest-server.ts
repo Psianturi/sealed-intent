@@ -1,20 +1,28 @@
-import { agentView } from "@sealed-intent/core";
+import { agentView, checkApproval, RateLimiter, type AccessStore, type ApprovalVerifier, type SignedApproval } from "@sealed-intent/core";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
-import type { AccountWatcher, Preflight, ReceiptStore, SharedBlocklist } from "@sealed-intent/core";
+import type { AccountWatcher, CustodyFreezer, Preflight, ReceiptStore, Reconciler, SharedBlocklist } from "@sealed-intent/core";
 import { bearer, type Auth } from "./auth";
 
 /**
+ * Every answer carries SeIn-Api-Version. Agents may send Idempotency-Key on preflight and execute: a
+ * repeat gets the first answer and is not acted on twice. An agent with a signing key must also send
+ * X-SeIn-Timestamp and X-SeIn-Signature.
+ *
  *   POST /v1/preflight          agent token   { intent, agentQuote? } -> decision
  *   POST /v1/execute            agent token   { decisionId }          -> { status, txHash }
- *   POST /v1/approve            owner token   { decisionId, approver }
- *   POST /v1/reject             owner token   { decisionId, approver }
+ *   POST /v1/approve            owner token, or a wallet signature when an owner account is set   { decisionId, approver | signed }
+ *   POST /v1/reject             same
+ *   POST /v1/agents/issue       owner token   { agentId, agentKey? }  -> token, shown once
+ *   POST /v1/agents/revoke      owner token   { agentId }
+ *   GET  /v1/proofs/:id                       -> where the receipt sits in an anchored batch
  *   GET  /v1/pending            owner token   -> WARN decisions waiting for a human, decrypted
  *   POST /v1/freeze             owner token   { reason }
  *   POST /v1/unfreeze           owner token
  *   POST /v1/counterparty/accept-code  owner token   { account }   accept a contract's current code
  *   POST /v1/blocklist/confirm  owner token   { account }   an agent's report now blocks
  *   POST /v1/watch/accept       owner token   { account }   accept the account's keys and code as they are now
+ *   POST /v1/reconcile/accept   owner token                 accept the wallet's transaction history as it is now
  *   GET  /v1/status                           -> { frozen, mode }; the owner also gets the reason
  *   POST /v1/blocklist/report   agent token   { account, reason, evidence[], reportedBy }
  *   GET  /v1/blocklist                        -> shared blocklist (signed entries)
@@ -28,9 +36,17 @@ export interface RestDeps {
   offline: boolean;
   auth: Auth;
   watcher?: AccountWatcher;
+  reconciler?: Reconciler;
+  /** the owner's freeze also reaches the custody wallet on chain */
+  custody?: CustodyFreezer;
+  access?: AccessStore;
+  /** when set, approving needs this account's wallet signature; the token is not enough */
+  ownerAccount?: string;
+  approvals?: ApprovalVerifier;
+  agentRequestsPerMinute?: number;
 }
 
-async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
+async function readBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const c of req) {
@@ -38,11 +54,11 @@ async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
     if (size > 256_000) throw new Error("body too large");
     chunks.push(c as Buffer);
   }
-  return chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {};
+  return Buffer.concat(chunks).toString("utf8");
 }
 
 function send(res: ServerResponse, status: number, data: unknown) {
-  res.writeHead(status, { "Content-Type": "application/json" });
+  res.writeHead(status, { "Content-Type": "application/json", "SeIn-Api-Version": "1" });
   res.end(JSON.stringify(data, null, 2));
 }
 
@@ -52,14 +68,47 @@ function sameToken(a: string | undefined, b: string): boolean {
 }
 
 export function createRestServer(deps: RestDeps): Server {
-  const { preflight, blocklist, receipts, offline, auth, watcher } = deps;
+  const { preflight, blocklist, receipts, offline, auth, watcher, reconciler, custody, access, ownerAccount, approvals } = deps;
+  const limiter = new RateLimiter(deps.agentRequestsPerMinute ?? 120);
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
       const route = `${req.method} ${url.pathname}`;
       const token = bearer(req);
-      const agentId = auth.agentForToken(token);
+      const agentId = access?.agentForToken(token) ?? auth.agentForToken(token);
       const isOwner = sameToken(token, auth.ownerToken);
+      const raw = req.method === "POST" ? await readBody(req) : "";
+      const body = async (_r?: IncomingMessage): Promise<Record<string, unknown>> => (raw ? (JSON.parse(raw) as Record<string, unknown>) : {});
+
+      if (agentId) {
+        if (!limiter.allow(agentId)) return send(res, 429, { error: "too many requests" });
+        const key = access?.keyOf(agentId);
+        if (key) {
+          const header = (name: string) => req.headers[name] as string | undefined;
+          const signed = access!.checkSignature(key, { timestamp: header("x-sein-timestamp"), signature: header("x-sein-signature") }, req.method ?? "", url.pathname, raw);
+          if (!signed.ok) return send(res, 401, { error: signed.reason });
+        }
+      }
+
+      /** Runs an agent action once per Idempotency-Key. */
+      const once = async (run: () => Promise<unknown>) => {
+        const key = req.headers["idempotency-key"] as string | undefined;
+        if (!key || !access || !agentId) return send(res, 200, await run());
+        const prior = access.claim(agentId, key, route);
+        if (prior === "busy") return send(res, 409, { error: "a request with this key is still running" });
+        if (prior) {
+          res.writeHead(prior.status, { "Content-Type": "application/json", "SeIn-Api-Version": "1", "Idempotent-Replay": "true" });
+          return res.end(prior.answer);
+        }
+        try {
+          const answer = await run();
+          access.settle(agentId, key, route, 200, JSON.stringify(answer, null, 2));
+          return send(res, 200, answer);
+        } catch (err) {
+          access.release(agentId, key, route);
+          throw err;
+        }
+      };
 
       if (route === "GET /health") return send(res, 200, { ok: true, mode: offline ? "offline" : "live" });
       if (route === "GET /v1/status") {
@@ -76,25 +125,41 @@ export function createRestServer(deps: RestDeps): Server {
         if (route.endsWith("unfreeze")) return send(res, 200, { ok: preflight.unfreeze("owner"), ...preflight.status() });
         const { reason } = (await body(req)) as { reason?: string };
         preflight.freeze(reason || "owner request", "owner");
-        return send(res, 200, preflight.status());
+        const onChain = await custody?.freeze().catch((err: Error) => ({ error: err.message }));
+        return send(res, 200, { ...preflight.status(), custodyFreeze: onChain ?? "not configured" });
       }
 
       if (route === "POST /v1/preflight") {
         if (!agentId) return send(res, 401, { error: "agent token required" });
         const input = await body(req);
-        return send(res, 200, agentView(await preflight.evaluate({ agentId, intent: input.intent, agentQuote: input.agentQuote as never })));
+        return once(async () => agentView(await preflight.evaluate({ agentId, intent: input.intent, agentQuote: input.agentQuote as never })));
       }
       if (route === "POST /v1/execute") {
         if (!agentId) return send(res, 401, { error: "agent token required" });
         const { decisionId } = (await body(req)) as { decisionId?: string };
         if (!decisionId) return send(res, 400, { error: "decisionId required" });
-        return send(res, 200, await preflight.execute(decisionId, agentId));
+        return once(() => preflight.execute(decisionId, agentId));
       }
       if (route === "POST /v1/approve" || route === "POST /v1/reject") {
+        const action = route.endsWith("approve") ? "approve" : "reject";
+        const { decisionId, approver, signed } = (await body(req)) as { decisionId?: string; approver?: string; signed?: SignedApproval };
+        if (ownerAccount) {
+          if (!signed || !decisionId || !approvals) return send(res, 401, { error: "this owner approves with a wallet signature" });
+          if (signed.action !== action || signed.decisionId !== decisionId) return send(res, 400, { error: "the signature is for something else" });
+          const check = await checkApproval(signed, { owner: ownerAccount, review: preflight.review(decisionId) }, approvals);
+          if (!check.ok) return send(res, 401, { error: check.reason });
+          return send(res, 200, action === "approve" ? preflight.approve(decisionId, ownerAccount) : preflight.reject(decisionId, ownerAccount));
+        }
         if (!isOwner) return send(res, 401, { error: "owner token required" });
-        const { decisionId, approver } = (await body(req)) as { decisionId?: string; approver?: string };
         if (!decisionId || !approver) return send(res, 400, { error: "decisionId and approver required" });
-        return send(res, 200, route.endsWith("approve") ? preflight.approve(decisionId, approver) : preflight.reject(decisionId, approver));
+        return send(res, 200, action === "approve" ? preflight.approve(decisionId, approver) : preflight.reject(decisionId, approver));
+      }
+      if (route === "POST /v1/agents/issue" || route === "POST /v1/agents/revoke") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        if (!access) return send(res, 400, { error: "agent access is not configured" });
+        const { agentId: id, agentKey } = (await body(req)) as { agentId?: string; agentKey?: string };
+        if (!id) return send(res, 400, { error: "agentId required" });
+        return send(res, 200, route.endsWith("issue") ? { agentId: id, token: access.issue(id, agentKey) } : { ok: access.revoke(id) });
       }
       if (route === "POST /v1/blocklist/report") {
         if (!agentId) return send(res, 401, { error: "agent token required" });
@@ -106,6 +171,10 @@ export function createRestServer(deps: RestDeps): Server {
         const { account } = (await body(req)) as { account?: string };
         if (!account) return send(res, 400, { error: "account required" });
         return send(res, 200, { ok: (await watcher?.accept(account)) ?? false });
+      }
+      if (route === "POST /v1/reconcile/accept") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        return send(res, 200, { ok: (await reconciler?.accept()) ?? false });
       }
       if (route === "POST /v1/blocklist/confirm") {
         if (!isOwner) return send(res, 401, { error: "owner token required" });
@@ -120,6 +189,11 @@ export function createRestServer(deps: RestDeps): Server {
         return send(res, 200, await preflight.acceptCounterpartyCode(account, "owner"));
       }
       if (route === "GET /v1/blocklist") return send(res, 200, blocklist.all());
+      const p = url.pathname.match(/^\/v1\/proofs\/([0-9a-f-]{36})$/);
+      if (req.method === "GET" && p) {
+        const proof = receipts.loadProof(p[1]!);
+        return proof ? send(res, 200, proof) : send(res, 404, { error: "not anchored yet" });
+      }
       const m = url.pathname.match(/^\/v1\/receipts\/([0-9a-f-]{36})$/);
       if (req.method === "GET" && m) {
         const r = receipts.load(m[1]!);
