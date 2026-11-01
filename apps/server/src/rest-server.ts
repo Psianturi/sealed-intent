@@ -10,6 +10,8 @@ import { bearer, type Auth } from "./auth";
  *   POST /v1/reject             owner token   { decisionId, approver }
  *   POST /v1/freeze             owner token   { reason }
  *   POST /v1/unfreeze           owner token
+ *   POST /v1/counterparty/accept-code  owner token   { account }   accept a contract's current code
+ *   POST /v1/blocklist/confirm  owner token   { account }   an agent's report now blocks
  *   GET  /v1/status                           -> { frozen, reason, mode }
  *   POST /v1/blocklist/report   agent token   { account, reason, evidence[], reportedBy }
  *   GET  /v1/blocklist                        -> shared blocklist (signed entries)
@@ -87,6 +89,18 @@ export function createRestServer(deps: RestDeps): Server {
         if (!agentId) return send(res, 401, { error: "agent token required" });
         const b = (await body(req)) as { account: string; reason: string; evidence: string[] };
         return send(res, 200, blocklist.report({ account: b.account, reason: b.reason, evidence: b.evidence ?? [], reportedBy: agentId }));
+      }
+      if (route === "POST /v1/blocklist/confirm") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        const { account } = (await body(req)) as { account?: string };
+        const e = account && blocklist.confirm(account);
+        return e ? send(res, 200, e) : send(res, 404, { error: "no report for that account" });
+      }
+      if (route === "POST /v1/counterparty/accept-code") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        const { account } = (await body(req)) as { account?: string };
+        if (!account) return send(res, 400, { error: "account required" });
+        return send(res, 200, await preflight.acceptCounterpartyCode(account, "owner"));
       }
       if (route === "GET /v1/blocklist") return send(res, 200, blocklist.all());
       const m = url.pathname.match(/^\/v1\/receipts\/([0-9a-f-]{36})$/);

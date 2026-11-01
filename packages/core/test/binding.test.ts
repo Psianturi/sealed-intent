@@ -8,7 +8,7 @@ import { buildPreflight } from "../src/config";
 import { ASSET, DEMO_ACCOUNTS } from "../src/fixtures";
 
 const usdc = (d: number) => String(Math.round(d * 1e6));
-const swap = { kind: "swap", tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(10), recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self };
+const swap = { kind: "swap", tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(10), recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self, taskText: "Routine treasury task approved by ops." };
 
 describe("receipt binding", () => {
   const dir = mkdtempSync(join(tmpdir(), "sealed-bind-"));

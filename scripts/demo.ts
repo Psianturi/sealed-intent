@@ -37,6 +37,7 @@ async function offlineDemo() {
     recipient: DEMO_ACCOUNTS.self,
     refundTo: DEMO_ACCOUNTS.self,
     purpose: "general",
+    taskText: "Routine treasury task approved by ops.",
     ...over,
   });
 
@@ -118,6 +119,7 @@ async function liveDemo() {
     recipient: get("--to", self)!,
     refundTo: self,
     purpose: get("--purpose", "general")!,
+    taskText: get("--task", "Manual live check by the owner.")!,
   };
   say(`LIVE preflight on mainnet: ${dollars} USDC -> ${intent.tokenOut} for ${intent.recipient}`);
   const d = await env.preflight.evaluate({ agentId, intent });

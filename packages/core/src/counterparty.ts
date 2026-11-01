@@ -26,6 +26,8 @@ export interface BlocklistEntry {
   /** ed25519 public key of the Sealed Intent instance that accepted the report */
   signer?: string;
   signature?: string;
+  /** false until the owner confirms an agent's report; absent on owner-curated entries */
+  confirmed?: boolean;
 }
 
 export class SharedBlocklist {
@@ -43,10 +45,10 @@ export class SharedBlocklist {
     return [...this.entries];
   }
 
-  /** Another agent reports a bad counterparty. Evidence is required. */
+  /** Another agent reports a bad counterparty. Evidence is required; the entry only warns until the owner confirms it. */
   report(input: Omit<BlocklistEntry, "reportedAt" | "signer" | "signature">): BlocklistEntry {
     if (!input.evidence.length) throw new Error("a report needs at least one piece of evidence (tx hash, receipt id, URL)");
-    const unsigned: BlocklistEntry = { ...input, account: input.account.toLowerCase(), reportedAt: new Date().toISOString() };
+    const unsigned: BlocklistEntry = { ...input, confirmed: input.confirmed ?? false, account: input.account.toLowerCase(), reportedAt: new Date().toISOString() };
     const entry = this.issuer
       ? { ...unsigned, signer: this.issuer.publicKeyHex, signature: signBytes(this.issuer, canonicalJson(unsigned)) }
       : unsigned;
@@ -54,6 +56,16 @@ export class SharedBlocklist {
     mkdirSync(dirname(this.path), { recursive: true });
     writeFileSync(this.path, JSON.stringify(this.entries, null, 2));
     return entry;
+  }
+
+  /** The owner confirms an agent's report: from then on it blocks. */
+  confirm(account: string): BlocklistEntry | undefined {
+    const e = this.find(account);
+    if (!e) return undefined;
+    const confirmed = { ...e, confirmed: true };
+    this.entries = this.entries.map((x) => (x === e ? confirmed : x));
+    writeFileSync(this.path, JSON.stringify(this.entries, null, 2));
+    return confirmed;
   }
 
   static verifyEntry(e: BlocklistEntry): boolean {
@@ -71,6 +83,8 @@ export interface ChainAccountInfo {
   codeHash?: string;
   /** ISO time the account was created, when an indexer is available */
   createdAt?: string;
+  /** two RPC sources answered differently */
+  disagreement?: boolean;
 }
 
 export interface ChainReader {
@@ -79,13 +93,22 @@ export interface ChainReader {
 
 const EMPTY_CODE = "11111111111111111111111111111111";
 
-/** NEAR RPC view_account. Account age is not available from RPC (needs an indexer). */
-export class RpcChainReader implements ChainReader {
-  constructor(private readonly rpcUrl = process.env.NEAR_RPC_URL ?? "https://rpc.mainnet.near.org") {}
+const DEFAULT_RPCS = ["https://rpc.mainnet.near.org", "https://free.rpc.fastnear.com"];
 
-  async account(id: string): Promise<ChainAccountInfo | undefined> {
-    if (id.startsWith("0x")) return undefined; // not a NEAR account
-    const res = await fetch(this.rpcUrl, {
+/**
+ * NEAR RPC view_account, asked of every configured endpoint (NEAR_RPC_URLS, comma separated).
+ * One lying endpoint cannot hide a code change: any disagreement is reported. Account age
+ * is not available from RPC (needs an indexer).
+ */
+export class RpcChainReader implements ChainReader {
+  private readonly urls: string[];
+  constructor(urls?: string | string[], private readonly fetchImpl: typeof fetch = fetch) {
+    const env = process.env.NEAR_RPC_URLS ?? process.env.NEAR_RPC_URL;
+    this.urls = typeof urls === "string" ? [urls] : (urls ?? (env ? env.split(",").map((s) => s.trim()).filter(Boolean) : DEFAULT_RPCS));
+  }
+
+  private async one(url: string, id: string): Promise<ChainAccountInfo | undefined> {
+    const res = await this.fetchImpl(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jsonrpc: "2.0", id: "sealed", method: "query", params: { request_type: "view_account", finality: "final", account_id: id } }),
@@ -94,6 +117,15 @@ export class RpcChainReader implements ChainReader {
     if (json.error?.cause?.name === "UNKNOWN_ACCOUNT") return { exists: false, isContract: false };
     if (!json.result) return undefined;
     return { exists: true, isContract: json.result.code_hash !== EMPTY_CODE, codeHash: json.result.code_hash };
+  }
+
+  async account(id: string): Promise<ChainAccountInfo | undefined> {
+    if (id.startsWith("0x")) return undefined; // not a NEAR account
+    const answers = (await Promise.allSettled(this.urls.map((u) => this.one(u, id)))).flatMap((r) => (r.status === "fulfilled" && r.value ? [r.value] : []));
+    const first = answers[0];
+    if (!first) return undefined;
+    const disagreement = answers.some((a) => a.exists !== first.exists || a.codeHash !== first.codeHash);
+    return disagreement ? { ...first, disagreement } : first;
   }
 }
 
@@ -130,11 +162,16 @@ export class CounterpartyMemory {
       .run(agentId, counterparty.toLowerCase(), now);
   }
 
-  /** Returns the previously seen code hash (if any) and stores the new one. */
-  swapCodeHash(account: string, codeHash: string, now = Date.now()): string | undefined {
+  /** Returns the code hash on record and stores this one only if none was recorded. A change stays visible until the owner accepts it. */
+  observeCodeHash(account: string, codeHash: string, now = Date.now()): string | undefined {
     const prev = this.db.prepare("SELECT code_hash FROM code_hashes WHERE account=?").get(account) as { code_hash: string } | undefined;
-    this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?) ON CONFLICT(account) DO UPDATE SET code_hash=excluded.code_hash, seen_at=excluded.seen_at").run(account, codeHash, now);
+    if (!prev) this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?)").run(account, codeHash, now);
     return prev?.code_hash;
+  }
+
+  /** The owner accepts the contract's current code. */
+  acceptCodeHash(account: string, codeHash: string, now = Date.now()): void {
+    this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?) ON CONFLICT(account) DO UPDATE SET code_hash=excluded.code_hash, seen_at=excluded.seen_at").run(account, codeHash, now);
   }
 
   close(): void {
@@ -168,16 +205,10 @@ export async function assessCounterparty(
 
   const listed = deps.blocklist.find(account);
   if (listed) {
-    block.push("COUNTERPARTY_BLOCKLISTED");
-    signals.blocklist = { reason: listed.reason, evidence: listed.evidence.length };
+    // an agent's unconfirmed report asks a human; an owner-confirmed entry blocks
+    (listed.confirmed === false ? review : block).push(listed.confirmed === false ? "COUNTERPARTY_REPORTED" : "COUNTERPARTY_BLOCKLISTED");
+    signals.blocklist = { reason: listed.reason, evidence: listed.evidence.length, confirmed: listed.confirmed !== false };
   }
-  if (policy.allowedRecipients.includes(account)) {
-    signals.allowListed = true;
-    return { block, review, signals };
-  }
-
-  // Not on the owner's allow-list: look closer, then block or ask a human.
-  (policy.unknownRecipient === "block" ? block : review).push("RECIPIENT_NOT_ALLOWLISTED");
 
   let info: ChainAccountInfo | undefined;
   try {
@@ -187,12 +218,23 @@ export async function assessCounterparty(
   }
   if (info) {
     signals.chain = info;
-    const implicit = /^[0-9a-f]{64}$/.test(account);
-    if (!info.exists && !implicit) block.push("COUNTERPARTY_NOT_FOUND");
+    if (info.disagreement) review.push("RPC_DISAGREEMENT");
+    // a code change is checked for every contract, allow-listed or not
     if (info.isContract && info.codeHash) {
-      const prev = deps.memory.swapCodeHash(account, info.codeHash, now);
+      const prev = deps.memory.observeCodeHash(account, info.codeHash, now);
       if (prev && prev !== info.codeHash) review.push("COUNTERPARTY_CODE_CHANGED");
     }
+  }
+  if (policy.allowedRecipients.includes(account)) {
+    signals.allowListed = true;
+    return { block, review, signals };
+  }
+
+  // Not on the owner's allow-list: look closer, then block or ask a human.
+  (policy.unknownRecipient === "block" ? block : review).push("RECIPIENT_NOT_ALLOWLISTED");
+  if (info) {
+    const implicit = /^[0-9a-f]{64}$/.test(account);
+    if (!info.exists && !implicit) block.push("COUNTERPARTY_NOT_FOUND");
     if (info.createdAt) {
       const ageDays = (now - Date.parse(info.createdAt)) / 86_400_000;
       signals.ageDays = Math.floor(ageDays);

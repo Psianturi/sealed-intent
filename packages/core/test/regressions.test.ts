@@ -11,7 +11,7 @@ import type { SwapIntent } from "../src/intent";
 const usdc = (d: number) => String(Math.round(d * 1e6));
 const intent = (over: Partial<SwapIntent> & Record<string, unknown> = {}) => ({
   kind: "swap" as const, tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(45),
-  recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self, purpose: "general", ...over,
+  recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self, purpose: "general", taskText: "Routine treasury task approved by ops.", ...over,
 });
 const tmp = () => mkdtempSync(join(tmpdir(), "sealed-reg-"));
 const build = (opts: { ledgerPath?: string; executor?: Executor } = {}) => {

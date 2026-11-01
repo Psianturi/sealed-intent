@@ -13,8 +13,8 @@ const build = (policy: Policy = DEMO_POLICY, ledgerPath = ":memory:") => {
   const d = mkdtempSync(join(tmpdir(), "sealed-act-"));
   return buildPreflight({ offline: true, home: join(d, ".sealed"), outDir: join(d, "out"), ledgerPath, policy });
 };
-const swap = { kind: "swap", tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(10), recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self };
-const ev = (env: ReturnType<typeof build>, intent: unknown) => env.preflight.evaluate({ agentId: "a", intent });
+const swap = { kind: "swap", tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(10), recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self, taskText: "Routine treasury task approved by ops." };
+const ev = (env: ReturnType<typeof build>, intent: unknown) => env.preflight.evaluate({ agentId: "a", intent: { taskText: "Routine treasury task approved by ops.", ...(intent as object) } });
 
 describe("forbidden action classes freeze the wallet", () => {
   it.each(["add_key", "deploy", "sign_message", "delete_account"])("%s is refused and the wallet freezes until the owner lifts it", async (kind) => {
@@ -46,7 +46,7 @@ describe("forbidden action classes freeze the wallet", () => {
   });
 
   it("a burst of blocks freezes the wallet", async () => {
-    const env = build({ ...DEMO_POLICY, freeze: { onForbiddenAction: true, maxBlocksPerHour: 3 } });
+    const env = build({ ...DEMO_POLICY, freeze: { onForbiddenAction: true, maxBlocksPerHour: 3, maxLimitProbesPerHour: 6 } });
     for (let i = 0; i < 3; i++) await ev(env, { ...swap, recipient: DEMO_ACCOUNTS.attacker });
     expect(env.preflight.status().frozen).toBe(true);
     expect(env.preflight.status().reason).toContain("3 blocks");

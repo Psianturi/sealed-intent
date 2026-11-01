@@ -74,7 +74,7 @@ export function buildPreflight(opts: BuildOptions): Built {
 
   if (opts.offline) {
     const oneclick = opts.oneclick ?? new FixtureOneClickClient();
-    for (const [account, hash] of Object.entries(FIXTURE_PREVIOUS_CODE_HASH)) memory.swapCodeHash(account, hash);
+    for (const [account, hash] of Object.entries(FIXTURE_PREVIOUS_CODE_HASH)) memory.acceptCodeHash(account, hash);
     const blocklistPath = join(home, "blocklist.offline.json");
     const blocklist = new SharedBlocklist(blocklistPath, issuer);
     for (const e of FIXTURE_BLOCKLIST) if (!blocklist.find(e.account)) blocklist.report(e);

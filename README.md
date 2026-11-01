@@ -105,8 +105,12 @@ commitment to the exact policy that was applied.
 
 - The agent's identity is assigned by the server: a bearer token maps to an agent name (`SEALED_AGENT_TOKENS`), and the budget is counted per that name. Whatever the agent writes in the request body is ignored.
 - Approving or rejecting a WARN, freezing and unfreezing need the **owner token** (`SEALED_OWNER_TOKEN`), which the agent never holds. Pending decisions live in SQLite, so a WARN raised through MCP can be approved through REST.
-- A forbidden action class, or 20 BLOCKs within an hour, freezes the wallet until the owner lifts it (`POST /v1/unfreeze`). The freeze survives restarts.
-- The budget is only given back when the executor reports that nothing left the wallet; an unclear outcome counts as spent.
+- A forbidden action class, 20 BLOCKs within an hour, or 6 BLOCKs caused only by a spending cap (an agent probing for the exact limit) freezes the wallet until the owner lifts it. The freeze survives restarts.
+- The budget is only given back when the executor reports that nothing left the wallet; an unclear outcome counts as spent. Spends are also counted: `velocity.maxTxPerHour` caps how many payments an agent may start per hour regardless of size.
+- A request that arrives without the task text that led to it cannot be screened for injection, so it is a WARN (`TASK_CONTEXT_MISSING`) until a human reads it. The screen covers English and Indonesian phrasings; the enclave opinion is the second filter.
+- A contract whose code changed since it was last seen stays flagged on every request, allow-listed or not, until the owner accepts the new code. Another agent's blocklist report only warns until the owner confirms it.
+- The chain is read from two RPC endpoints (`NEAR_RPC_URLS`); if they disagree about an account, the decision goes to a human (`RPC_DISAGREEMENT`).
+- The owner's tool: `pnpm owner status|freeze|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>` against the running REST server, with `SEALED_OWNER_TOKEN` from `.env`.
 
 ---
 
@@ -236,9 +240,9 @@ fixtures            example policy (offline fixtures live in packages/core/src/f
 - **Only swaps are quoted.** Transfers and contract calls are checked against the policy and priced from the token list, with no 1Click quote.
 - **NEAR AI Cloud signatures** prove a response came from an attested signing key, not which instance produced it, since instances share keys. Confidential Intents hides the origin and route, not the amount or recipient on the destination chain.
 - **Account age** needs an indexer (FastNEAR / NearBlocks). RPC does not provide it. In live mode the signal is skipped when unavailable.
-- The heuristic injection screen is a first filter. The deterministic checks are what actually stop the money.
+- The heuristic injection screen (English and Indonesian patterns) is a first filter and misses paraphrases. The deterministic checks are what actually stop the money.
 - Live execution currently supports NEP-141 origin assets on NEAR.
-- **Blocklist reports are self-asserted.** Any authenticated agent can add an entry with "evidence"; treat the shared list as a signal, not a verdict.
+- **Blocklist reports are self-asserted.** An agent's report with "evidence" only warns until the owner confirms it; the shared list is a signal, not a verdict.
 - Not audited. Do not use with funds you cannot lose.
 
 ## Roadmap

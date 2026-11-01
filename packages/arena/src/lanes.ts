@@ -141,7 +141,7 @@ export class SealedLane implements Lane {
 
   /** Sealed Intent has seen the vault's audited code before the run, like a wallet with history. */
   async init(): Promise<this> {
-    for (const acc of [ACC.vault]) this.env.memory.swapCodeHash(acc, (await this.chain.codeHash(acc)) ?? "");
+    for (const acc of [ACC.vault]) this.env.memory.acceptCodeHash(acc, (await this.chain.codeHash(acc)) ?? "");
     return this;
   }
 

@@ -18,11 +18,13 @@ import { DatabaseSync } from "./sqlite";
 export interface BudgetLimits {
   hourlyCents: number;
   dailyCents: number;
+  /** how many spends (any amount) the agent may start per hour */
+  maxPerHour?: number;
 }
 
 export type ReserveResult =
   | { ok: true; reservationId: string; hourUsedCents: number; dayUsedCents: number }
-  | { ok: false; reason: "HOURLY_BUDGET_EXCEEDED" | "DAILY_BUDGET_EXCEEDED" };
+  | { ok: false; reason: "HOURLY_BUDGET_EXCEEDED" | "DAILY_BUDGET_EXCEEDED" | "TX_RATE_EXCEEDED" };
 
 const HOUR = 3_600_000;
 const DAY = 86_400_000;
@@ -65,6 +67,13 @@ export class BudgetLedger {
       if (day + usdCents > limits.dailyCents) {
         this.db.exec("ROLLBACK");
         return { ok: false, reason: "DAILY_BUDGET_EXCEEDED" };
+      }
+      if (limits.maxPerHour !== undefined) {
+        const n = Number((this.db.prepare("SELECT COUNT(*) AS n FROM reservations WHERE agent_id=? AND status IN ('reserved','committed') AND created_at >= ?").get(agentId, now - HOUR) as { n: number }).n);
+        if (n + 1 > limits.maxPerHour) {
+          this.db.exec("ROLLBACK");
+          return { ok: false, reason: "TX_RATE_EXCEEDED" };
+        }
       }
       const id = randomUUID();
       this.db

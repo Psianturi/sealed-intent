@@ -28,7 +28,11 @@ export const Policy = z.object({
   /** purposes that must use a confidential route */
   privatePurposes: z.array(z.string()),
   confidentialLevel: z.enum(["basic", "advanced"]),
-  injection: z.object({ block: z.boolean() }),
+  injection: z.object({
+    block: z.boolean(),
+    /** a request without the task text that led to it cannot be screened: ask a human */
+    requireTaskText: z.boolean().default(true),
+  }),
   tee: z.object({
     required: z.boolean(),
     /** if the private TEE check says "block", block (true) or only record it (false) */
@@ -54,8 +58,12 @@ export const Policy = z.object({
       onForbiddenAction: z.boolean().default(true),
       /** this many BLOCKs for one agent within an hour freezes the wallet */
       maxBlocksPerHour: z.number().int().positive().default(20),
+      /** BLOCKs caused only by limit codes (an agent probing for the exact cap) freeze sooner */
+      maxLimitProbesPerHour: z.number().int().positive().default(6),
     })
     .prefault({}),
+  /** How often the agent may spend, independent of amounts. */
+  velocity: z.object({ maxTxPerHour: z.number().int().positive().default(30) }).prefault({}),
 });
 export type Policy = z.infer<typeof Policy>;
 

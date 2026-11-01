@@ -25,9 +25,14 @@ export class FreezeStore {
     if (path !== ":memory:") this.db.exec("PRAGMA journal_mode = WAL;");
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS freeze (scope TEXT PRIMARY KEY, reason TEXT NOT NULL, by TEXT NOT NULL, at INTEGER NOT NULL);
-      CREATE TABLE IF NOT EXISTS block_log (agent_id TEXT NOT NULL, at INTEGER NOT NULL);
+      CREATE TABLE IF NOT EXISTS block_log (agent_id TEXT NOT NULL, at INTEGER NOT NULL, kind TEXT NOT NULL DEFAULT 'block');
       CREATE INDEX IF NOT EXISTS idx_block_log ON block_log(agent_id, at);
     `);
+    try {
+      this.db.exec("ALTER TABLE block_log ADD COLUMN kind TEXT NOT NULL DEFAULT 'block'");
+    } catch {
+      /* column exists */
+    }
   }
 
   state(): FreezeState {
@@ -43,12 +48,13 @@ export class FreezeStore {
     return Number(this.db.prepare("DELETE FROM freeze WHERE scope='wallet'").run().changes) === 1;
   }
 
-  /** Records a BLOCK and returns how many this agent collected in the last hour. */
-  recordBlock(agentId: string, now = Date.now()): number {
-    this.db.prepare("INSERT INTO block_log (agent_id, at) VALUES (?, ?)").run(agentId, now);
+  /** Records a BLOCK and returns this agent's counts for the last hour. "limit" marks a block caused only by a cap. */
+  recordBlock(agentId: string, kind: "block" | "limit" = "block", now = Date.now()): { blocks: number; limitProbes: number } {
+    this.db.prepare("INSERT INTO block_log (agent_id, at, kind) VALUES (?, ?, ?)").run(agentId, now, kind);
     this.db.prepare("DELETE FROM block_log WHERE at < ?").run(now - 24 * HOUR);
-    const row = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ?").get(agentId, now - HOUR) as { n: number };
-    return Number(row.n);
+    const all = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ?").get(agentId, now - HOUR) as { n: number };
+    const limit = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ? AND kind='limit'").get(agentId, now - HOUR) as { n: number };
+    return { blocks: Number(all.n), limitProbes: Number(limit.n) };
   }
 
   close(): void {

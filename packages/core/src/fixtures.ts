@@ -61,6 +61,7 @@ export const FIXTURE_BLOCKLIST: BlocklistEntry[] = [
     reason: "received funds from 3 prompt-injected agents within 24h (FIXTURE: illustrative, not a real account)",
     evidence: ["receipt:fixture-7c1e", "tx:FIXTURE9bPq...e21", "report:ops-bot-7"],
     reportedBy: "ops-bot-7",
+    confirmed: true,
     reportedAt: "2026-10-29T08:00:00.000Z",
   },
 ];
@@ -82,11 +83,12 @@ export const DEMO_POLICY: Policy = {
   maxDryLiveDriftBps: 150,
   privatePurposes: ["payroll"],
   confidentialLevel: "basic",
-  injection: { block: true },
+  injection: { block: true, requireTaskText: true },
   tee: { required: false, obeyBlockSignal: true, acceptedTcbStatuses: ["UpToDate"], requireGpu: true, allowGatewaySignature: false },
   actions: { allowed: ["swap", "transfer", "call"], never: ["sign_message", "add_key", "delete_key", "deploy", "delete_account", "stake"] },
   contracts: { [DEMO_ACCOUNTS.pool]: { methods: ["deposit", "claim"], maxDepositYocto: "1000000000000000000000000" } },
-  freeze: { onForbiddenAction: true, maxBlocksPerHour: 20 },
+  freeze: { onForbiddenAction: true, maxBlocksPerHour: 20, maxLimitProbesPerHour: 6 },
+  velocity: { maxTxPerHour: 30 },
 };
 
 // Deterministic ed25519 "1Click manager" key for offline quotes.

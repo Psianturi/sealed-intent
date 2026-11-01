@@ -9,6 +9,12 @@ const PATTERNS: { code: string; re: RegExp }[] = [
   { code: "INJECTION_ROLE", re: /\b(you are now|act as|new system prompt|developer mode|jailbreak)\b/i },
   { code: "INJECTION_SECRECY", re: /\b(don'?t|do not|never)\b.{0,20}\b(tell|report|log|mention)\b/i },
   { code: "INJECTION_URGENCY", re: /\b(urgent|immediately|right now|asap)\b.{0,40}\b(send|transfer|pay)\b/i },
+  // Indonesian and Malay phrasings of the same five patterns
+  { code: "INJECTION_OVERRIDE", re: /\b(abaikan|lupakan|hiraukan|kesampingkan)\b.{0,40}\b(instruksi|aturan|perintah|kebijakan|peraturan)\b/i },
+  { code: "INJECTION_DRAIN", re: /\b(kirim|kirimkan|transfer|pindahkan|tarik|tukar)\b.{0,30}\b(semua|semuanya|seluruh|seluruhnya|saldo penuh|maksimal|maksimum)\b/i },
+  { code: "INJECTION_ROLE", re: /\b(kamu sekarang adalah|anda sekarang adalah|bertindak sebagai|mode pengembang|prompt sistem baru)\b/i },
+  { code: "INJECTION_SECRECY", re: /\b(jangan|tidak usah|tak perlu)\b.{0,20}\b(beri ?tahu|lapor|laporkan|catat|sebut|sebutkan)\b/i },
+  { code: "INJECTION_URGENCY", re: /\b(segera|mendesak|sekarang juga|secepatnya|darurat)\b.{0,40}\b(kirim|kirimkan|transfer|bayar|bayarkan)\b/i },
 ];
 
 // account-like strings: named NEAR accounts, 64-hex implicit accounts, EVM addresses
@@ -21,7 +27,7 @@ export interface InjectionScan {
 
 export function scanTaskText(text: string | undefined, knownAccounts: string[]): InjectionScan {
   if (!text) return { codes: [], foreignAccounts: [] };
-  const codes = PATTERNS.filter((p) => p.re.test(text)).map((p) => p.code);
+  const codes = [...new Set(PATTERNS.filter((p) => p.re.test(text)).map((p) => p.code))];
   const known = new Set(knownAccounts.map((a) => a.toLowerCase()));
   const foreignAccounts = [...new Set([...text.matchAll(ACCOUNT_RE)].map((m) => m[1]!.toLowerCase()))].filter(
     (a) => !known.has(a),

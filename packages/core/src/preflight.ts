@@ -6,6 +6,8 @@ import { assessCounterparty, type CounterpartyDeps } from "./counterparty";
 import type { ExecutableAction, Executor, ExecutionResult } from "./executor";
 import type { FreezeState, FreezeStore } from "./freeze";
 import { scanTaskText } from "./injection";
+
+const LIMIT_CODES = new Set(["ABOVE_PER_TX_LIMIT", "HOURLY_BUDGET_EXCEEDED", "DAILY_BUDGET_EXCEEDED", "TX_RATE_EXCEEDED"]);
 import { AgentId, DeclaredIntent, type SwapIntent } from "./intent";
 import type { OneClickClient, QuoteRequest, QuoteResponse, TokenResponse } from "./oneclick";
 import type { PendingStore } from "./pending";
@@ -102,7 +104,7 @@ export class Preflight {
     const executable = intent.kind === "swap" || intent.kind === "transfer" || intent.kind === "call";
     if (!executable || policy.actions.never.includes(intent.kind) || !policy.actions.allowed.includes(intent.kind)) {
       if (policy.freeze.onForbiddenAction) this.deps.freeze.freeze(`agent ${agentId} requested ${intent.kind}`, "auto");
-      this.deps.freeze.recordBlock(agentId);
+      this.deps.freeze.recordBlock(agentId, "block");
       return this.finish({ ...base, verdict: "BLOCK", block: ["ACTION_CLASS_FORBIDDEN"], review: [], kind: intent.kind });
     }
     if (intent.kind !== "swap" && intent.kind !== "transfer" && intent.kind !== "call") throw new Error("unreachable");
@@ -134,6 +136,7 @@ export class Preflight {
     const known = [...policy.allowedRecipients, ...policy.ownAccounts, counterpartyAccount, ...(intent.kind === "swap" ? [intent.refundTo] : [])];
     const scan = scanTaskText(intent.taskText, known);
     if (scan.codes.length) (policy.injection.block ? g.block : g.review).add("PROMPT_INJECTION_SUSPECTED");
+    if (!intent.taskText && policy.injection.requireTaskText) g.review.add("TASK_CONTEXT_MISSING");
 
     let tee: TeeEvidence | undefined;
     if (this.deps.tee) {
@@ -160,8 +163,12 @@ export class Preflight {
     }
 
     const verdict: Verdict = g.block.size ? "BLOCK" : g.review.size ? "WARN" : "ALLOW";
-    if (verdict === "BLOCK" && this.deps.freeze.recordBlock(agentId) >= policy.freeze.maxBlocksPerHour) {
-      this.deps.freeze.freeze(`agent ${agentId} hit ${policy.freeze.maxBlocksPerHour} blocks in an hour`, "auto");
+    if (verdict === "BLOCK") {
+      // blocks caused only by a cap look like an agent probing for the exact limit
+      const probe = [...g.block].every((c) => LIMIT_CODES.has(c));
+      const n = this.deps.freeze.recordBlock(agentId, probe ? "limit" : "block");
+      if (n.blocks >= policy.freeze.maxBlocksPerHour) this.deps.freeze.freeze(`agent ${agentId} hit ${policy.freeze.maxBlocksPerHour} blocks in an hour`, "auto");
+      else if (n.limitProbes >= policy.freeze.maxLimitProbesPerHour) this.deps.freeze.freeze(`agent ${agentId} probed the spending limits ${n.limitProbes} times in an hour`, "auto");
     }
     const decision = await this.finish({ ...base, verdict, block: [...g.block], review: [...g.review], kind: intent.kind, quote: g.quote ?? g.dryQuote, live: g.quote, tee, reservationId });
     if (verdict !== "BLOCK" && g.action && reservationId) {
@@ -226,7 +233,17 @@ export class Preflight {
     return this.deps.ledger.reserve(agentId, cents, {
       hourlyCents: Math.round(this.deps.policy.hourlyUsd * 100),
       dailyCents: Math.round(this.deps.policy.dailyUsd * 100),
+      maxPerHour: this.deps.policy.velocity.maxTxPerHour,
     });
+  }
+
+  /** Owner-only: accept a contract's current code after a COUNTERPARTY_CODE_CHANGED review. */
+  async acceptCounterpartyCode(account: string, by: string): Promise<{ ok: boolean; codeHash?: string; details?: string }> {
+    const info = await this.deps.counterparty.chain.account(account);
+    if (!info?.isContract || !info.codeHash) return { ok: false, details: "account is not a contract or could not be read" };
+    this.deps.counterparty.memory.acceptCodeHash(account, info.codeHash);
+    this.deps.store.saveExecution(`code.${Date.now()}`, { account, codeHash: info.codeHash, acceptedBy: by, at: new Date().toISOString() });
+    return { ok: true, codeHash: info.codeHash };
   }
 
   private async finish(args: {

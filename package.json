@@ -23,7 +23,8 @@
     "arena:replay": "tsx packages/arena/src/cli.ts replay",
     "arena:verify": "tsx packages/arena/src/cli.ts verify",
     "web:dev": "pnpm --filter @sealed-intent/web dev",
-    "web:build": "pnpm --filter @sealed-intent/web build"
+    "web:build": "pnpm --filter @sealed-intent/web build",
+    "owner": "tsx scripts/owner.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

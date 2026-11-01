@@ -9,7 +9,7 @@ import { createRestServer } from "../src/rest-server";
 const usdc = (d: number) => String(Math.round(d * 1e6));
 const intent = (over: Record<string, unknown> = {}) => ({
   kind: "swap", tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(5),
-  recipient: DEMO_ACCOUNTS.newVendor, refundTo: DEMO_ACCOUNTS.self, ...over,
+  recipient: DEMO_ACCOUNTS.newVendor, refundTo: DEMO_ACCOUNTS.self, taskText: "Routine treasury task approved by ops.", ...over,
 });
 
 describe("REST server auth", () => {

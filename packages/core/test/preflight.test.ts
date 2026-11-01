@@ -21,6 +21,7 @@ const base = (over: Partial<SwapIntent> = {}): SwapIntent => ({
   recipient: DEMO_ACCOUNTS.self,
   refundTo: DEMO_ACCOUNTS.self,
   purpose: "general",
+  taskText: "Routine treasury task approved by ops.",
   ...over,
 });
 
