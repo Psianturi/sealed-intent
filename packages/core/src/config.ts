@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadOrCreateIssuerKey } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
-import { CounterpartyMemory, FixtureChainReader, RpcChainReader, SharedBlocklist } from "./counterparty";
+import { CounterpartyMemory, FixtureChainReader, RpcChainReader, SharedBlocklist, type ChainReader } from "./counterparty";
 import { OutLayerExecutor, SimulatedExecutor, type Executor } from "./executor";
 import {
   DEMO_POLICY,
@@ -29,6 +29,10 @@ export interface BuildOptions {
   ledgerPath?: string;
   /** test hook: replace the executor */
   executor?: Executor;
+  /** test hook: replace the chain reader used for counterparty signals */
+  chain?: ChainReader;
+  /** test hook: replace the 1Click client (offline only) */
+  oneclick?: FixtureOneClickClient;
 }
 
 /**
@@ -69,7 +73,7 @@ export function buildPreflight(opts: BuildOptions): Built {
   const memory = new CounterpartyMemory(opts.ledgerPath === ":memory:" ? ":memory:" : join(home, "counterparty.db"));
 
   if (opts.offline) {
-    const oneclick = new FixtureOneClickClient();
+    const oneclick = opts.oneclick ?? new FixtureOneClickClient();
     for (const [account, hash] of Object.entries(FIXTURE_PREVIOUS_CODE_HASH)) memory.swapCodeHash(account, hash);
     const blocklistPath = join(home, "blocklist.offline.json");
     const blocklist = new SharedBlocklist(blocklistPath, issuer);
@@ -83,7 +87,7 @@ export function buildPreflight(opts: BuildOptions): Built {
       issuer,
       store,
       executor: opts.executor ?? new SimulatedExecutor(),
-      counterparty: { blocklist, chain: new FixtureChainReader(FIXTURE_CHAIN), memory },
+      counterparty: { blocklist, chain: opts.chain ?? new FixtureChainReader(FIXTURE_CHAIN), memory },
       tee: new SimulatedTeeChecker(join(home, "sim-enclave.key")),
       quoteManagerPublicKey: FIXTURE_MANAGER_PUBLIC_KEY,
     });

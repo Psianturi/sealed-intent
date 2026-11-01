@@ -1,0 +1,11 @@
+{
+  "name": "@sealed-intent/arena",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@sealed-intent/core": "workspace:*",
+    "@sealed-intent/receipt": "workspace:*"
+  }
+}

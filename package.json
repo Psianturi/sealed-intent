@@ -18,10 +18,15 @@
     "mcp": "tsx apps/server/src/mcp.ts",
     "policy:seal": "tsx scripts/seal-policy.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "arena:run": "tsx packages/arena/src/cli.ts run",
+    "arena:replay": "tsx packages/arena/src/cli.ts replay",
+    "arena:verify": "tsx packages/arena/src/cli.ts verify"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

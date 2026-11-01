@@ -36,6 +36,15 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
 
+  packages/arena:
+    dependencies:
+      '@sealed-intent/core':
+        specifier: workspace:*
+        version: link:../core
+      '@sealed-intent/receipt':
+        specifier: workspace:*
+        version: link:../receipt
+
   packages/core:
     dependencies:
       '@phala/dcap-qvl':

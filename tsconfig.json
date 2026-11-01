@@ -15,7 +15,8 @@
     "paths": {
       "@sealed-intent/core": ["packages/core/src/index.ts"],
       "@sealed-intent/receipt": ["packages/receipt/src/index.ts"],
-      "@sealed-intent/redteam": ["packages/redteam/src/index.ts"]
+      "@sealed-intent/redteam": ["packages/redteam/src/index.ts"],
+      "@sealed-intent/arena": ["packages/arena/src/index.ts"]
     }
   },
   "include": ["packages/*/src", "packages/*/test", "apps/*/src", "apps/*/test", "scripts"]
