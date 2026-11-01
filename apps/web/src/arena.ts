@@ -14,7 +14,7 @@ async function main() {
   }
   const m = run.manifest;
   $("badges").innerHTML = [
-    `<span class="badge">CHAIN: SIMULATED LEDGER</span>`,
+    `<span class="badge${m.chain === "sandbox" ? " real" : ""}">CHAIN: ${m.chain === "sandbox" ? "LOCAL NEAR NODE" : "SIMULATED LEDGER"}</span>`,
     `<span class="badge">QUOTES AND ENCLAVE: SIMULATED</span>`,
     `<span class="badge real">RULES: THE REAL CODE</span>`,
     `<span class="badge">AGENT: SCRIPTED, FOLLOWS EVERY MESSAGE</span>`,

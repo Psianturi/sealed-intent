@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- *   pnpm arena:run [--approver lazy] [--all]     run the catalog on the simulated ledger, record to replays/
+ *   pnpm arena:run [--approver lazy] [--all] [--chain sandbox]   run the catalog, record to replays/ (sandbox: real local node, Linux/macOS)
  *   pnpm arena:replay [runId]                     print a recorded run (default: newest)
  *   pnpm arena:verify [runId]                     re-sign-check the manifest and recompute the referee
  */
@@ -9,6 +9,7 @@ import { join } from "node:path";
 import { SCENARIOS } from "./catalog";
 import { loadRun, record, verifyRun } from "./recorder";
 import { runArena, type RunResult } from "./runner";
+import { startSandboxWorlds } from "./sandbox";
 
 const [cmd = "run", ...rest] = process.argv.slice(2);
 const flag = (f: string) => rest.includes(f);
@@ -33,7 +34,7 @@ function scoreboard(r: Pick<RunResult, "manifest" | "outcomes" | "totals">): str
   const row = (label: string, f: (l: (typeof lanes)[number]) => string) => label.padEnd(22) + lanes.map((l) => f(l).padStart(w)).join("");
   const n = r.outcomes.length;
   const lines = [
-    `Sealed Intent Arena  run=${r.manifest.runId}  chain=${String(r.manifest.chain).toUpperCase()} (simulated)  victim=${r.manifest.victim}  approver=${r.manifest.approver}`,
+    `Sealed Intent Arena  run=${r.manifest.runId}  chain=${String(r.manifest.chain).toUpperCase()}${r.manifest.chain === "ledger" ? " (simulated)" : " (local NEAR node)"}  victim=${r.manifest.victim}  approver=${r.manifest.approver}`,
     `${n} scenarios x 6 legit tasks each. Referee reads balances only. Test tokens at fixed reference prices.`,
     "",
     "".padEnd(22) + lanes.map((l) => names[l].padStart(w)).join(""),
@@ -68,7 +69,13 @@ function scoreboard(r: Pick<RunResult, "manifest" | "outcomes" | "totals">): str
 }
 
 if (cmd === "run") {
-  const result = await runArena({ approver: flag("--approver") && value("--approver") === "lazy" ? "lazy" : "strict", scenarios: flag("--all") ? SCENARIOS : undefined });
+  const chains = value("--chain") === "sandbox" ? await startSandboxWorlds((s) => console.log(s)) : undefined;
+  let result: RunResult;
+  try {
+    result = await runArena({ approver: flag("--approver") && value("--approver") === "lazy" ? "lazy" : "strict", scenarios: flag("--all") ? SCENARIOS : undefined, chains, onScenario: chains ? (s) => console.log(`running ${s.id}`) : undefined });
+  } finally {
+    if (chains) await Promise.all(Object.values(chains).map((c) => c.close()));
+  }
   const dir = record(result, root);
   console.log(scoreboard(result));
   console.log(`\nRecorded to ${dir}. Verify: pnpm arena:verify ${result.manifest.runId}`);

@@ -183,12 +183,40 @@ SEALED_MODE=live pnpm rest        # REST in live mode (binds 127.0.0.1); set SEA
 
 NEAR Intents has no testnet. Use a separate dev account and tiny amounts. Live mode refuses to start without `OUTLAYER_API_KEY` (set `SEALED_ALLOW_SIMULATED_EXECUTOR=1` for a preflight-only run), and the example policy requires a verified TEE opinion.
 
+## The Arena: incident patterns replayed against three wallets
+
+Three identical scripted agents receive the same everyday tasks and the same attacks. One holds its own key
+(no guard), one has spending caps only (what most agent wallets ship), one goes through Sealed Intent. A referee
+that only reads balances, keys and code hashes keeps score; it never reads a verdict, so the checker cannot grade itself.
+Every scenario follows the pattern of a real incident (Grok/Bankr, Aave/CoW, Binance, Kiln, DSProxy, Permit, Morse,
+NEAR-native cases) with a source link; what could not be replicated is stated per scenario.
+
+```bash
+pnpm arena:run                      # in-memory ledger with NEP-141 rules, 14 mandatory scenarios, seconds
+pnpm arena:run --all                # the whole catalog (17)
+pnpm arena:run --chain sandbox      # the same world on a real local NEAR node (near-sandbox; Linux or macOS)
+pnpm arena:verify official          # re-check the manifest signature and recompute the referee from recorded balances
+```
+
+Official recording (`replays/official`, ledger, strict owner): no guard lost $1,502.78 to 13 of 14 attacks, caps only
+$652.78 to 11, Sealed Intent $235.00 to 5. All three finished 84 of 84 legitimate tasks. The five that get through
+Sealed Intent are by design: a stolen key, a forged verdict accepted by the signer, a compromised checker host, a
+lying RPC, and a token-contract bug. They are shown, not hidden. Test tokens only; quotes, the enclave opinion and
+custody are simulated stand-ins; the rules are the real code. The web replay is at https://sein-near.vercel.app/arena.html.
+
+The `--chain sandbox` adapter (`packages/arena/src/sandbox.ts`) deploys genuine wrap.near bytecode as the four
+tokens, creates every account under the sandbox root, and runs each scenario from a restored snapshot. The swap router
+and account age are simulated there; everything else is the node's own behaviour. `SEALED_SANDBOX_TESTS=1 pnpm test`
+runs a parity test that compares the referee's verdicts between ledger and sandbox.
+
 ## Project layout
 
 ```
 packages/core       preflight engine, 1Click client, checks, counterparty, budget, TEE client, executors, SealedWallet
 packages/receipt    canonical JSON, commitments, ed25519 receipts, EIP-191 / TEE evidence check, verify + disclose CLIs
 packages/redteam    20 attack scenarios + report
+packages/arena      three-lane simulation: ledger and near-sandbox chains, incident catalog, referee, signed recordings
+apps/web            public site: overview, Arena replay, in-browser receipt verifier (Vite, static)
 apps/server         REST and MCP servers
 scripts             demo, policy sealing
 fixtures            example policy (offline fixtures live in packages/core/src/fixtures.ts)

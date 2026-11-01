@@ -1,4 +1,5 @@
-import type { ChainAccountInfo, ChainReader } from "@sealed-intent/core";
+import type { ChainAccountInfo } from "@sealed-intent/core";
+import type { ArenaChain, SwapResult, TxResult } from "./chain";
 
 /**
  * In-memory chain with the NEP-141 rules that matter to the referee: balances, account
@@ -26,7 +27,7 @@ export type ChainEvent =
 
 export type Snapshot = Record<string, { balances: Record<string, string>; keys: LedgerAccount["keys"]; codeHash: string | null; createdAt: number }>;
 
-export class LedgerChain implements ChainReader {
+export class LedgerChain implements ArenaChain {
   readonly kind = "ledger" as const;
   private accounts = new Map<string, LedgerAccount>();
   private block = 1;
@@ -34,6 +35,7 @@ export class LedgerChain implements ChainReader {
   /** fraction of value a swap loses to the route, in bps; the loss goes to `swapLossTo` */
   swapHaircutBps = 20;
   swapLossTo = "mev-pool.arena";
+  private pristine?: Snapshot;
 
   constructor(readonly tokens: Record<string, TokenSpec>, private now = () => Date.now()) {}
 
@@ -62,7 +64,7 @@ export class LedgerChain implements ChainReader {
   }
 
   /** NEP-141 ft_transfer: sender and receiver must exist, balance must cover, 1 yocto must be attached. */
-  transfer(token: string, from: string, to: string, amount: bigint, opts: { memo?: string; yocto?: boolean } = { yocto: true }): { ok: true } | { ok: false; error: string } {
+  transfer(token: string, from: string, to: string, amount: bigint, opts: { memo?: string; yocto?: boolean } = { yocto: true }): TxResult {
     if (!this.tokens[token]) return { ok: false, error: `unknown token ${token}` };
     if (!this.accounts.has(from)) return { ok: false, error: `sender ${from} does not exist` };
     if (!this.accounts.has(to)) return { ok: false, error: `receiver ${to} is not registered` };
@@ -78,7 +80,7 @@ export class LedgerChain implements ChainReader {
   }
 
   /** Converts at reference prices, minus the route haircut which goes to the pool. */
-  swap(from: string, tokenIn: string, amountIn: bigint, tokenOut: string, to: string, haircutBps = this.swapHaircutBps): { ok: true; amountOut: bigint } | { ok: false; error: string } {
+  swap(from: string, tokenIn: string, amountIn: bigint, tokenOut: string, to: string, haircutBps = this.swapHaircutBps): SwapResult {
     const tin = this.tokens[tokenIn];
     const tout = this.tokens[tokenOut];
     if (!tin || !tout) return { ok: false, error: "unknown token" };
@@ -134,6 +136,20 @@ export class LedgerChain implements ChainReader {
     }
     return out;
   }
+
+  codeHashFor(label: string): string {
+    return label;
+  }
+
+  markPristine(): void {
+    this.pristine = this.snapshot();
+  }
+
+  reset(): void {
+    if (this.pristine) this.restore(this.pristine);
+  }
+
+  close(): void {}
 
   restore(s: Snapshot): void {
     this.accounts = new Map(Object.entries(s).map(([id, a]) => [id, { balances: Object.fromEntries(Object.entries(a.balances).map(([t, v]) => [t, BigInt(v)])), keys: a.keys.map((k) => ({ ...k })), codeHash: a.codeHash, createdAt: a.createdAt }]));

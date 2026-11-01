@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { ASSET, type Policy } from "@sealed-intent/core";
 import { canonicalJson } from "@sealed-intent/receipt";
 import { TASKS, SCENARIOS } from "./catalog";
+import type { ArenaChain } from "./chain";
 import { CapsOnlyLane, NoGuardLane, SealedLane, type Lane, type LaneId, type LaneResult } from "./lanes";
 import type { Snapshot } from "./ledger";
 import { referee, type RefereeTask, type RefereeVerdict } from "./referee";
@@ -33,13 +34,16 @@ export interface RunOptions {
   tasks?: Task[];
   approver?: "strict" | "lazy";
   seed?: string;
+  /** one chain per lane; default: a fresh in-memory ledger per scenario */
+  chains?: Record<LaneId, ArenaChain>;
+  onScenario?: (s: Scenario) => void;
 }
 
 export interface RunResult {
   manifest: {
     runId: string;
     createdAt: string;
-    chain: "ledger";
+    chain: "ledger" | "sandbox";
     victim: "scripted";
     approver: "strict" | "lazy";
     policyHash: string;
@@ -69,11 +73,13 @@ function makeApprover(mode: "strict" | "lazy"): Lane["approver"] {
   };
 }
 
-function laneSet(policy: Policy, approver: "strict" | "lazy"): Record<LaneId, Lane> {
+async function laneSet(policy: Policy, approver: "strict" | "lazy", chains?: Record<LaneId, ArenaChain>): Promise<Record<LaneId, Lane>> {
+  const c = chains ?? { "no-guard": buildWorld(), "caps-only": buildWorld(), sealed: buildWorld() };
+  await Promise.all(Object.values(c).map((chain) => chain.reset()));
   return {
-    "no-guard": new NoGuardLane(buildWorld()),
-    "caps-only": new CapsOnlyLane(buildWorld()),
-    sealed: new SealedLane(buildWorld(), policy, makeApprover(approver)),
+    "no-guard": new NoGuardLane(c["no-guard"]),
+    "caps-only": new CapsOnlyLane(c["caps-only"]),
+    sealed: await new SealedLane(c.sealed, policy, makeApprover(approver)).init(),
   };
 }
 
@@ -89,18 +95,22 @@ function describe(a: AgentAction): string {
   }
 }
 
-export async function runScenario(scenario: Scenario, tasks: Task[], opts: Required<Pick<RunOptions, "policy" | "approver">>): Promise<ScenarioOutcome> {
-  const lanes = laneSet(opts.policy, opts.approver);
+async function snapshots(lanes: Record<LaneId, Lane>, ids: LaneId[]): Promise<Record<LaneId, Snapshot>> {
+  return Object.fromEntries(await Promise.all(ids.map(async (id) => [id, await lanes[id].chain.snapshot()]))) as Record<LaneId, Snapshot>;
+}
+
+export async function runScenario(scenario: Scenario, tasks: Task[], opts: Required<Pick<RunOptions, "policy" | "approver">> & Pick<RunOptions, "chains">): Promise<ScenarioOutcome> {
+  const lanes = await laneSet(opts.policy, opts.approver, opts.chains);
   const ids = Object.keys(lanes) as LaneId[];
-  const before = Object.fromEntries(ids.map((id) => [id, lanes[id].chain.snapshot()])) as Record<LaneId, Snapshot>;
+  const before = await snapshots(lanes, ids);
   const events: ArenaEvent[] = [];
   const results: Record<LaneId, LaneResult[]> = { "no-guard": [], "caps-only": [], sealed: [] };
   let seq = 0;
   const note = (lane: ArenaEvent["lane"], type: ArenaEvent["type"], summary: string, extra: Partial<ArenaEvent> = {}) => events.push({ seq: seq++, scenario: scenario.id, lane, type, summary, ...extra });
   let phase: "task" | "attack" = "task";
   const ask = async (action: AgentAction, taskText: string | undefined, label: string) => {
-    for (const id of ids) {
-      const r = { ...(await lanes[id].request(action, taskText)), phase };
+    const rs = await Promise.all(ids.map(async (id) => [id, { ...(await lanes[id].request(action, taskText)), phase }] as const));
+    for (const [id, r] of rs) {
       results[id].push(r);
       note(id, "decision", `${label}: ${r.verdict}${r.codes.length ? ` (${r.codes.join(", ")})` : ""}${r.executed ? ", executed" : r.error ? `, not executed: ${r.error}` : ", not executed"}`, { action, result: r });
     }
@@ -126,7 +136,7 @@ export async function runScenario(scenario: Scenario, tasks: Task[], opts: Requi
     await ask(t.action, t.text, t.title);
   }
 
-  const after = Object.fromEntries(ids.map((id) => [id, lanes[id].chain.snapshot()])) as Record<LaneId, Snapshot>;
+  const after = await snapshots(lanes, ids);
   const refTasks: RefereeTask[] = tasks.map((t) => ({ id: t.id, token: t.action.kind === "swap" ? t.action.tokenOut! : t.action.token!, recipient: t.action.recipient ?? ACC.agent, amount: t.action.kind === "swap" ? "0" : t.action.amount!, toleranceBps: 0 }));
   const payees = scenario.attackers.map((payee) => ({ id: scenario.id, payee }));
   const attackerAccounts = [...new Set([...ATTACKERS, ...scenario.attackers])];
@@ -157,16 +167,17 @@ async function applyStep(step: Step, scenario: Scenario, lanes: Record<LaneId, L
       for (const a of step.actions) await ask(a, undefined, describe(a));
       return;
     case "chain":
-      for (const id of ids) {
-        const chain = lanes[id].chain;
-        if (step.op === "dust") chain.transfer(step.token, step.from, step.to, BigInt(step.amount));
-        else if (step.op === "deploy") chain.deploy(step.account, step.codeHash);
-        else chain.transfer(step.token, step.from, step.to, BigInt(step.amount));
-      }
+      await Promise.all(
+        ids.map(async (id) => {
+          const chain = lanes[id].chain;
+          if (step.op === "deploy") await chain.deploy(step.account, step.codeHash);
+          else await chain.transfer(step.token, step.from, step.to, BigInt(step.amount));
+        }),
+      );
       note("chain", "chain", step.op === "dust" ? `dust from look-alike ${step.from.slice(0, 8)}… lands in the agent's history` : step.op === "deploy" ? `${step.account} code changed to ${step.codeHash.slice(0, 10)}…` : `${step.label}: ${step.amount} moved from ${step.from} to ${step.to} without the agent`);
       return;
     case "lying_rpc":
-      (lanes.sealed as SealedLane).reader.lies.set(step.account, step.codeHash);
+      (lanes.sealed as SealedLane).reader.lies.set(step.account, await lanes.sealed.chain.codeHashFor(step.codeHash));
       note("attacker", "note", `the RPC used by the checker now reports the old code hash for ${step.account}`);
       return;
     case "bad_quote":
@@ -182,7 +193,11 @@ export async function runArena(opts: RunOptions = {}): Promise<RunResult> {
   const scenarios = opts.scenarios ?? SCENARIOS.filter((s) => s.mandatory);
   const tasks = opts.tasks ?? TASKS;
   const outcomes: ScenarioOutcome[] = [];
-  for (const s of scenarios) outcomes.push(await runScenario(s, tasks, { policy, approver }));
+  const chain = opts.chains?.sealed.kind ?? "ledger";
+  for (const s of scenarios) {
+    opts.onScenario?.(s);
+    outcomes.push(await runScenario(s, tasks, { policy, approver, chains: opts.chains }));
+  }
   const totals = Object.fromEntries(
     (["no-guard", "caps-only", "sealed"] as LaneId[]).map((id) => [
       id,
@@ -199,9 +214,9 @@ export async function runArena(opts: RunOptions = {}): Promise<RunResult> {
   const seed = opts.seed ?? "default";
   return {
     manifest: {
-      runId: `ledger-${new Date().toISOString().slice(0, 10)}-${hash({ seed, scenarios: scenarios.map((s) => s.id) }).slice(0, 8)}`,
+      runId: `${chain}-${new Date().toISOString().slice(0, 10)}-${hash({ seed, scenarios: scenarios.map((s) => s.id) }).slice(0, 8)}`,
       createdAt: new Date().toISOString(),
-      chain: "ledger",
+      chain,
       victim: "scripted",
       approver,
       policyHash: hash(policy),
@@ -210,7 +225,10 @@ export async function runArena(opts: RunOptions = {}): Promise<RunResult> {
       prices: TOKENS,
       accounts: { agent: ACC.agent, treasury: ACC.treasury, attackers: ATTACKERS.join(",") },
       realVsSimulated: {
-        chain: "SIMULATED LEDGER (NEP-141 rules in memory; the near-sandbox adapter is the real chain)",
+        chain:
+          chain === "sandbox"
+            ? "REAL LOCAL NEAR NODE (near-sandbox; genuine NEP-141 token contracts; the swap router and reference prices are simulated)"
+            : "SIMULATED LEDGER (NEP-141 rules in memory; pass --chain sandbox for a real local node)",
         quotes: "SIMULATED (fixture 1Click quotes signed with a local key)",
         tee: "SIMULATED (offline rule-based stand-in)",
         custody: "SIMULATED (ledger executor instead of OutLayer)",

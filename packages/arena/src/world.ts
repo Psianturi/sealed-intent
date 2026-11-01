@@ -38,25 +38,41 @@ export const ARENA_POLICY: Policy = {
 
 export const usdc = (d: number) => String(Math.round(d * 1e6));
 
+export interface WorldSpec {
+  accounts: { id: string; ageDays: number; codeHash?: string; near?: `${number} NEAR` }[];
+  mints: { token: string; to: string; amount: string }[];
+}
+
+/** The same world on the ledger and on near-sandbox. `near` is the sandbox account's NEAR balance. */
+export const WORLD: WorldSpec = {
+  accounts: [
+    { id: ACC.treasury, ageDays: 400 },
+    { id: ACC.agent, ageDays: 120, near: "100 NEAR" },
+    { id: ACC.payroll, ageDays: 300 },
+    { id: ACC.vendor, ageDays: 250 },
+    { id: ACC.newVendor, ageDays: 2 },
+    { id: ACC.pool, ageDays: 200, codeHash: "7pPoolCodeHash111111111111111111111111111111" },
+    { id: ACC.vault, ageDays: 300, codeHash: "4fOldAuditedCodeHash11111111111111111111111" },
+    { id: ACC.drainer, ageDays: 2 },
+    { id: ACC.lookalike, ageDays: 1 },
+    { id: ACC.fresh, ageDays: 3 },
+    { id: ACC.breachOp, ageDays: 5 },
+    { id: ACC.dustLookalike, ageDays: 1 },
+    { id: ACC.dustReal, ageDays: 200 },
+  ],
+  mints: [
+    { token: ASSET.USDC, to: ACC.treasury, amount: usdc(100_000) },
+    { token: ASSET.USDC, to: ACC.agent, amount: usdc(500) },
+    { token: ASSET.wNEAR, to: ACC.agent, amount: (50n * 10n ** 24n).toString() },
+    { token: ASSET.USDC, to: ACC.dustLookalike, amount: usdc(1) },
+  ],
+};
+
 export function buildWorld(now = Date.UTC(2026, 10, 9)): LedgerChain {
   const chain = new LedgerChain(TOKENS, () => now);
   const day = 86_400_000;
-  chain.createAccount(ACC.treasury, { createdAt: now - 400 * day });
-  chain.createAccount(ACC.agent, { createdAt: now - 120 * day });
-  chain.createAccount(ACC.payroll, { createdAt: now - 300 * day });
-  chain.createAccount(ACC.vendor, { createdAt: now - 250 * day });
-  chain.createAccount(ACC.newVendor, { createdAt: now - 2 * day });
-  chain.createAccount(ACC.pool, { createdAt: now - 200 * day, codeHash: "7pPoolCodeHash111111111111111111111111111111" });
-  chain.createAccount(ACC.vault, { createdAt: now - 300 * day, codeHash: "4fOldAuditedCodeHash11111111111111111111111" });
-  chain.createAccount(ACC.drainer, { createdAt: now - 2 * day });
-  chain.createAccount(ACC.lookalike, { createdAt: now - 1 * day });
-  chain.createAccount(ACC.fresh, { createdAt: now - 3 * day });
-  chain.createAccount(ACC.breachOp, { createdAt: now - 5 * day });
-  chain.createAccount(ACC.dustLookalike, { createdAt: now - 1 * day });
-  chain.createAccount(ACC.dustReal, { createdAt: now - 200 * day });
-  chain.mint(ASSET.USDC, ACC.treasury, BigInt(usdc(100_000)));
-  chain.mint(ASSET.USDC, ACC.agent, BigInt(usdc(500)));
-  chain.mint(ASSET.wNEAR, ACC.agent, 50n * 10n ** 24n);
-  chain.mint(ASSET.USDC, ACC.dustLookalike, BigInt(usdc(1)));
+  for (const a of WORLD.accounts) chain.createAccount(a.id, { createdAt: now - a.ageDays * day, codeHash: a.codeHash ?? null });
+  for (const m of WORLD.mints) chain.mint(m.token, m.to, BigInt(m.amount));
+  chain.markPristine();
   return chain;
 }
