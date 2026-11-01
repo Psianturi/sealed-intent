@@ -3,15 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sealed Intent Arena</title>
+  <title>Arena · SeIn</title>
   <meta name="description" content="Three identical AI agents, the same tasks and attacks, a referee that only reads chain balances. Watch which attacks get stopped." />
+  <meta property="og:title" content="Arena · SeIn" />
+  <meta property="og:description" content="Three identical AI agents, the same tasks and attacks, a referee that only reads chain balances. Watch which attacks get stopped." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#2747c4" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <header class="top">
-    <a class="brand" href="/">Sealed Intent</a>
+    <a class="brand" href="/" aria-label="SeIn, Sealed Intent, home"><svg class="mark" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span class="word">Se<b>In</b></span><span class="full">Sealed Intent</span></a>
     <nav>
       <a href="/">Overview</a>
       <a href="/arena.html" aria-current="page">Arena</a>
@@ -61,7 +66,7 @@
     <p class="note">Patterns are not replicas: how the real attackers got in, the victims' signing systems, the chains involved and the sums are not reproduced.</p>
 
     <details class="dev"><summary>For builders: reproduce this run</summary><p id="repro"></p></details>
-    <footer>Built at NEAR HACKATHON, November 2026. Test tokens only; no real money moves in the Arena.</footer>
+    <footer><div class="foot-brand"><svg class="mark" width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span>Se<b>In</b> · Sealed Intent</span></div><div>Built at NEAR HACKATHON, November 2026. Test tokens only; no real money moves in the Arena.</div></footer>
   </main>
   <aside class="drawer" id="drawer" aria-hidden="true"></aside>
   <script type="module" src="/src/arena.ts"></script>

@@ -1,11 +1,13 @@
-# Sealed Intent
+<p align="center"><img src="apps/web/public/logo.svg" alt="SeIn, Sealed Intent" width="300"></p>
+
+# Sealed Intent (SeIn)
 
 **A private preflight checker that sits between an AI agent and its money on NEAR.**
 The agent can *ask* to swap or pay. Only Sealed Intent can let it happen, and only after checking
 what the money will actually do, who receives it, and whether the instruction came from an attacker.
 Every decision produces a signed receipt that anyone can verify, without revealing amounts or recipients.
 
-Built at NEAR HACKATHON (Nov 2026). Tracks: `security` (main), `privacy`, `agents`, `defi`.
+Live site: https://sein-near.vercel.app (overview, Arena replay, receipt verifier). Built at NEAR HACKATHON (Nov 2026). Tracks: `security` (main), `privacy`, `agents`, `defi`.
 
 > **Status:** working offline MVP (no keys, no funds). Of the live path, real 1Click dry quotes and real
 > NEAR AI Cloud attestation verification have been exercised; OutLayer execution and a mainnet swap have not yet.

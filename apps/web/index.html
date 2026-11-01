@@ -3,15 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sealed Intent</title>
-  <meta name="description" content="A guard that checks every payment an AI agent wants to make on NEAR before the money moves. The agent can ask; only Sealed Intent can let money move." />
+  <title>SeIn · Sealed Intent</title>
+  <meta name="description" content="SeIn (Sealed Intent) checks every payment an AI agent wants to make on NEAR before the money moves. The agent can ask; only SeIn can let money move." />
+  <meta property="og:title" content="SeIn · Sealed Intent" />
+  <meta property="og:description" content="SeIn (Sealed Intent) checks every payment an AI agent wants to make on NEAR before the money moves. The agent can ask; only SeIn can let money move." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#2747c4" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <header class="top">
-    <a class="brand" href="/">Sealed Intent</a>
+    <a class="brand" href="/" aria-label="SeIn, Sealed Intent, home"><svg class="mark" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span class="word">Se<b>In</b></span><span class="full">Sealed Intent</span></a>
     <nav>
       <a href="/" aria-current="page">Overview</a>
       <a href="/arena.html">Arena</a>
@@ -22,6 +27,7 @@
   <main>
     <section class="hero">
       <div>
+        <p class="eyebrow"><svg class="mark" width="18" height="18" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg> SeIn · Sealed Intent · built on NEAR</p>
         <h1>Your AI agent can ask for money. It can't take it.</h1>
         <p class="lead">Sealed Intent sits between an AI agent and its wallet on NEAR. Every payment the agent wants to make is checked first: is the deal real, who gets the money, was the agent tricked, is it within budget. Only then does the money move, and every decision leaves a sealed receipt.</p>
         <p class="pitch">Signers check format. Sealed Intent checks meaning.</p>
@@ -108,7 +114,7 @@
       <p>Open source, MIT. The repository has a sixty-second offline demo, the test suite, the red-team catalog and the Arena recorder. <a href="https://github.com/Psianturi/sealed-intent">Read the code on GitHub</a>.</p>
     </section>
 
-    <footer>Built at NEAR HACKATHON, November 2026. Not audited. Do not use with funds you cannot lose.</footer>
+    <footer><div class="foot-brand"><svg class="mark" width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span>Se<b>In</b> · Sealed Intent</span></div><div>Built at NEAR HACKATHON, November 2026. Not audited. Do not use with funds you cannot lose.</div></footer>
   </main>
   <script type="module" src="/src/landing.ts"></script>
 </body>

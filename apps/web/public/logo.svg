@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 96" width="360" height="96">
+  <title>SeIn, Sealed Intent</title>
+  <rect x="8" y="16" width="64" height="64" rx="16" fill="#2747c4"/>
+  <path d="M41 35.5C37.5 29 20.5 29 20.5 38C20.5 47 41 44.5 41 54.5C41 63.5 23 66 18.5 58.5" fill="none" stroke="#fff" stroke-width="7.5" stroke-linecap="round"/>
+  <rect x="50" y="39" width="8" height="28" rx="4" fill="#fff"/>
+  <circle cx="54" cy="30" r="4.5" fill="#7ee2a4"/>
+  <text x="90" y="56" font-family="Instrument Sans, Segoe UI, Helvetica, Arial, sans-serif" font-size="44" font-weight="700" fill="#141a21" letter-spacing="-1">Se<tspan fill="#2747c4">In</tspan></text>
+  <text x="92" y="78" font-family="Instrument Sans, Segoe UI, Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#5b6673" letter-spacing="3.2">SEALED INTENT</text>
+</svg>
