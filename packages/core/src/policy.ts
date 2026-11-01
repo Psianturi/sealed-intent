@@ -62,6 +62,14 @@ export const Policy = z.object({
       maxLimitProbesPerHour: z.number().int().positive().default(6),
     })
     .prefault({}),
+  /** Private records (openings, raw enclave exchanges, audit log) are deleted after this many days. */
+  retention: z.object({ privateDays: z.number().int().positive().default(30) }).prefault({}),
+  /**
+   * Extra protection for the per-transaction cap. A fixed cap leaks one bit per probe, so with
+   * perTxJitterPct above 0 the effective cap for an agent is redrawn every hour from
+   * [cap minus that percent, cap]. Honest payments inside that band can be refused, so it is off by default.
+   */
+  secrecy: z.object({ perTxJitterPct: z.number().min(0).max(90).default(0) }).prefault({}),
   /** How often the agent may spend, independent of amounts. */
   velocity: z.object({ maxTxPerHour: z.number().int().positive().default(30) }).prefault({}),
 });

@@ -11,6 +11,7 @@ out/
 replays/*/
 !replays/official/
 !replays/official-sandbox/
+!replays/official-lazy/
 *.db
 *.db-journal
 *.db-wal

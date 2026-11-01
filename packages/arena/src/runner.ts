@@ -54,7 +54,20 @@ export interface RunResult {
     realVsSimulated: Record<string, string>;
   };
   outcomes: ScenarioOutcome[];
-  totals: Record<LaneId, { stolenCents: number; escaped: string[]; legitDone: number; legitTotal: number; falseBlocks: string[]; foreignKeys: number }>;
+  totals: Record<
+    LaneId,
+    {
+      stolenCents: number;
+      /** funds reached an attacker */
+      escaped: string[];
+      /** funds reached an attacker, or an attacker's key stayed on the account */
+      compromised: string[];
+      legitDone: number;
+      legitTotal: number;
+      falseBlocks: string[];
+      foreignKeys: number;
+    }
+  >;
 }
 
 const hash = (v: unknown) => createHash("sha256").update(canonicalJson(v)).digest("hex");
@@ -204,6 +217,7 @@ export async function runArena(opts: RunOptions = {}): Promise<RunResult> {
       {
         stolenCents: outcomes.reduce((n, o) => n + o.lanes[id].verdict.stolenCents, 0),
         escaped: outcomes.flatMap((o) => o.lanes[id].verdict.escaped),
+        compromised: outcomes.filter((o) => o.lanes[id].verdict.stolenCents > 0 || o.lanes[id].verdict.foreignKeys.length > 0).map((o) => o.scenario.id),
         legitDone: outcomes.reduce((n, o) => n + o.lanes[id].verdict.legitDone, 0),
         legitTotal: outcomes.reduce((n, o) => n + o.lanes[id].verdict.legitTotal, 0),
         falseBlocks: outcomes.flatMap((o) => o.lanes[id].verdict.falseBlocks.map((t) => `${o.scenario.id}/${t}`)),
@@ -214,7 +228,7 @@ export async function runArena(opts: RunOptions = {}): Promise<RunResult> {
   const seed = opts.seed ?? "default";
   return {
     manifest: {
-      runId: `${chain}-${new Date().toISOString().slice(0, 10)}-${hash({ seed, scenarios: scenarios.map((s) => s.id) }).slice(0, 8)}`,
+      runId: `${chain}-${approver === "lazy" ? "lazy-" : ""}${new Date().toISOString().slice(0, 10)}-${hash({ seed, scenarios: scenarios.map((s) => s.id) }).slice(0, 8)}`,
       createdAt: new Date().toISOString(),
       chain,
       victim: "scripted",
@@ -227,13 +241,13 @@ export async function runArena(opts: RunOptions = {}): Promise<RunResult> {
       realVsSimulated: {
         chain:
           chain === "sandbox"
-            ? "REAL LOCAL NEAR NODE (near-sandbox; genuine NEP-141 token contracts; the swap router and reference prices are simulated)"
-            : "SIMULATED LEDGER (NEP-141 rules in memory; pass --chain sandbox for a real local node)",
-        quotes: "SIMULATED (fixture 1Click quotes signed with a local key)",
-        tee: "SIMULATED (offline rule-based stand-in)",
-        custody: "SIMULATED (ledger executor instead of OutLayer)",
+            ? "REAL (local NEAR nodes with genuine NEP-141 token contracts; the swap router and reference prices are simulated)"
+            : "SIMULATED (an in-memory ledger with NEP-141 token rules; another recording runs on real local NEAR nodes)",
+        quotes: "SIMULATED (test quotes signed with a local key)",
+        tee: "SIMULATED (a rule-based stand-in; the real enclave check is kept as separate evidence)",
+        custody: "SIMULATED (the run's own executor instead of OutLayer)",
         victim: "scripted (no LLM; it follows every message)",
-        rules: "REAL (the same Sealed Intent code that runs live)",
+        rules: "REAL (the same code that runs live)",
       },
     },
     outcomes,

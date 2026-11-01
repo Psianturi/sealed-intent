@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadOrCreateIssuerKey } from "@sealed-intent/receipt";
+import { loadEnv, loadOrCreateIssuerKey, loadVault, type Vault } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
 import { CounterpartyMemory, FixtureChainReader, RpcChainReader, SharedBlocklist, type ChainReader } from "./counterparty";
 import { OutLayerExecutor, SimulatedExecutor, type Executor } from "./executor";
@@ -19,7 +19,7 @@ import { FreezeStore } from "./freeze";
 import { readSealedPolicy, type Policy } from "./policy";
 import { Preflight } from "./preflight";
 import { ReceiptStore } from "./store";
-import { NearAiCloudChecker, SimulatedTeeChecker } from "./tee-check";
+import { NearAiCloudChecker, SimulatedTeeChecker, type TeeChecker } from "./tee-check";
 
 export interface BuildOptions {
   offline: boolean;
@@ -27,6 +27,8 @@ export interface BuildOptions {
   outDir?: string;
   policy?: Policy;
   ledgerPath?: string;
+  /** replace the enclave checker */
+  tee?: TeeChecker;
   /** test hook: replace the executor */
   executor?: Executor;
   /** test hook: replace the chain reader used for counterparty signals */
@@ -48,29 +50,28 @@ export interface Built {
   oneclick: FixtureOneClickClient | HttpOneClickClient;
   blocklist: SharedBlocklist;
   memory: CounterpartyMemory;
+  store: ReceiptStore;
+  vault: Vault;
 }
 
 /** Reads .env from the working directory when present. Values already in the environment win. */
-export function loadEnv(path = ".env"): void {
-  if (!existsSync(path)) return;
-  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
-    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
-    if (!m || line.trim().startsWith("#")) continue;
-    const value = m[2]!.replace(/^(["'])(.*)\1$/, "$2");
-    if (process.env[m[1]!] === undefined && value !== "") process.env[m[1]!] = value;
-  }
-}
+export { loadEnv };
 
 export function buildPreflight(opts: BuildOptions): Built {
   loadEnv();
   const home = opts.home ?? ".sealed";
+  // the keys and databases live here; no other OS user may even list it
+  mkdirSync(home, { recursive: true, mode: 0o700 });
+  chmodSync(home, 0o700);
   const issuer = loadOrCreateIssuerKey(join(home, "issuer.pem"));
-  const store = new ReceiptStore(opts.outDir ?? "out", home);
+  const vault = loadVault(home, { requireEnvKey: !opts.offline });
+  const blind = (s: string) => vault.blind(s);
+  const store = new ReceiptStore(opts.outDir ?? "out", home, vault);
   const ledgerPath = opts.ledgerPath ?? join(home, "budget.db");
-  const ledger = new BudgetLedger(ledgerPath);
-  const pending = new PendingStore(ledgerPath);
-  const freeze = new FreezeStore(ledgerPath);
-  const memory = new CounterpartyMemory(opts.ledgerPath === ":memory:" ? ":memory:" : join(home, "counterparty.db"));
+  const ledger = new BudgetLedger(ledgerPath, undefined, blind);
+  const pending = new PendingStore(ledgerPath, vault);
+  const freeze = new FreezeStore(ledgerPath, vault);
+  const memory = new CounterpartyMemory(opts.ledgerPath === ":memory:" ? ":memory:" : join(home, "counterparty.db"), vault);
 
   if (opts.offline) {
     const oneclick = opts.oneclick ?? new FixtureOneClickClient();
@@ -88,10 +89,12 @@ export function buildPreflight(opts: BuildOptions): Built {
       store,
       executor: opts.executor ?? new SimulatedExecutor(),
       counterparty: { blocklist, chain: opts.chain ?? new FixtureChainReader(FIXTURE_CHAIN), memory },
-      tee: new SimulatedTeeChecker(join(home, "sim-enclave.key")),
+      tee: opts.tee ?? new SimulatedTeeChecker(join(home, "sim-enclave.key")),
       quoteManagerPublicKey: FIXTURE_MANAGER_PUBLIC_KEY,
+      vault,
     });
-    return { preflight, ledger, pending, freeze, oneclick, blocklist, memory };
+    preflight.purgeExpired();
+    return { preflight, ledger, pending, freeze, oneclick, blocklist, memory, store, vault };
   }
 
   const key = process.env.SEALED_POLICY_KEY;
@@ -113,9 +116,11 @@ export function buildPreflight(opts: BuildOptions): Built {
     store,
     executor: liveExecutor(oneclick),
     counterparty: { blocklist, chain: new RpcChainReader(), memory },
-    tee: process.env.NEARAI_API_KEY ? new NearAiCloudChecker() : undefined,
+    tee: opts.tee ?? (process.env.NEARAI_API_KEY ? new NearAiCloudChecker() : undefined),
+    vault,
   });
-  return { preflight, ledger, pending, freeze, oneclick, blocklist, memory };
+  preflight.purgeExpired();
+  return { preflight, ledger, pending, freeze, oneclick, blocklist, memory, store, vault };
 }
 
 function liveExecutor(oneclick: HttpOneClickClient): Executor {

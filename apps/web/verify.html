@@ -3,47 +3,57 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Verify a receipt · SeIn</title>
-  <meta name="description" content="Check a SeIn receipt in your browser. Nothing is uploaded." />
-  <meta property="og:title" content="Verify a receipt · SeIn" />
-  <meta property="og:description" content="Check a SeIn receipt in your browser. Nothing is uploaded." />
+  <title>Check a receipt | SeIn</title>
+  <meta name="description" content="Check a SeIn receipt in your browser. See what was decided and prove nobody changed it, while the amount and receiver stay sealed. Nothing is uploaded." />
+  <meta property="og:title" content="Check a SeIn receipt yourself" />
+  <meta property="og:description" content="Proof of what was decided, without exposing the amount or the receiver. Runs in your browser." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sein-near.vercel.app/verify.html" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
   <meta name="theme-color" content="#2747c4" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <header class="top">
-    <a class="brand" href="/" aria-label="SeIn, Sealed Intent, home"><svg class="mark" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span class="word">Se<b>In</b></span><span class="full">Sealed Intent</span></a>
-    <nav>
-      <a href="/">Overview</a>
-      <a href="/arena.html">Arena</a>
-      <a href="/verify.html" aria-current="page">Verify a receipt</a>
-      <a href="https://github.com/Psianturi/sealed-intent">For builders</a>
-    </nav>
-  </header>
+  <!--header:verify-->
   <main>
-    <h1>Verify a receipt</h1>
-    <p class="lead">Drop in a receipt and this page checks it right here in your browser; nothing is uploaded anywhere. A valid receipt means a Sealed Intent instance really made that decision and nobody changed it afterwards. The amount and the receiver stay sealed unless the owner opens one field for you.</p>
-    <div class="controls">
-      <input type="file" id="file" accept="application/json" />
-      <button class="btn primary" id="sample">Try with a sample receipt</button>
-      <label>Trusted issuer key (hex, optional) <input type="text" id="trust" class="mono" style="width:min(420px,100%)" placeholder="paste the operator's published ed25519 public key" /></label>
+    <h1 class="page-title">Check a receipt yourself</h1>
+    <p class="lead">A receipt proves what SeIn decided and that nobody changed it since. The amount and the receiver stay sealed. Everything runs in this browser, and nothing is uploaded.</p>
+    <div class="drop" id="drop">
+      <p class="drop-title">Drop a receipt here</p>
+      <div class="btns">
+        <button class="btn primary big" id="sample">Try a real receipt</button>
+        <label class="btn big">Choose a file<input type="file" id="file" accept="application/json" class="sr-only" /></label>
+      </div>
+      <p class="note">The sample came from a real check on NEAR AI Cloud. No money moved.</p>
     </div>
-    <textarea id="json" placeholder="paste a receipt JSON here"></textarea>
-    <div class="controls"><button class="btn primary" id="go">Verify</button>
-      <label>Disclosure file (optional) <input type="file" id="disclosure" accept="application/json" /></label></div>
-    <div id="out"></div>
-    <h2>What is checked</h2>
-    <ul>
-      <li><strong>Issuer signature:</strong> ed25519 over the canonical JSON of the receipt. Any edit, even one character, invalidates it.</li>
-      <li><strong>Issuer identity:</strong> only if you paste the key the operator published. Without it the receipt is self-signed by an unknown key and this page says so.</li>
-      <li><strong>Enclave signature:</strong> the signed text must equal <code>model:sha256(request):sha256(response)</code> and recover to the signing address. Offline-simulated receipts are labelled as such and never count as attested. Real receipts must carry a locally verified attestation; the Intel and NVIDIA checks themselves happen at decision time and are listed in the receipt.</li>
-      <li><strong>Disclosure:</strong> a disclosed field must match its salted commitment.</li>
-    </ul>
-    <footer><div class="foot-brand"><svg class="mark" width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span>Se<b>In</b> · Sealed Intent</span></div><div>Built at NEAR HACKATHON, November 2026. Receipts are checked locally; nothing leaves your browser.</div></footer>
+    <div id="out" aria-live="polite"></div>
+    <div class="btns" id="try-more" hidden>
+      <button class="btn" id="open-field">Open one sealed field</button>
+      <button class="btn" id="tamper">Change the verdict and check again</button>
+      <button class="btn" id="reset">Back to the original</button>
+    </div>
+    <details class="dev">
+      <summary>Advanced: paste a receipt, trust a key, add a disclosure file</summary>
+      <label class="field">Receipt JSON<textarea id="json" spellcheck="false"></textarea></label>
+      <label class="field">Operator's public key, to confirm who signed (optional)<input type="text" id="trust" class="mono" /></label>
+      <label class="field">Disclosure file (optional)<input type="file" id="disclosure" accept="application/json" /></label>
+      <div class="btns"><button class="btn" id="go">Check</button></div>
+      <h3>What is checked</h3>
+      <ul>
+        <li><strong>Operator signature:</strong> ed25519 over the canonical JSON of the receipt. Any edit invalidates it.</li>
+        <li><strong>Who signed:</strong> confirmed only if you paste the key the operator published. Without it, this page says the key is unknown.</li>
+        <li><strong>Enclave signature:</strong> the signed text must equal <code>model:sha256(request):sha256(response)</code> and recover to the signing address. Simulated enclaves are labelled and never count as attested.</li>
+        <li><strong>Hardware evidence:</strong> the Intel and NVIDIA checks happen at decision time and are listed in the receipt. This page shows that record; it does not repeat them.</li>
+        <li><strong>Opened fields:</strong> an opened value must match its salted commitment.</li>
+      </ul>
+    </details>
+    <!--footer:verify-->
   </main>
   <script type="module" src="/src/verify.ts"></script>
 </body>

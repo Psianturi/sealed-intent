@@ -22,6 +22,10 @@ export const PRIVATE_FIELDS = [
   "method",
   "args",
   "details",
+  /** the whole declared intent; its commitment is also inside the enclave's signed request */
+  "intent",
+  /** which limit was hit; the agent and the public receipt only see LIMIT_EXCEEDED */
+  "limitDetail",
 ] as const;
 export type PrivateField = (typeof PRIVATE_FIELDS)[number];
 
@@ -76,6 +80,8 @@ export interface BuildReceiptInput {
   warnCodes?: string[];
   publicPart: Receipt["public"];
   privateValues: Partial<Record<PrivateField, unknown>>;
+  /** commitments made earlier, so another signed document can name them */
+  precommitted?: Partial<Record<PrivateField, { commitment: string; opening: Opening }>>;
   policy: unknown;
   tee?: TeeEvidence;
 }
@@ -94,6 +100,10 @@ export function buildReceipt(input: BuildReceiptInput, issuer: IssuerKey): { rec
     const c = commit(value);
     commitments[field] = c.commitment;
     openings[field] = c.opening;
+  }
+  for (const [field, c] of Object.entries(input.precommitted ?? {})) {
+    commitments[field as PrivateField] = c.commitment;
+    openings[field as PrivateField] = c.opening;
   }
   const policy = commit(input.policy);
   const unsigned: Omit<Receipt, "signature"> = {

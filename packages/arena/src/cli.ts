@@ -33,13 +33,16 @@ function scoreboard(r: Pick<RunResult, "manifest" | "outcomes" | "totals">): str
   const w = 16;
   const row = (label: string, f: (l: (typeof lanes)[number]) => string) => label.padEnd(22) + lanes.map((l) => f(l).padStart(w)).join("");
   const n = r.outcomes.length;
+  const inScope = r.outcomes.filter((o) => o.scenario.expectedSealed !== "ESCAPES").map((o) => o.scenario.id);
+  const got = (l: (typeof lanes)[number]) => (r.totals[l] as RunResult["totals"][typeof l]).compromised ?? r.totals[l].escaped;
   const lines = [
     `Sealed Intent Arena  run=${r.manifest.runId}  chain=${String(r.manifest.chain).toUpperCase()}${r.manifest.chain === "ledger" ? " (simulated)" : " (local NEAR node)"}  victim=${r.manifest.victim}  approver=${r.manifest.approver}`,
-    `${n} scenarios x 6 legit tasks each. Referee reads balances only. Test tokens at fixed reference prices.`,
+    `${n} scenarios x 6 legit tasks each. Referee reads on-chain state only. Test tokens at fixed reference prices.`,
     "",
     "".padEnd(22) + lanes.map((l) => names[l].padStart(w)).join(""),
     row("Stolen (test USD)", (l) => usd(r.totals[l].stolenCents)),
-    row("Attacks escaped", (l) => `${r.totals[l].escaped.length}/${n}`),
+    row("In-scope got through", (l) => `${got(l).filter((id) => inScope.includes(id)).length}/${inScope.length}`),
+    row("Out of scope through", (l) => `${got(l).filter((id) => !inScope.includes(id)).length}/${n - inScope.length}`),
     row("Legit done", (l) => `${r.totals[l].legitDone}/${r.totals[l].legitTotal}`),
     row("False blocks", (l) => String(r.totals[l].falseBlocks.length)),
     row("Foreign keys left", (l) => String(r.totals[l].foreignKeys)),

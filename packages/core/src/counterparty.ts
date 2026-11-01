@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { canonicalJson, signBytes, verifyBytes, type IssuerKey } from "@sealed-intent/receipt";
+import { canonicalJson, signBytes, verifyBytes, type IssuerKey, type Vault } from "@sealed-intent/receipt";
 import type { Policy } from "./policy";
 import { DatabaseSync } from "./sqlite";
 
@@ -140,8 +140,11 @@ export class FixtureChainReader implements ChainReader {
 
 export class CounterpartyMemory {
   private db: DatabaseSync;
+  private readonly key: (s: string) => string;
 
-  constructor(path: string) {
+  /** With a vault, the database holds keyed hashes instead of who paid whom. */
+  constructor(path: string, vault?: Vault) {
+    this.key = (s) => (vault ? vault.blind(s.toLowerCase()) : s.toLowerCase());
     if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
     this.db.exec("PRAGMA busy_timeout = 10000;");
@@ -152,26 +155,27 @@ export class CounterpartyMemory {
   }
 
   interactions(agentId: string, counterparty: string): number {
-    const row = this.db.prepare("SELECT n FROM interactions WHERE agent_id=? AND counterparty=?").get(agentId, counterparty.toLowerCase()) as { n: number } | undefined;
+    const row = this.db.prepare("SELECT n FROM interactions WHERE agent_id=? AND counterparty=?").get(this.key(agentId), this.key(counterparty)) as { n: number } | undefined;
     return row ? Number(row.n) : 0;
   }
 
   recordInteraction(agentId: string, counterparty: string, now = Date.now()): void {
     this.db
       .prepare("INSERT INTO interactions VALUES (?,?,1,?) ON CONFLICT(agent_id, counterparty) DO UPDATE SET n = n + 1, last_at = excluded.last_at")
-      .run(agentId, counterparty.toLowerCase(), now);
+      .run(this.key(agentId), this.key(counterparty), now);
   }
 
   /** Returns the code hash on record and stores this one only if none was recorded. A change stays visible until the owner accepts it. */
   observeCodeHash(account: string, codeHash: string, now = Date.now()): string | undefined {
-    const prev = this.db.prepare("SELECT code_hash FROM code_hashes WHERE account=?").get(account) as { code_hash: string } | undefined;
-    if (!prev) this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?)").run(account, codeHash, now);
+    const id = this.key(account);
+    const prev = this.db.prepare("SELECT code_hash FROM code_hashes WHERE account=?").get(id) as { code_hash: string } | undefined;
+    if (!prev) this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?)").run(id, codeHash, now);
     return prev?.code_hash;
   }
 
   /** The owner accepts the contract's current code. */
   acceptCodeHash(account: string, codeHash: string, now = Date.now()): void {
-    this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?) ON CONFLICT(account) DO UPDATE SET code_hash=excluded.code_hash, seen_at=excluded.seen_at").run(account, codeHash, now);
+    this.db.prepare("INSERT INTO code_hashes VALUES (?,?,?) ON CONFLICT(account) DO UPDATE SET code_hash=excluded.code_hash, seen_at=excluded.seen_at").run(this.key(account), codeHash, now);
   }
 
   close(): void {

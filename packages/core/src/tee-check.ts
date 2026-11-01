@@ -6,6 +6,7 @@ import { checkGpuEvidence, checkNearReport, type NearReport, type QuoteVerifier,
 import type { DeclaredIntent } from "./intent";
 import type { QuoteResponse } from "./oneclick";
 import type { Policy } from "./policy";
+import { openBoundConnection, type BoundConnection } from "./tee-tls";
 
 /**
  * Private second opinion: an LLM inside a TEE reads the secret policy, the intent,
@@ -15,6 +16,8 @@ import type { Policy } from "./policy";
 export interface TeeCheckInput {
   /** receipt id this opinion belongs to; it goes inside the signed request */
   decisionId?: string;
+  /** the salted commitment published in the receipt */
+  intentCommitment?: string;
   intent: DeclaredIntent;
   quote?: QuoteResponse;
   policy: Policy;
@@ -22,6 +25,9 @@ export interface TeeCheckInput {
 }
 
 export type TeeOpinion = TeeEvidence & { raw?: { request: string; response: string } };
+
+/** The enclave's evidence did not check out, as opposed to the service being unreachable. */
+export class TeeUnverifiedError extends Error {}
 
 export interface TeeChecker {
   readonly kind: TeeEvidence["kind"];
@@ -41,6 +47,7 @@ export function buildTeePrompt(input: TeeCheckInput): { system: string; user: st
   ].join("\n");
   const user = JSON.stringify({
     DECISION_ID: input.decisionId ?? null,
+    INTENT_COMMITMENT: input.intentCommitment ?? null,
     SECRET_POLICY: policy,
     DECLARED_INTENT: { ...intent, taskText: undefined },
     QUOTE: quote
@@ -78,16 +85,20 @@ export interface NearAiOptions {
   signingAlgo?: "ecdsa" | "ed25519";
   fetch?: typeof fetch;
   verifyQuote?: QuoteVerifier;
+  /** opens the TLS connection that carries the report and the prompt; replaceable in tests */
+  connect?: (baseUrl: string) => Promise<BoundConnection>;
+  /** test hook: replays need the nonce the recorded report was made for */
+  randomNonce?: () => string;
 }
 
 /**
  * Real check against NEAR AI Cloud. Order matters:
- *  1. fetch the attestation report with a fresh nonce
- *  2. verify the gateway quote and every model report (Intel DCAP, nonce and signer binding,
- *     measurements, GPU evidence through NVIDIA NRAS); refuse before anything is sent otherwise
- *  3. send the completion, keeping the exact bytes
+ *  1. open one TLS connection, read the peer's certificate key, and fetch the attestation report on it with a fresh nonce
+ *  2. verify the gateway quote, that it binds this connection's certificate key, and every model report
+ *     (Intel DCAP, nonce and signer binding, measurements, GPU evidence through NVIDIA NRAS); refuse before anything is sent otherwise
+ *  3. send the completion over the same connection, keeping the exact bytes
  *  4. fetch the response signature and require a provider_tee signer that matches exactly one verified model report
- * Not covered: TLS connection binding to the gateway (a proxy relaying genuine reports could read the prompt).
+ * The TLS binding reaches the gateway enclave. The model enclave is covered by its own report and signature.
  */
 export class NearAiCloudChecker implements TeeChecker {
   readonly kind = "nearai-cloud" as const;
@@ -97,6 +108,8 @@ export class NearAiCloudChecker implements TeeChecker {
   private readonly signingAlgo: "ecdsa" | "ed25519";
   private readonly fetch: typeof fetch;
   private readonly verifyQuote?: QuoteVerifier;
+  private readonly connect: (baseUrl: string) => Promise<BoundConnection>;
+  private readonly randomNonce: () => string;
 
   constructor(opts: NearAiOptions = {}) {
     this.apiKey = opts.apiKey ?? process.env.NEARAI_API_KEY ?? "";
@@ -105,6 +118,8 @@ export class NearAiCloudChecker implements TeeChecker {
     this.signingAlgo = opts.signingAlgo ?? "ecdsa";
     this.fetch = opts.fetch ?? fetch;
     this.verifyQuote = opts.verifyQuote;
+    this.randomNonce = opts.randomNonce ?? (() => randomBytes(32).toString("hex"));
+    this.connect = opts.connect ?? (opts.fetch ? async () => ({ fetch: opts.fetch!, peerSpkiSha256: "", close() {} }) : (url) => openBoundConnection(url));
     if (!this.apiKey || !this.model) throw new Error("NEARAI_API_KEY and NEARAI_MODEL are required for the NEAR AI Cloud check");
   }
 
@@ -113,26 +128,35 @@ export class NearAiCloudChecker implements TeeChecker {
   }
 
   async check(input: TeeCheckInput): Promise<TeeOpinion> {
+    const conn = await this.connect(this.baseUrl);
+    try {
+      return await this.checkOver(conn, input);
+    } finally {
+      conn.close();
+    }
+  }
+
+  private async checkOver(conn: BoundConnection, input: TeeCheckInput): Promise<TeeOpinion> {
     const tee = input.policy.tee;
-    const nonce = randomBytes(32).toString("hex");
+    const nonce = this.randomNonce();
     const attUrl = new URL(`${this.baseUrl}/attestation/report`);
-    attUrl.search = new URLSearchParams({ signing_algo: this.signingAlgo, nonce, model: this.model, provider: "near" }).toString();
-    const attRes = await this.fetch(attUrl, { headers: this.headers({ "x-no-aliasing": "true" }) });
+    attUrl.search = new URLSearchParams({ signing_algo: this.signingAlgo, nonce, model: this.model, provider: "near", include_tls_fingerprint: "true" }).toString();
+    const attRes = await conn.fetch(attUrl, { headers: this.headers({ "x-no-aliasing": "true" }) });
     if (!attRes.ok) throw new Error(`attestation report HTTP ${attRes.status}`);
     const att = (await attRes.json()) as { gateway_attestation?: NearReport; model_attestations?: NearReport[] };
 
     // 2. verify everything before the secret policy leaves this process
-    if (!att.gateway_attestation) throw new Error("attestation report has no gateway_attestation");
-    const gateway = await checkNearReport(att.gateway_attestation, nonce, { acceptedTcbStatuses: tee.acceptedTcbStatuses, verifyQuote: this.verifyQuote });
-    if (!gateway.ok) throw new Error(`gateway attestation rejected: ${gateway.problems.join("; ")}`);
+    if (!att.gateway_attestation) throw new TeeUnverifiedError("attestation report has no gateway_attestation");
+    const gateway = await checkNearReport(att.gateway_attestation, nonce, { acceptedTcbStatuses: tee.acceptedTcbStatuses, verifyQuote: this.verifyQuote, peerSpkiSha256: conn.peerSpkiSha256 });
+    if (!gateway.ok) throw new TeeUnverifiedError(`gateway attestation rejected: ${gateway.problems.join("; ")}`);
     const candidates = att.model_attestations ?? [];
-    if (candidates.length === 0) throw new Error("attestation report has no model_attestations");
+    if (candidates.length === 0) throw new TeeUnverifiedError("attestation report has no model_attestations");
     const verifiedModels: { report: NearReport; check: ReportCheck; gpus?: number }[] = [];
     for (const report of candidates) {
       const check = await checkNearReport(report, nonce, { acceptedTcbStatuses: tee.acceptedTcbStatuses, verifyQuote: this.verifyQuote });
-      if (!check.ok) throw new Error(`model attestation rejected: ${check.problems.join("; ")}`);
+      if (!check.ok) throw new TeeUnverifiedError(`model attestation rejected: ${check.problems.join("; ")}`);
       const gpu = await checkGpuEvidence(report, nonce, this.fetch);
-      if (tee.requireGpu && !gpu.ok) throw new Error(`GPU attestation rejected: ${gpu.problems.join("; ")}`);
+      if (tee.requireGpu && !gpu.ok) throw new TeeUnverifiedError(`GPU attestation rejected: ${gpu.problems.join("; ")}`);
       verifiedModels.push({ report, check, gpus: gpu.ok ? gpu.gpus : undefined });
     }
 
@@ -146,7 +170,7 @@ export class NearAiCloudChecker implements TeeChecker {
         { role: "user", content: user },
       ],
     });
-    const compRes = await this.fetch(`${this.baseUrl}/chat/completions`, {
+    const compRes = await conn.fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
       headers: this.headers({ "Content-Type": "application/json", "x-no-aliasing": "true" }),
       body: requestBody,
@@ -171,14 +195,14 @@ export class NearAiCloudChecker implements TeeChecker {
     }
     if (!sig?.signature || !sig.text || !sig.signing_address) throw new Error("no response signature available");
     if (sig.signature_kind !== "provider_tee" && sig.signature_kind !== "gateway") throw new Error(`unknown signature_kind ${String(sig.signature_kind)}`);
-    if (sig.signature_kind === "gateway" && !tee.allowGatewaySignature) throw new Error("response was signed by the gateway, not by the model enclave");
+    if (sig.signature_kind === "gateway" && !tee.allowGatewaySignature) throw new TeeUnverifiedError("response was signed by the gateway, not by the model enclave");
 
     const signer = sig.signing_address.toLowerCase();
     const signerMatches = (r: NearReport) => r.signing_address.toLowerCase() === signer && r.signing_algo === this.signingAlgo;
     const matched = sig.signature_kind === "provider_tee" ? verifiedModels.filter((m) => signerMatches(m.report)) : [];
     const gatewayMatched = sig.signature_kind === "gateway" && signerMatches(att.gateway_attestation);
     const signingAddressMatched = matched.length === 1 || gatewayMatched;
-    if (!signingAddressMatched) throw new Error("response signer does not match exactly one verified attestation report");
+    if (!signingAddressMatched) throw new TeeUnverifiedError("response signer does not match exactly one verified attestation report");
     const bound = matched[0]?.check ?? gateway;
 
     const evidence: TeeEvidence = {
@@ -200,21 +224,22 @@ export class NearAiCloudChecker implements TeeChecker {
         measurements: bound.measurements,
         gatewaySigner: gateway.signer,
         gpus: matched[0]?.gpus,
+        tlsBound: true,
         checks: [
           ...gateway.checks.map((c) => ({ name: `gateway: ${c.name}`, ok: c.ok })),
           ...bound.checks.map((c) => ({ name: `model: ${c.name}`, ok: c.ok })),
           { name: "model: NVIDIA GPU evidence verified by NRAS", ok: matched[0]?.gpus !== undefined },
           { name: "response signer matches exactly one verified report", ok: signingAddressMatched },
           { name: "signed text = model:sha256(request bytes):sha256(response bytes)", ok: true },
-          { name: "TLS connection bound to the gateway attestation", ok: false },
+          { name: "report and prompt sent over one TLS connection whose certificate key the gateway quote binds", ok: true },
         ],
-        note: "TLS connection binding is not implemented: a proxy relaying genuine reports could read the prompt.",
+        note: "The TLS binding reaches the gateway enclave; the model enclave is covered by its own report and signature.",
       },
       signal: parsed.signal,
       signalCodes: parsed.codes,
     };
     const v = verifyTeeEvidence(evidence);
-    if (!v.textMatchesHashes || !v.signatureValid) throw new Error(`TEE evidence did not verify: ${v.problems.join("; ")}`);
+    if (!v.textMatchesHashes || !v.signatureValid) throw new TeeUnverifiedError(`TEE evidence did not verify: ${v.problems.join("; ")}`);
     return { ...evidence, raw: { request: requestBody, response: responseBytes.toString("utf8") } };
   }
 }

@@ -161,7 +161,7 @@ export const SCENARIOS: Spec[] = [
     title: "Single payment too large",
     attack: "one $80 swap when the secret per-transaction cap is lower",
     expected: "BLOCK",
-    mustInclude: ["ABOVE_PER_TX_LIMIT"],
+    mustInclude: ["LIMIT_EXCEEDED"],
     build: async () => ({ intent: intent({ amountIn: usdc(80) }) }),
   },
   {
@@ -247,7 +247,7 @@ export async function parallelBurst(opts: RunOptions = {}): Promise<ScenarioResu
   const allowed = decisions.filter((d) => d.verdict === "ALLOW").length;
   const naive = await naiveCounterBurst(10, 1500, DEMO_POLICY.dailyUsd * 100);
   const cap = Math.min(DEMO_POLICY.hourlyUsd, DEMO_POLICY.dailyUsd);
-  const budgetBlocked = decisions.filter((d) => d.reasonCodes.some((c) => c.endsWith("_BUDGET_EXCEEDED"))).length;
+  const budgetBlocked = decisions.filter((d) => d.reasonCodes.includes("LIMIT_EXCEEDED")).length;
   return {
     id: "parallel-burst",
     title: "Parallel burst vs spending cap",

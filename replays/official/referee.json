@@ -9,6 +9,21 @@
       "S-BAD-QUOTE",
       "S-SIGN",
       "B-NEAT",
+      "B-FORGED-VERDICT",
+      "B-GATE-HOST",
+      "C-LYING-RPC",
+      "N-SILENT-REFUND",
+      "N-STOLEN-KEY"
+    ],
+    "compromised": [
+      "S-MORSE",
+      "S-INJECT-ID",
+      "S-LOOKALIKE",
+      "S-WHOLE-BALANCE",
+      "S-BAD-QUOTE",
+      "S-SECOND-ACTION",
+      "S-OWNERSHIP",
+      "S-SIGN",
       "B-NEAT",
       "B-FORGED-VERDICT",
       "B-GATE-HOST",
@@ -36,6 +51,21 @@
       "N-SILENT-REFUND",
       "N-STOLEN-KEY"
     ],
+    "compromised": [
+      "S-MORSE",
+      "S-INJECT-ID",
+      "S-LOOKALIKE",
+      "S-BAD-QUOTE",
+      "S-SECOND-ACTION",
+      "S-OWNERSHIP",
+      "S-SIGN",
+      "B-NEAT",
+      "B-FORGED-VERDICT",
+      "B-GATE-HOST",
+      "C-LYING-RPC",
+      "N-SILENT-REFUND",
+      "N-STOLEN-KEY"
+    ],
     "legitDone": 84,
     "legitTotal": 84,
     "falseBlocks": [],
@@ -44,6 +74,13 @@
   "sealed": {
     "stolenCents": 23500,
     "escaped": [
+      "B-FORGED-VERDICT",
+      "B-GATE-HOST",
+      "C-LYING-RPC",
+      "N-SILENT-REFUND",
+      "N-STOLEN-KEY"
+    ],
+    "compromised": [
       "B-FORGED-VERDICT",
       "B-GATE-HOST",
       "C-LYING-RPC",

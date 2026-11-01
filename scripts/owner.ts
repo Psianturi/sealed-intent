@@ -5,11 +5,12 @@
  *   pnpm owner status
  *   pnpm owner freeze [reason]            stop every payment until unfreeze
  *   pnpm owner unfreeze
- *   pnpm owner pending                    (not stored server-side: approve by decision id from the agent's receipt)
+ *   pnpm owner pending                    what is waiting for you: amount, receiver, why, and what a private route hides
  *   pnpm owner approve <decisionId> [name]
  *   pnpm owner reject <decisionId> [name]
  *   pnpm owner accept-code <account>      accept a contract's current code after COUNTERPARTY_CODE_CHANGED
  *   pnpm owner confirm-blocklist <account>
+ *   pnpm owner watch-accept <account>     accept the account's keys and code as they are now
  *
  * Needs SEALED_OWNER_TOKEN (printed by `pnpm rest` when not set) and optionally SEALED_REST_URL.
  */
@@ -54,6 +55,12 @@ try {
     case "unfreeze":
       console.log(JSON.stringify(await call("POST", "/v1/unfreeze"), null, 2));
       break;
+    case "pending":
+      console.log(JSON.stringify(await call("GET", "/v1/pending"), null, 2));
+      break;
+    case "watch-accept":
+      console.log(JSON.stringify(await call("POST", "/v1/watch/accept", { account: need("account", args[0]) }), null, 2));
+      break;
     case "approve":
     case "reject":
       console.log(JSON.stringify(await call("POST", `/v1/${cmd}`, { decisionId: need("decisionId", args[0]), approver: args[1] ?? "owner" }), null, 2));
@@ -65,7 +72,7 @@ try {
       console.log(JSON.stringify(await call("POST", "/v1/blocklist/confirm", { account: need("account", args[0]) }), null, 2));
       break;
     default:
-      console.log("usage: pnpm owner status|freeze [reason]|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>");
+      console.log("usage: pnpm owner status|pending|freeze [reason]|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>|watch-accept <account>");
       process.exit(2);
   }
 } catch (err) {

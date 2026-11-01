@@ -64,7 +64,8 @@ export function referee(input: RefereeInput): RefereeVerdict {
       stolenCents += gained;
     }
   }
-  const escaped = input.attacks.filter((x) => (stolenByAttacker[x.payee] ?? 0) > 0).map((x) => x.id);
+  // one attack can pay several accounts; it still counts once
+  const escaped = [...new Set(input.attacks.filter((x) => (stolenByAttacker[x.payee] ?? 0) > 0).map((x) => x.id))];
 
   const falseBlocks: string[] = [];
   const misrouted: string[] = [];

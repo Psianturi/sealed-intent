@@ -1,20 +1,22 @@
 import { randomUUID } from "node:crypto";
-import { buildExecutionReceipt, buildReceipt, type IssuerKey, type Receipt, type TeeEvidence, type Verdict } from "@sealed-intent/receipt";
+import { buildExecutionReceipt, buildReceipt, commit, type IssuerKey, type Opening, type Receipt, type TeeEvidence, type Vault, type Verdict } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
 import { checkCall, checkDryLiveDrift, checkQuote, checkTransfer, type QuoteMetrics } from "./checks";
 import { assessCounterparty, type CounterpartyDeps } from "./counterparty";
 import type { ExecutableAction, Executor, ExecutionResult } from "./executor";
 import type { FreezeState, FreezeStore } from "./freeze";
 import { scanTaskText } from "./injection";
-
-const LIMIT_CODES = new Set(["ABOVE_PER_TX_LIMIT", "HOURLY_BUDGET_EXCEEDED", "DAILY_BUDGET_EXCEEDED", "TX_RATE_EXCEEDED"]);
 import { AgentId, DeclaredIntent, type SwapIntent } from "./intent";
 import type { OneClickClient, QuoteRequest, QuoteResponse, TokenResponse } from "./oneclick";
-import type { PendingStore } from "./pending";
+import type { PendingDecision, PendingStore, RouteNote } from "./pending";
 import type { Policy } from "./policy";
 import { checkQuoteSignature } from "./quote-signature";
 import type { ReceiptStore } from "./store";
-import type { TeeChecker } from "./tee-check";
+import { TeeUnverifiedError, type TeeChecker } from "./tee-check";
+
+const LIMIT_CODES = new Set(["ABOVE_PER_TX_LIMIT", "HOURLY_BUDGET_EXCEEDED", "DAILY_BUDGET_EXCEEDED", "TX_RATE_EXCEEDED"]);
+/** The agent and the public receipt learn that a limit was hit, not which one. */
+const publicCodes = (codes: string[]) => [...new Set(codes.map((c) => (LIMIT_CODES.has(c) ? "LIMIT_EXCEEDED" : c)))];
 
 export interface PreflightDeps {
   oneclick: OneClickClient;
@@ -29,6 +31,8 @@ export interface PreflightDeps {
   tee?: TeeChecker;
   /** 1Click manager key; undefined = the SDK's built-in production key */
   quoteManagerPublicKey?: string;
+  /** keys the hourly draw when policy.secrecy.perTxJitterPct is on */
+  vault?: Vault;
 }
 
 /** What the agent gets back. Deliberately thin: no thresholds, no amounts, no policy. */
@@ -39,6 +43,30 @@ export interface Decision {
   warnCodes: string[];
   route: Receipt["public"]["route"];
   receiptPath: string;
+  /** which limit was hit. For the owner; agentView removes it. */
+  detailCodes?: string[];
+}
+
+/** Exactly what an agent may see of a decision. */
+export function agentView<T extends Decision & { metrics?: unknown }>(d: T): Omit<T, "receiptPath" | "detailCodes" | "metrics"> {
+  const { receiptPath: _p, detailCodes: _d, metrics: _m, ...view } = d;
+  return view;
+}
+
+/** What the owner reads before approving a WARN. */
+export interface OwnerReview {
+  decisionId: string;
+  createdAt: string;
+  agentId: string;
+  kind: string;
+  token?: string;
+  amount?: string;
+  recipient?: string;
+  usd: number;
+  warnCodes: string[];
+  route?: string;
+  routeNote?: RouteNote;
+  approvedBy?: string;
 }
 
 export interface EvaluateInput {
@@ -55,6 +83,7 @@ interface Gathered {
   action?: ExecutableAction;
   quote?: QuoteResponse;
   dryQuote?: QuoteResponse;
+  routeNote?: RouteNote;
 }
 
 export class Preflight {
@@ -75,12 +104,12 @@ export class Preflight {
   /** Owner-only. Callers must authenticate the owner before calling these. */
   freeze(reason: string, by: string): void {
     this.deps.freeze.freeze(reason, by);
-    this.deps.store.saveExecution(`freeze.${Date.now()}`, { frozen: true, reason, by, at: new Date().toISOString() });
+    this.deps.store.saveAudit(`freeze.${Date.now()}`, { frozen: true, reason, by, at: new Date().toISOString() });
   }
 
   unfreeze(by: string): boolean {
     const ok = this.deps.freeze.unfreeze();
-    if (ok) this.deps.store.saveExecution(`freeze.${Date.now()}`, { frozen: false, by, at: new Date().toISOString() });
+    if (ok) this.deps.store.saveAudit(`freeze.${Date.now()}`, { frozen: false, by, at: new Date().toISOString() });
     return ok;
   }
 
@@ -95,7 +124,10 @@ export class Preflight {
     const intent = parsed.data;
     const route: Receipt["public"]["route"] = policy.privatePurposes.includes(intent.purpose) ? `confidential-${policy.confidentialLevel}` : "public";
     const decisionId = randomUUID();
-    const base = { agentId, intent, route, receiptId: decisionId };
+    // named in the enclave's signed request and in the receipt, so the two can be tied together
+    const intentCommit = commit(intent);
+    const base = { agentId, intent, route, receiptId: decisionId, intentCommit };
+    const checkPolicy = this.effectivePolicy(agentId);
 
     if (this.deps.freeze.state().frozen) {
       return this.finish({ ...base, verdict: "BLOCK", block: ["WALLET_FROZEN"], review: [], kind: intent.kind });
@@ -113,16 +145,16 @@ export class Preflight {
     const g: Gathered = { block: new Set(), review: new Set() };
     let counterpartyAccount: string;
     if (intent.kind === "swap") {
-      await this.gatherSwap(intent, route, tokens, input.agentQuote, g);
+      await this.gatherSwap(intent, route, tokens, input.agentQuote, g, checkPolicy);
       counterpartyAccount = intent.recipient;
     } else if (intent.kind === "transfer") {
-      const r = checkTransfer({ intent, policy, tokens });
+      const r = checkTransfer({ intent, policy: checkPolicy, tokens });
       r.block.forEach((c) => g.block.add(c));
       g.metrics = r.metrics;
       g.action = { kind: "transfer", token: intent.token, recipient: intent.recipient, amount: intent.amount, memo: intent.memo };
       counterpartyAccount = intent.recipient;
     } else {
-      const r = checkCall({ intent, policy, tokens });
+      const r = checkCall({ intent, policy: checkPolicy, tokens });
       r.block.forEach((c) => g.block.add(c));
       g.metrics = r.metrics;
       g.action = { kind: "call", contract: intent.contract, method: intent.method, args: intent.args, depositYocto: intent.depositYocto };
@@ -141,13 +173,14 @@ export class Preflight {
     let tee: TeeEvidence | undefined;
     if (this.deps.tee) {
       try {
-        const { raw, ...evidence } = await this.deps.tee.check({ decisionId, intent, quote: input.agentQuote ?? g.quote ?? g.dryQuote, policy, injectionCodes: scan.codes });
+        const { raw, ...evidence } = await this.deps.tee.check({ decisionId, intentCommitment: intentCommit.commitment, intent, quote: input.agentQuote ?? g.quote ?? g.dryQuote, policy, injectionCodes: scan.codes });
         tee = evidence;
         if (raw) this.deps.store.saveTeeExchange(decisionId, raw);
         if (tee.signal === "block") (policy.tee.obeyBlockSignal ? g.block : g.review).add("TEE_SIGNAL_BLOCK");
         if (tee.signal === "warn") g.review.add("TEE_SIGNAL_WARN");
-      } catch {
-        (policy.tee.required ? g.block : g.review).add("TEE_UNAVAILABLE");
+      } catch (err) {
+        // an enclave that fails verification never loosens anything
+        (policy.tee.required ? g.block : g.review).add(err instanceof TeeUnverifiedError ? "TEE_UNVERIFIED" : "TEE_UNAVAILABLE");
       }
     } else if (policy.tee.required) {
       g.block.add("TEE_UNAVAILABLE");
@@ -172,13 +205,41 @@ export class Preflight {
     }
     const decision = await this.finish({ ...base, verdict, block: [...g.block], review: [...g.review], kind: intent.kind, quote: g.quote ?? g.dryQuote, live: g.quote, tee, reservationId });
     if (verdict !== "BLOCK" && g.action && reservationId) {
-      this.deps.pending.put({ decisionId: decision.decisionId, agentId, intent, action: g.action, reservationId, inCents, verdict, createdAt: Date.now() });
+      this.deps.pending.put({ decisionId: decision.decisionId, agentId, intent, action: g.action, reservationId, inCents, verdict, warnCodes: [...g.review], route, routeNote: g.routeNote, createdAt: Date.now() });
     }
     return { ...decision, metrics: g.metrics };
   }
 
-  private async gatherSwap(intent: SwapIntent, route: Receipt["public"]["route"], tokens: TokenResponse[], agentQuote: QuoteResponse | undefined, g: Gathered): Promise<void> {
-    const { policy, oneclick } = this.deps;
+  /** A fixed cap leaks one bit per probe. With jitter on, the effective cap is redrawn per agent every hour. */
+  private effectivePolicy(agentId: string, now = Date.now()): Policy {
+    const { policy, vault } = this.deps;
+    const pct = policy.secrecy.perTxJitterPct;
+    if (!pct || !vault) return policy;
+    const draw = parseInt(vault.blind(`jitter:${agentId}:${Math.floor(now / 3_600_000)}`).slice(0, 8), 16) / 0xffffffff;
+    return { ...policy, perTxUsd: policy.perTxUsd * (1 - (pct / 100) * draw) };
+  }
+
+  /** Owner-only: the WARN decisions waiting for a human, decrypted. */
+  reviewQueue(): OwnerReview[] {
+    return this.deps.pending
+      .list()
+      .filter((p) => p.verdict === "WARN")
+      .map((p: PendingDecision) => {
+        const i = p.intent;
+        const money = i.kind === "swap" ? { token: i.tokenIn, amount: i.amountIn, recipient: i.recipient } : i.kind === "transfer" ? { token: i.token, amount: i.amount, recipient: i.recipient } : i.kind === "call" ? { amount: i.depositYocto, recipient: i.contract } : {};
+        return { decisionId: p.decisionId, createdAt: new Date(p.createdAt).toISOString(), agentId: p.agentId, kind: i.kind, ...money, usd: p.inCents / 100, warnCodes: p.warnCodes ?? [], route: p.route, routeNote: p.routeNote, approvedBy: p.approvedBy };
+      });
+  }
+
+  /** Deletes private records past the retention window. */
+  purgeExpired(now = Date.now()): number {
+    const days = this.deps.policy.retention.privateDays;
+    this.deps.ledger.purge(now);
+    return this.deps.store.purge(days, now) + this.deps.pending.purge(days, now);
+  }
+
+  private async gatherSwap(intent: SwapIntent, route: Receipt["public"]["route"], tokens: TokenResponse[], agentQuote: QuoteResponse | undefined, g: Gathered, policy: Policy): Promise<void> {
+    const { oneclick } = this.deps;
     // A quote handed in by the agent (or its tools) is evidence, never something we execute.
     if (agentQuote) {
       const sig = await checkQuoteSignature(agentQuote, this.deps.quoteManagerPublicKey);
@@ -211,6 +272,7 @@ export class Preflight {
     } catch {
       g.block.add("QUOTE_UNAVAILABLE");
     }
+    if (route !== "public" && g.dryQuote && g.block.size === 0) g.routeNote = await this.routeNote(req, g.dryQuote);
     // Live quote (carries the deposit address) only when nothing is blocked so far.
     if (g.dryQuote && g.block.size === 0) {
       try {
@@ -229,6 +291,21 @@ export class Preflight {
     }
   }
 
+  /** Told to the owner before a private route is signed. The cost comes from comparing two dry quotes. */
+  private async routeNote(req: QuoteRequest, confidential: QuoteResponse): Promise<RouteNote> {
+    const note: RouteNote = { hidden: ["the origin of the funds", "the route"], stillPublic: ["the destination and what it receives"] };
+    try {
+      const { confidentiality: _c, ...publicReq } = req;
+      const pub = await this.deps.oneclick.quote(publicReq);
+      const a = Number(pub.quote.minAmountOut);
+      const b = Number(confidential.quote.minAmountOut);
+      if (a > 0) note.extraCostBps = Math.round(((a - b) / a) * 10_000);
+    } catch {
+      /* the owner sees that the cost is unknown */
+    }
+    return note;
+  }
+
   private reserve(agentId: string, cents: number) {
     return this.deps.ledger.reserve(agentId, cents, {
       hourlyCents: Math.round(this.deps.policy.hourlyUsd * 100),
@@ -242,7 +319,7 @@ export class Preflight {
     const info = await this.deps.counterparty.chain.account(account);
     if (!info?.isContract || !info.codeHash) return { ok: false, details: "account is not a contract or could not be read" };
     this.deps.counterparty.memory.acceptCodeHash(account, info.codeHash);
-    this.deps.store.saveExecution(`code.${Date.now()}`, { account, codeHash: info.codeHash, acceptedBy: by, at: new Date().toISOString() });
+    this.deps.store.saveAudit(`code.${Date.now()}`, { account, codeHash: info.codeHash, acceptedBy: by, at: new Date().toISOString() });
     return { ok: true, codeHash: info.codeHash };
   }
 
@@ -259,11 +336,14 @@ export class Preflight {
     live?: QuoteResponse;
     tee?: TeeEvidence;
     reservationId?: string;
+    intentCommit?: { commitment: string; opening: Opening };
   }): Promise<Decision> {
     const q = args.quote;
     const sigOk = q ? (await checkQuoteSignature(q, this.deps.quoteManagerPublicKey)) === "valid" : false;
     const i = args.intent;
     const privateValues: Record<string, unknown> = { agentId: args.agentId };
+    const limitDetail = args.block.filter((c) => LIMIT_CODES.has(c));
+    if (limitDetail.length) privateValues.limitDetail = limitDetail;
     if (i) {
       privateValues.taskText = i.taskText;
       if (i.kind === "swap") Object.assign(privateValues, { tokenIn: i.tokenIn, tokenOut: i.tokenOut, amountIn: i.amountIn, minAmountOut: q?.quote.minAmountOut, recipient: i.recipient, refundTo: i.refundTo, depositAddress: args.live?.quote.depositAddress });
@@ -275,7 +355,7 @@ export class Preflight {
       {
         receiptId: args.receiptId,
         verdict: args.verdict,
-        reasonCodes: args.block,
+        reasonCodes: publicCodes(args.block),
         warnCodes: args.review,
         publicPart: {
           intentKind: args.kind,
@@ -285,6 +365,7 @@ export class Preflight {
           budgetReservationId: args.reservationId,
         },
         privateValues,
+        precommitted: args.intentCommit ? { intent: args.intentCommit } : undefined,
         policy: this.deps.policy,
         tee: args.tee,
       },
@@ -298,6 +379,7 @@ export class Preflight {
       warnCodes: receipt.warnCodes ?? [],
       route: args.route,
       receiptPath,
+      detailCodes: limitDetail.length ? limitDetail : undefined,
     };
   }
 
@@ -307,7 +389,7 @@ export class Preflight {
     if (!p) return { ok: false, details: "unknown, blocked or already executed decision" };
     if (p.verdict !== "WARN") return { ok: false, details: "decision does not need approval" };
     this.deps.pending.approve(decisionId, approver);
-    this.deps.store.saveExecution(`${decisionId}.approval`, { decisionId, approvedBy: approver, at: new Date().toISOString() });
+    this.deps.store.saveAudit(`${decisionId}.approval`, { decisionId, approvedBy: approver, at: new Date().toISOString() });
     return { ok: true };
   }
 
@@ -316,7 +398,7 @@ export class Preflight {
     const p = this.deps.pending.take(decisionId);
     if (!p) return { ok: false };
     this.deps.ledger.release(p.reservationId);
-    this.deps.store.saveExecution(`${decisionId}.approval`, { decisionId, rejectedBy: approver, at: new Date().toISOString() });
+    this.deps.store.saveAudit(`${decisionId}.approval`, { decisionId, rejectedBy: approver, at: new Date().toISOString() });
     return { ok: true };
   }
 
@@ -363,8 +445,8 @@ export class Preflight {
     if (result.status === "not_sent") this.deps.ledger.uncommit(p.reservationId);
     else if (result.status !== "unknown") this.deps.counterparty.memory.recordInteraction(p.agentId, counterparty);
     const record = buildExecutionReceipt({ decisionId, kind: p.action.kind, status: result.status, txHash: result.txHash, executedAt: new Date().toISOString(), approvedBy: p.approvedBy }, this.deps.issuer);
-    this.deps.store.save(record as never, { receiptId: record.receiptId, openings: {}, policyOpening: { value: null, salt: "" } });
-    this.deps.store.saveExecution(decisionId, { ...record, agentId: p.agentId, details: result.details });
+    this.deps.store.savePublic(record.receiptId, record);
+    this.deps.store.saveAudit(`${decisionId}.execution`, { ...record, agentId: p.agentId, details: result.details });
     return { decisionId, ...result, executionReceiptId: record.receiptId };
   }
 }

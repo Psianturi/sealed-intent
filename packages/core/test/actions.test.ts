@@ -1,7 +1,7 @@
 // Action classes (F1), contract method allow-list (F4) and persistent freeze (F3).
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildPreflight } from "../src/config";
 import { ASSET, DEMO_ACCOUNTS, DEMO_POLICY } from "../src/fixtures";
@@ -10,7 +10,8 @@ import type { Policy } from "../src/policy";
 const usdc = (d: number) => String(Math.round(d * 1e6));
 const NEAR = (n: number) => `${n}000000000000000000000000`;
 const build = (policy: Policy = DEMO_POLICY, ledgerPath = ":memory:") => {
-  const d = mkdtempSync(join(tmpdir(), "sealed-act-"));
+  // processes sharing a database share one data key
+  const d = ledgerPath === ":memory:" ? mkdtempSync(join(tmpdir(), "sealed-act-")) : dirname(ledgerPath);
   return buildPreflight({ offline: true, home: join(d, ".sealed"), outDir: join(d, "out"), ledgerPath, policy });
 };
 const swap = { kind: "swap", tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(10), recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self, taskText: "Routine treasury task approved by ops." };
@@ -64,7 +65,7 @@ describe("transfer", () => {
 
   it("blocks oversize, look-alike token and blocklisted recipient", async () => {
     const env = build();
-    expect((await ev(env, { kind: "transfer", token: ASSET.USDC, amount: usdc(80), recipient: DEMO_ACCOUNTS.payroll })).reasonCodes).toContain("ABOVE_PER_TX_LIMIT");
+    expect((await ev(env, { kind: "transfer", token: ASSET.USDC, amount: usdc(80), recipient: DEMO_ACCOUNTS.payroll })).detailCodes).toContain("ABOVE_PER_TX_LIMIT");
     expect((await ev(env, { kind: "transfer", token: ASSET.FAKE_USDC, amount: usdc(5), recipient: DEMO_ACCOUNTS.payroll })).reasonCodes).toContain("LOOKALIKE_ASSET");
     expect((await ev(env, { kind: "transfer", token: ASSET.USDC, amount: usdc(5), recipient: DEMO_ACCOUNTS.attacker })).reasonCodes).toContain("COUNTERPARTY_BLOCKLISTED");
   });

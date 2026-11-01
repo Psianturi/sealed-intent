@@ -17,7 +17,7 @@ describe("receipt binding", () => {
   it("the enclave's signed request names the receipt it belongs to", async () => {
     const d = await env.preflight.evaluate({ agentId: "a", intent: swap });
     const receipt = JSON.parse(readFileSync(d.receiptPath, "utf8")) as Receipt;
-    const raw = JSON.parse(readFileSync(join(dir, ".sealed", "tee", `${d.decisionId}.json`), "utf8")) as { request: string; response: string };
+    const raw = env.store.loadTeeExchange(d.decisionId)!;
     expect(receipt.tee?.requestHash).toBe(sha256Hex(raw.request));
     expect(receipt.tee?.responseHash).toBe(sha256Hex(raw.response));
     const userMessage = JSON.parse((JSON.parse(raw.request) as { messages: { content: string }[] }).messages[1]!.content) as { DECISION_ID: string };

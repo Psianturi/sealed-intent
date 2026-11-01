@@ -1,0 +1,8 @@
+{
+  "receiptId": "b971dda5-0b89-4bea-a78d-997a298a879d",
+  "field": "recipient",
+  "opening": {
+    "value": "payroll-alice.near",
+    "salt": "8ef527610c16d68d2a90ecc102702b38"
+  }
+}

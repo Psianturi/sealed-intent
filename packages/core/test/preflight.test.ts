@@ -145,7 +145,8 @@ describe("Preflight (offline)", () => {
     const decisions = await Promise.all(Array.from({ length: 10 }, () => env.preflight.evaluate({ agentId: "agent-1", intent: base({ amountIn: usdc(15) }) })));
     const allowed = decisions.filter((d) => d.verdict === "ALLOW").length;
     expect(allowed).toBe(6);
-    expect(decisions.filter((d) => d.reasonCodes.includes("DAILY_BUDGET_EXCEEDED")).length + decisions.filter((d) => d.reasonCodes.includes("HOURLY_BUDGET_EXCEEDED")).length).toBe(4);
+    expect(decisions.filter((d) => d.reasonCodes.includes("LIMIT_EXCEEDED")).length).toBe(4);
+    expect(decisions.filter((d) => d.detailCodes?.some((c) => /(DAILY|HOURLY)_BUDGET_EXCEEDED/.test(c))).length).toBe(4);
   });
 
   it("issues receipts that hide amounts and recipients but verify", async () => {

@@ -1,21 +1,41 @@
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { PrivateOpenings, Receipt } from "@sealed-intent/receipt";
+import { loadVault, type PrivateOpenings, type Receipt, type Vault } from "@sealed-intent/receipt";
+
+const PRIVATE_DIRS = ["openings", "tee", "audit"];
 
 /**
  * Public receipts go to out/receipts (safe to publish).
- * Private openings (values + salts) go to .sealed/openings (never publish).
+ * Openings, raw enclave exchanges and audit records go to .sealed, encrypted, and expire.
  */
 export class ReceiptStore {
-  constructor(readonly outDir = "out", readonly sealedDir = ".sealed") {
+  private cached?: Vault;
+
+  constructor(readonly outDir = "out", readonly sealedDir = ".sealed", vault?: Vault) {
+    this.cached = vault;
     mkdirSync(join(outDir, "receipts"), { recursive: true });
-    mkdirSync(join(sealedDir, "openings"), { recursive: true });
+    mkdirSync(sealedDir, { recursive: true, mode: 0o700 });
+  }
+
+  private get vault(): Vault {
+    return (this.cached ??= loadVault(this.sealedDir));
+  }
+
+  private writeSealed(dir: string, name: string, value: unknown): string {
+    mkdirSync(join(this.sealedDir, dir), { recursive: true, mode: 0o700 });
+    const path = join(this.sealedDir, dir, `${name}.sealed`);
+    writeFileSync(path, this.vault.seal(value), { mode: 0o600 });
+    return path;
   }
 
   save(receipt: Receipt, openings: PrivateOpenings): string {
-    const path = join(this.outDir, "receipts", `${receipt.receiptId}.json`);
-    writeFileSync(path, JSON.stringify(receipt, null, 2));
-    writeFileSync(join(this.sealedDir, "openings", `${receipt.receiptId}.json`), JSON.stringify(openings, null, 2), { mode: 0o600 });
+    this.writeSealed("openings", receipt.receiptId, openings);
+    return this.savePublic(receipt.receiptId, receipt);
+  }
+
+  savePublic(receiptId: string, record: unknown): string {
+    const path = join(this.outDir, "receipts", `${receiptId}.json`);
+    writeFileSync(path, JSON.stringify(record, null, 2));
     return path;
   }
 
@@ -24,18 +44,41 @@ export class ReceiptStore {
     return existsSync(path) ? (JSON.parse(readFileSync(path, "utf8")) as Receipt) : undefined;
   }
 
-  /** Raw TEE request and response bytes. Private: they contain the secret policy. */
-  saveTeeExchange(receiptId: string, exchange: { request: string; response: string }): string {
-    mkdirSync(join(this.sealedDir, "tee"), { recursive: true });
-    const path = join(this.sealedDir, "tee", `${receiptId}.json`);
-    writeFileSync(path, JSON.stringify(exchange), { mode: 0o600 });
-    return path;
+  loadOpenings(receiptId: string): PrivateOpenings | undefined {
+    const path = join(this.sealedDir, "openings", `${receiptId}.sealed`);
+    return existsSync(path) ? this.vault.open<PrivateOpenings>(readFileSync(path, "utf8")) : undefined;
   }
 
-  saveExecution(receiptId: string, record: unknown): string {
-    mkdirSync(join(this.outDir, "executions"), { recursive: true });
-    const path = join(this.outDir, "executions", `${receiptId}.json`);
-    writeFileSync(path, JSON.stringify(record, null, 2));
-    return path;
+  /** Raw TEE request and response bytes. They contain the secret policy, so an auditor gets them only from the owner. */
+  saveTeeExchange(receiptId: string, exchange: { request: string; response: string }): string {
+    return this.writeSealed("tee", receiptId, exchange);
+  }
+
+  loadTeeExchange(receiptId: string): { request: string; response: string } | undefined {
+    const path = join(this.sealedDir, "tee", `${receiptId}.sealed`);
+    return existsSync(path) ? this.vault.open(readFileSync(path, "utf8")) : undefined;
+  }
+
+  /** Who approved, froze or accepted what, and execution details. Encrypted, for the owner. */
+  saveAudit(name: string, record: unknown): string {
+    return this.writeSealed("audit", name, record);
+  }
+
+  /** Deletes private records older than the retention window. Their receipts stay valid; the fields can no longer be opened. */
+  purge(retentionDays: number, now = Date.now()): number {
+    const cutoff = now - retentionDays * 86_400_000;
+    let removed = 0;
+    for (const dir of PRIVATE_DIRS) {
+      const full = join(this.sealedDir, dir);
+      if (!existsSync(full)) continue;
+      for (const name of readdirSync(full)) {
+        const file = join(full, name);
+        if (statSync(file).mtimeMs < cutoff) {
+          rmSync(file);
+          removed++;
+        }
+      }
+    }
+    return removed;
   }
 }

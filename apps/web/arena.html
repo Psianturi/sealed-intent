@@ -3,70 +3,69 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Arena · SeIn</title>
-  <meta name="description" content="Three identical AI agents, the same tasks and attacks, a referee that only reads chain balances. Watch which attacks get stopped." />
-  <meta property="og:title" content="Arena · SeIn" />
-  <meta property="og:description" content="Three identical AI agents, the same tasks and attacks, a referee that only reads chain balances. Watch which attacks get stopped." />
+  <title>The Arena: three agents, the same attacks | SeIn</title>
+  <meta name="description" content="Three identical AI agents, the same tasks and attacks, and a referee that reads only on-chain state. See which attacks got through." />
+  <meta property="og:title" content="The Arena: three agents, the same attacks" />
+  <meta property="og:description" content="No guard, spending limits only, or SeIn. A referee that reads only on-chain state keeps score." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sein-near.vercel.app/arena.html" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
   <meta name="theme-color" content="#2747c4" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <header class="top">
-    <a class="brand" href="/" aria-label="SeIn, Sealed Intent, home"><svg class="mark" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span class="word">Se<b>In</b></span><span class="full">Sealed Intent</span></a>
-    <nav>
-      <a href="/">Overview</a>
-      <a href="/arena.html" aria-current="page">Arena</a>
-      <a href="/verify.html">Verify a receipt</a>
-      <a href="https://github.com/Psianturi/sealed-intent">For builders</a>
-    </nav>
-  </header>
+  <!--header:arena-->
   <main>
-    <h1>The Arena</h1>
-    <p class="lead">Three identical AI agents get the same everyday tasks and the same attacks. One has no guard. One has spending limits only. One goes through Sealed Intent. A referee that only reads account balances keeps score; it never reads our verdicts, so we cannot grade ourselves.</p>
+    <h1 class="page-title">The Arena</h1>
+    <p class="lead">Three identical AI agents get the same everyday tasks and the same attacks. One has no guard. One has spending limits only. One goes through SeIn. A referee that reads only on-chain state keeps score, so we cannot grade ourselves.</p>
     <div class="controls">
       <label for="chainpick">Recording</label>
       <select id="chainpick">
-        <option value="official">Simulated ledger (seconds)</option>
-        <option value="official-sandbox">Real local NEAR node (near-sandbox)</option>
+        <option value="official">Simulated chain, the owner reads each WARN</option>
+        <option value="official-sandbox">Real local NEAR nodes, the owner reads each WARN</option>
+        <option value="official-lazy">Simulated chain, the owner approves everything</option>
       </select>
     </div>
-    <div class="badges" id="badges"></div>
-    <p class="note" id="run-meta"></p>
+    <p class="note" id="run-meta"><!--meta--></p>
 
     <h2>Scoreboard</h2>
-    <div id="score" class="score"></div>
-    <p class="note" id="summary"></p>
+    <div id="score" class="score"><!--score--></div>
+    <p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design: a stolen key, a forged verdict, a compromised checker, a lying data source, a bug inside a token.</p>
+    <p class="lead small" id="summary"><!--score-sentence--></p>
 
-    <h2>Watch a scenario</h2>
-    <p class="note">Pick an attack. Money leaves the vault; gates light green or red; what gets past the last gate lands with the attacker. The referee counts only what actually moved.</p>
+    <h2>Watch one attack</h2>
     <div class="controls">
-      <label for="pick">Scenario</label>
+      <label for="pick">Attack</label>
       <select id="pick"></select>
       <button class="btn primary" id="play">Play</button>
-      <button class="btn" id="skip">Show result</button>
+      <button class="btn" id="skip">Show the result</button>
     </div>
-    <div id="corridor"></div>
     <p class="note" id="scenario-summary"></p>
+    <div id="corridor"></div>
     <ol class="narration" id="narration"></ol>
 
-    <h2>All scenarios</h2>
-    <p class="note">Each one follows the pattern of a real incident, replayed against an agent on NEAR. Click a row for the story, the evidence and what could not be replicated. "Expected" is what we predicted for Sealed Intent before running, so you can judge us; the referee never reads it.</p>
-    <table id="scenarios"><thead><tr><th>Attack</th><th>Pattern from</th><th>No guard</th><th>Limits only</th><th>Sealed Intent</th><th>Expected</th></tr></thead><tbody></tbody></table>
+    <h2>All attacks</h2>
+    <p class="note">Each follows the pattern of a real incident, replayed against an agent on NEAR. Select a row for the story and the evidence. "We predicted" was written before the run, so you can judge us; the referee never reads it.</p>
+    <table id="scenarios" class="stack"><thead><tr><th>Attack</th><th>Pattern from</th><th>No guard</th><th>Limits only</th><th>SeIn</th><th>We predicted</th></tr></thead><tbody><!--rows--></tbody></table>
 
-    <h2>What got past Sealed Intent</h2>
-    <p class="note">Shown on purpose. These are the attacks a checker in front of the wallet cannot stop by itself.</p>
-    <ul id="escaped"></ul>
+    <h2>What got past SeIn</h2>
+    <p class="note">Shown on purpose. These are attacks a checker in front of the wallet cannot stop by itself.</p>
+    <ul id="escaped"><!--escaped--></ul>
 
     <h2>What is real and what is simulated</h2>
-    <table id="honesty"><tbody></tbody></table>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="What is real and what is simulated"><table id="honesty"><tbody><!--honesty--></tbody></table></div>
     <p class="note">Patterns are not replicas: how the real attackers got in, the victims' signing systems, the chains involved and the sums are not reproduced.</p>
 
-    <details class="dev"><summary>For builders: reproduce this run</summary><p id="repro"></p></details>
-    <footer><div class="foot-brand"><svg class="mark" width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span>Se<b>In</b> · Sealed Intent</span></div><div>Built at NEAR HACKATHON, November 2026. Test tokens only; no real money moves in the Arena.</div></footer>
+    <details class="dev"><summary>For builders: fingerprints of this run</summary><p id="repro"><!--fingerprints--></p></details>
+    <!--footer:arena-->
   </main>
   <aside class="drawer" id="drawer" aria-hidden="true"></aside>
   <script type="module" src="/src/arena.ts"></script>

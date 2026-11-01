@@ -1,6 +1,7 @@
+import { agentView } from "@sealed-intent/core";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
-import type { Preflight, ReceiptStore, SharedBlocklist } from "@sealed-intent/core";
+import type { AccountWatcher, Preflight, ReceiptStore, SharedBlocklist } from "@sealed-intent/core";
 import { bearer, type Auth } from "./auth";
 
 /**
@@ -8,11 +9,13 @@ import { bearer, type Auth } from "./auth";
  *   POST /v1/execute            agent token   { decisionId }          -> { status, txHash }
  *   POST /v1/approve            owner token   { decisionId, approver }
  *   POST /v1/reject             owner token   { decisionId, approver }
+ *   GET  /v1/pending            owner token   -> WARN decisions waiting for a human, decrypted
  *   POST /v1/freeze             owner token   { reason }
  *   POST /v1/unfreeze           owner token
  *   POST /v1/counterparty/accept-code  owner token   { account }   accept a contract's current code
  *   POST /v1/blocklist/confirm  owner token   { account }   an agent's report now blocks
- *   GET  /v1/status                           -> { frozen, reason, mode }
+ *   POST /v1/watch/accept       owner token   { account }   accept the account's keys and code as they are now
+ *   GET  /v1/status                           -> { frozen, mode }; the owner also gets the reason
  *   POST /v1/blocklist/report   agent token   { account, reason, evidence[], reportedBy }
  *   GET  /v1/blocklist                        -> shared blocklist (signed entries)
  *   GET  /v1/receipts/:id                     -> public receipt
@@ -24,6 +27,7 @@ export interface RestDeps {
   receipts: ReceiptStore;
   offline: boolean;
   auth: Auth;
+  watcher?: AccountWatcher;
 }
 
 async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
@@ -48,7 +52,7 @@ function sameToken(a: string | undefined, b: string): boolean {
 }
 
 export function createRestServer(deps: RestDeps): Server {
-  const { preflight, blocklist, receipts, offline, auth } = deps;
+  const { preflight, blocklist, receipts, offline, auth, watcher } = deps;
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
@@ -58,7 +62,15 @@ export function createRestServer(deps: RestDeps): Server {
       const isOwner = sameToken(token, auth.ownerToken);
 
       if (route === "GET /health") return send(res, 200, { ok: true, mode: offline ? "offline" : "live" });
-      if (route === "GET /v1/status") return send(res, 200, preflight.status());
+      if (route === "GET /v1/status") {
+        // the reason can name an agent, so only the owner gets it
+        const { frozen, mode, ...detail } = preflight.status();
+        return send(res, 200, isOwner ? { frozen, mode, ...detail } : { frozen, mode });
+      }
+      if (route === "GET /v1/pending") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        return send(res, 200, preflight.reviewQueue());
+      }
       if (route === "POST /v1/freeze" || route === "POST /v1/unfreeze") {
         if (!isOwner) return send(res, 401, { error: "owner token required" });
         if (route.endsWith("unfreeze")) return send(res, 200, { ok: preflight.unfreeze("owner"), ...preflight.status() });
@@ -70,8 +82,7 @@ export function createRestServer(deps: RestDeps): Server {
       if (route === "POST /v1/preflight") {
         if (!agentId) return send(res, 401, { error: "agent token required" });
         const input = await body(req);
-        const { metrics: _private, receiptPath: _path, ...decision } = await preflight.evaluate({ agentId, intent: input.intent, agentQuote: input.agentQuote as never });
-        return send(res, 200, decision);
+        return send(res, 200, agentView(await preflight.evaluate({ agentId, intent: input.intent, agentQuote: input.agentQuote as never })));
       }
       if (route === "POST /v1/execute") {
         if (!agentId) return send(res, 401, { error: "agent token required" });
@@ -89,6 +100,12 @@ export function createRestServer(deps: RestDeps): Server {
         if (!agentId) return send(res, 401, { error: "agent token required" });
         const b = (await body(req)) as { account: string; reason: string; evidence: string[] };
         return send(res, 200, blocklist.report({ account: b.account, reason: b.reason, evidence: b.evidence ?? [], reportedBy: agentId }));
+      }
+      if (route === "POST /v1/watch/accept") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        const { account } = (await body(req)) as { account?: string };
+        if (!account) return send(res, 400, { error: "account required" });
+        return send(res, 200, { ok: (await watcher?.accept(account)) ?? false });
       }
       if (route === "POST /v1/blocklist/confirm") {
         if (!isOwner) return send(res, 401, { error: "owner token required" });

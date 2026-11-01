@@ -4,3 +4,4 @@ export * from "./eip191";
 export * from "./keys";
 export * from "./receipt";
 export * from "./tee";
+export * from "./vault";

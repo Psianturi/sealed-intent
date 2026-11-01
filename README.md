@@ -1,4 +1,4 @@
-<p align="center"><img src="apps/web/public/logo.svg" alt="SeIn, Sealed Intent" width="300"></p>
+<p align="center"><img src="apps/web/public/logo.png" alt="SeIn, Sealed Intent" width="280"></p>
 
 # Sealed Intent (SeIn)
 
@@ -9,9 +9,9 @@ Every decision produces a signed receipt that anyone can verify, without reveali
 
 Live site: https://sein-near.vercel.app (overview, Arena replay, receipt verifier). Built at NEAR HACKATHON (Nov 2026). Tracks: `security` (main), `privacy`, `agents`, `defi`.
 
-> **Status:** working offline MVP (no keys, no funds). Of the live path, real 1Click dry quotes and real
-> NEAR AI Cloud attestation verification have been exercised; OutLayer execution and a mainnet swap have not yet.
-> See [Limits](#limits-read-this).
+> **Status:** the checker, the receipts and the Arena run offline with no keys and no funds. Of the live path, real 1Click dry
+> quotes and a real NEAR AI Cloud check (Intel TDX, NVIDIA, TLS binding, signed answer; see [`evidence/tee`](evidence/tee)) have been exercised.
+> OutLayer execution, a mainnet swap and a live confidential route have not. See [Limits](#limits-read-this).
 
 ---
 
@@ -22,7 +22,7 @@ Requirements: Node.js **22.13+** and pnpm (`corepack enable`).
 ```bash
 pnpm install
 pnpm demo        # the whole story, offline
-pnpm test        # 52 tests, including an 8-process race on the budget
+pnpm test        # including an 8-process race on the budget and a scan of every byte written to disk
 pnpm redteam     # 20 attack scenarios -> out/redteam-report.md
 pnpm verify out/receipts
 ```
@@ -38,7 +38,8 @@ pnpm verify out/receipts
 | `pnpm verify <receipt> --disclose out/disclosures/<id>.recipient.json` | Only the recipient is revealed, and it is proven to match the receipt |
 | Edit `"verdict"` in any receipt, then `pnpm verify` it | `INVALID ... issuer signature invalid` |
 | `pnpm rest` then `curl -X POST localhost:8787/v1/preflight -H 'Content-Type: application/json' -d @examples/intent.json` | JSON decision (`ALLOW` / `WARN` / `BLOCK`). Approving a WARN needs the owner token printed at startup |
-| `pnpm mcp` | MCP server with tools `preflight_swap`, `preflight_transfer`, `preflight_call`, `execute_swap`, `report_counterparty`, `get_receipt`. The agent's name comes from `SEALED_AGENT_ID`, never from the agent |
+| `pnpm mcp:agent` | What an agent host runs in real use: it holds one agent token, forwards to the REST service, and refuses to start if a secret reached its environment |
+| `pnpm mcp` | In-process MCP server for the offline demo, with tools `preflight_swap`, `preflight_transfer`, `preflight_call`, `execute_swap`, `report_counterparty`, `get_receipt`. The agent's name comes from `SEALED_AGENT_ID`, never from the agent |
 
 ---
 
@@ -85,7 +86,7 @@ flowchart LR
 | Action class | anything that is not a swap, transfer or allow-listed contract call: adding keys, deploying code, signing messages for intents.near, deleting the account. These block **and freeze the wallet** | `ACTION_CLASS_FORBIDDEN`, `METHOD_NOT_ALLOWED`, `WALLET_FROZEN` |
 | Counterparty | blocklisted (with evidence), non-existent, brand-new, first contact, contract code changed | `COUNTERPARTY_BLOCKLISTED`, `COUNTERPARTY_NOT_FOUND`, `COUNTERPARTY_CODE_CHANGED` (WARN) |
 | Instruction | prompt injection in the task text (heuristics + TEE opinion) | `PROMPT_INJECTION_SUSPECTED`, `TEE_SIGNAL_BLOCK` |
-| Money | per-tx cap; hourly/daily caps that hold under parallel requests | `ABOVE_PER_TX_LIMIT`, `HOURLY_BUDGET_EXCEEDED` |
+| Money | per-tx cap; hourly/daily caps and a payment count that hold under parallel requests. The agent and the public receipt only see the generic code; which limit was hit stays sealed for the owner | `LIMIT_EXCEEDED` |
 | Privacy | payroll and other sensitive purposes forced through Confidential Intents | `ROUTE_NOT_CONFIDENTIAL` |
 
 ### Three verdicts
@@ -96,10 +97,21 @@ flowchart LR
 
 ### Why the policy is secret
 
-The agent only sees a verdict and generic codes, never thresholds. This raises the cost of probing for a limit;
-it does not prevent it, since ALLOW/BLOCK answers still leak one bit per request (rate limiting and probe detection
-are on the roadmap). The policy is stored encrypted (AES-256-GCM, `pnpm policy:seal`), and each receipt carries a
-commitment to the exact policy that was applied.
+The agent only sees a verdict and generic codes, never thresholds, and it is not told which limit it hit. The policy is
+stored encrypted (AES-256-GCM, `pnpm policy:seal`), and each receipt carries a commitment to the exact policy applied.
+
+This raises the cost of probing a limit; it does not end it. ALLOW and BLOCK still leak one bit per request, measured here
+against a $50 cap (`packages/core/test/privacy.test.ts`):
+
+| The agent's starting guess | Requests before the wallet froze | What it learned |
+|---|---|---|
+| $10,000 | 6 | below $156 |
+| $1,000 | 8 | between $46.88 and $50.78 |
+| $200 | 7 | between $50.00 and $51.56 |
+
+So a fixed cap can be located within a few percent by a prober with a sensible guess, once, at the price of a frozen wallet
+and an owner who now knows. `secrecy.perTxJitterPct` redraws the effective cap every hour: at 50 the prober finds the draw,
+which leaves the real cap uncertain by about a third. It can also refuse honest payments near the cap, so it is off by default.
 
 ### Identity, approval and the kill switch
 
@@ -110,32 +122,42 @@ commitment to the exact policy that was applied.
 - A request that arrives without the task text that led to it cannot be screened for injection, so it is a WARN (`TASK_CONTEXT_MISSING`) until a human reads it. The screen covers English and Indonesian phrasings; the enclave opinion is the second filter.
 - A contract whose code changed since it was last seen stays flagged on every request, allow-listed or not, until the owner accepts the new code. Another agent's blocklist report only warns until the owner confirms it.
 - The chain is read from two RPC endpoints (`NEAR_RPC_URLS`); if they disagree about an account, the decision goes to a human (`RPC_DISAGREEMENT`).
-- The owner's tool: `pnpm owner status|freeze|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>` against the running REST server, with `SEALED_OWNER_TOKEN` from `.env`.
+- A watcher compares the agent's account with what the owner last accepted (`SEALED_WATCH_ACCOUNTS`). A key or code that did not come through Sealed Intent freezes the wallet within one round; this is tested against a real local NEAR node.
+- The owner's tool: `pnpm owner status|pending|freeze|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>|watch-accept <account>` against the running REST server, with `SEALED_OWNER_TOKEN` from `.env`. `pending` shows the amount, the receiver, why it was flagged, and what a private route hides.
+
+### Keeping the agent away from the money
+
+The checker runs as its own OS user with the custody key, the policy key and the owner token. The agent runs as another user with one agent token and `pnpm mcp:agent`. `scripts/isolation-check.sh` sets this up with two throwaway users and proves it on every CI run: the agent's environment holds no secret, it cannot read the checker's folder, database or process environment, the custody API gives it nothing without the key, its token cannot approve, freeze or read the review queue, and the MCP bridge refuses to start if a secret leaks into its environment. Live mode refuses to start the in-process MCP server, and refuses a `.env` other users can read.
 
 ---
 
-## Privacy: what is hidden, what is proven
+## Privacy: who sees what
 
-| Data | Where it goes |
-|---|---|
-| Verdict, reason codes, route, mode, quote correlation id | **Public receipt** (signed ed25519) |
-| Agent id, tokens, amounts, minAmountOut, recipient, refund, deposit address, task text | Public receipt holds only **salted SHA-256 commitments**. Values and salts stay in `.sealed/openings` with the owner |
-| One field for one auditor | `pnpm disclose <receiptId> recipient` -> `pnpm verify <receipt> --disclose <file>` |
-| Secret policy | Encrypted at rest; sent only to the TEE; the receipt holds a commitment |
-| TEE request/response | **Not stored.** Only `sha256(request bytes)`, `sha256(response bytes)` and the enclave signature go into the receipt |
-| Payment route | `confidentiality: basic/advanced` on the 1Click quote when the policy says so (Confidential Intents) |
+| Data | The agent | Public and chain | Sealed Intent operator | Auditor | NEAR AI enclaves | Quote and custody services |
+|---|---|---|---|---|---|---|
+| Policy: limits, allow-list | No, generic reasons only | No, a commitment only | Yes, encrypted at rest | Only if the owner opens it | Inside the verified enclave | No |
+| The instruction | Yes, its own input | No | Encrypted at rest, then deleted | One field at a time | Inside the verified enclave | No |
+| Amount and receiver | Yes, it asked for them | Not in the receipt. On chain once paid; a private route hides origin and route, not the destination | Encrypted at rest, then deleted | One field at a time | Inside the verified enclave | Yes, to quote and sign |
+| Verdict and reasons | Yes, generic reasons | In the receipt, if published | Yes | Yes | Gives its opinion | No |
+| Wallet key | Never | Never | Never | Never | Never | Stays in the custody enclave |
 
-**TEE evidence (live mode).** Before the secret policy is sent anywhere, Sealed Intent fetches a NEAR AI Cloud
-attestation report with a fresh 32-byte nonce and verifies, on your machine:
+Where each cell is proven: `packages/core/test/privacy.test.ts` scans every byte written to disk, including SQLite pages, and the logs for the amount, receiver, instruction and agent name; it also checks what the agent's view and the public receipt contain, expiry, and field-by-field opening. `packages/core/test/tls.test.ts` covers the enclave connection, and `scripts/isolation-check.sh` covers the agent's boundary.
+
+Still readable on the operator's disk: USD spend per hidden agent name, because the budget has to add it up, and the shared blocklist, which is public by design. RPC providers see which accounts are looked up.
+
+- **One field for one auditor:** `pnpm disclose --receipt <id> --field amount`, then `pnpm verify <receipt> --disclose <file>` or the verify page. A changed value is reported as invalid.
+- **Retention:** openings, raw enclave exchanges and the audit log are encrypted (`SEALED_DATA_KEY`, or derived from `SEALED_POLICY_KEY`) and deleted after `retention.privateDays`, 30 by default. The receipt stays valid; its fields can no longer be opened.
+- **The route:** `privatePurposes` such as payroll must use Confidential Intents, otherwise `ROUTE_NOT_CONFIDENTIAL`. Before approving, the owner sees what stays hidden, what stays public, and the extra cost measured from two dry quotes. 1Click answers confidential quotes only with a login (`ONECLICK_JWT`), so this path is tested on fixtures and has not run live.
+
+**TEE evidence (live mode).** Before the secret policy is sent anywhere, Sealed Intent opens one TLS connection to NEAR AI Cloud, fetches the attestation report on it with a fresh 32-byte nonce, and verifies on your machine:
 1. the Intel TDX quote of the gateway and of every model report, against Intel collateral (`@phala/dcap-qvl`), with the TCB status your policy accepts and debug mode off;
-2. that the verified quote's report data binds our nonce and the signing address;
+2. that the verified quote binds our nonce, the signing address and, for the gateway, this connection's certificate key;
 3. that the measured configuration matches MRCONFIGID and the event log replays to RTMR3;
 4. the NVIDIA GPU evidence through NVIDIA's attestation service (NRAS), nonce included.
 
-Only then is the prompt sent. The receipt id is inside the signed request, so the enclave's signature names this
-decision. After the completion, the response signature must be `provider_tee` and its signer must match exactly one
-verified model report; `pnpm verify` re-checks the signature offline and refuses real evidence that is not bound.
-Not covered: binding the TLS connection to the gateway attestation (see Limits).
+Only then is the prompt sent, over that same connection. A genuine report relayed over another certificate gets `TEE_UNVERIFIED` and the prompt stays home. The decision id and a salted commitment to the intent are inside the signed request, so the enclave's signature names this decision and the receipt's commitment. After the completion, the response signature must be `provider_tee` and its signer must match exactly one verified model report; `pnpm verify` re-checks the signature offline and refuses real evidence that is not bound.
+
+A real run is kept in [`evidence/tee`](evidence/tee), and `pnpm tee:live` repeats it. Each check took about 20 to 60 seconds, most of it the hardware evidence.
 
 ---
 
@@ -180,7 +202,7 @@ SHIELD screens quotes at the protocol level; Sealed Intent protects an agent's o
 ## Live mode (mainnet)
 
 ```bash
-cp .env.example .env              # fill NEARAI_API_KEY, NEARAI_MODEL, OUTLAYER_API_KEY, SEALED_AGENT_TOKENS, SEALED_OWNER_TOKEN
+cp .env.example .env              # fill NEARAI_API_KEY, NEARAI_MODEL, OUTLAYER_API_KEY, SEALED_AGENT_TOKENS, SEALED_OWNER_TOKEN; chmod 600 .env
 pnpm policy:seal fixtures/policy.example.json   # prints a SEALED_POLICY_KEY the first time; put it in .env
 pnpm demo --live --usd 1          # preflight only
 pnpm demo --live --usd 1 --yes    # preflight + execute through OutLayer custody
@@ -193,7 +215,7 @@ NEAR Intents has no testnet. Use a separate dev account and tiny amounts. Live m
 
 Three identical scripted agents receive the same everyday tasks and the same attacks. One holds its own key
 (no guard), one has spending caps only (what most agent wallets ship), one goes through Sealed Intent. A referee
-that only reads balances, keys and code hashes keeps score; it never reads a verdict, so the checker cannot grade itself.
+that reads only balances, keys and code hashes keeps score; it never reads a verdict, so the checker cannot grade itself.
 Every scenario follows the pattern of a real incident (Grok/Bankr, Aave/CoW, Binance, Kiln, DSProxy, Permit, Morse,
 NEAR-native cases) with a source link; what could not be replicated is stated per scenario.
 
@@ -204,15 +226,20 @@ pnpm arena:run --chain sandbox      # the same world on a real local NEAR node (
 pnpm arena:verify official          # re-check the manifest signature and recompute the referee from recorded balances
 ```
 
-Official recording (`replays/official`, ledger, strict owner): no guard lost $1,502.78 to 13 of 14 attacks, caps only
-$652.78 to 11, Sealed Intent $235.00 to 5. All three finished 84 of 84 legitimate tasks. The five that get through
-Sealed Intent are by design: a stolen key, a forged verdict accepted by the signer, a compromised checker host, a
-lying RPC, and a token-contract bug. They are shown, not hidden. Test tokens only; quotes, the enclave opinion and
-custody are simulated stand-ins; the rules are the real code. The web replay is at https://sein-near.vercel.app/arena.html.
+Official recording (`replays/official`, ledger, an owner who reads each WARN):
 
-A second recording, `replays/official-sandbox`, is the same 14 scenarios run on three real local NEAR nodes
-(`--chain sandbox`, nearcore 2.13.4). Its scoreboard is identical to the ledger run, line for line, and it verifies
-the same way (`pnpm arena:verify official-sandbox`). The web replay has a selector for either recording.
+| | No guard | Spending caps only | Sealed Intent |
+|---|---|---|---|
+| In scope, stopped | 0 of 9 | 1 of 9 | 9 of 9 |
+| Lost to attacks in scope | $1,267.78 | $417.78 | $0.00 |
+| Out of scope, stopped | 0 of 5 | 0 of 5 | 0 of 5 |
+| Lost out of scope | $235.00 | $235.00 | $235.00 |
+| Everyday tasks finished | 84 of 84 | 84 of 84 | 84 of 84 |
+| Attacker keys left behind | 2 | 2 | 0 |
+
+Of the nine, seven are blocked automatically and two are stopped because the owner rejects a WARN. `replays/official-lazy` is the same run with an owner who approves everything: two of the nine get through, $85.00. The five out of scope get through by design: a stolen key, a forged verdict accepted by the signer, a compromised checker host, every RPC lying at once, and a token-contract bug. They are shown, not hidden. Test tokens only; quotes, the enclave opinion and custody are simulated stand-ins there; the rules are the real code. The web replay is at https://sein-near.vercel.app/arena.html.
+
+A second recording, `replays/official-sandbox`, is the same 14 scenarios run on three real local NEAR nodes (`--chain sandbox`, nearcore 2.13.4). Its scoreboard matches the ledger run line for line, and it verifies the same way (`pnpm arena:verify official-sandbox`). The web replay has a selector for the three recordings.
 
 The `--chain sandbox` adapter (`packages/arena/src/sandbox.ts`) deploys genuine wrap.near bytecode as the four
 tokens, creates every account under the sandbox root, and runs each scenario from a restored snapshot. The swap router
@@ -227,20 +254,23 @@ packages/receipt    canonical JSON, commitments, ed25519 receipts, EIP-191 / TEE
 packages/redteam    20 attack scenarios + report
 packages/arena      three-lane simulation: ledger and near-sandbox chains, incident catalog, referee, signed recordings
 apps/web            public site: overview, Arena replay, in-browser receipt verifier (Vite, static)
-apps/server         REST and MCP servers
-scripts             demo, policy sealing
+apps/server         REST service, the agent's MCP bridge, the in-process MCP demo
+evidence/tee        a real NEAR AI Cloud check, with everything needed to recheck it
+scripts             demo, policy sealing, owner tool, live enclave check, isolation check
 fixtures            example policy (offline fixtures live in packages/core/src/fixtures.ts)
 ```
 
 ## Limits (read this)
 
 - **Offline mode is a simulation.** Fixture quotes are signed with a local "manager" key and checked by the *same* SDK function used in live mode. The enclave is simulated and every receipt says `offline-simulated`.
-- **TLS connection binding is not implemented.** The Intel and NVIDIA evidence is verified locally, but a proxy that relays genuine reports could still read the prompt. Collateral for the Intel check comes from Phala's PCCS unless `SEALED_PCCS_URL` points at Intel. The NVIDIA token is accepted on NRAS's TLS, not validated locally.
-- **The Sealed Intent process itself is a trust point.** If the host running it is compromised, the checks are bypassed. Run it on a machine the agent cannot reach; the MCP transport is stdio today, so put it behind a thin proxy or use REST from another host. A guard contract on chain is the roadmap answer.
+- **The TLS binding ends at the gateway enclave.** The prompt is readable inside the verified gateway and model enclaves. Encrypting it to the model key (NEAR AI's E2EE) is not done yet. Collateral for the Intel check comes from Phala's PCCS unless `SEALED_PCCS_URL` points at Intel. The NVIDIA token is accepted on NRAS's TLS, not validated locally.
+- **The Sealed Intent process itself is a trust point.** If the host running it is compromised, the checks are bypassed. Separate OS users stop an agent that is merely confined to its own user, not a root compromise. A second policy inside custody and a guard contract on chain are the answers; neither is in place yet.
 - **Only swaps are quoted.** Transfers and contract calls are checked against the policy and priced from the token list, with no 1Click quote.
 - **NEAR AI Cloud signatures** prove a response came from an attested signing key, not which instance produced it, since instances share keys. Confidential Intents hides the origin and route, not the amount or recipient on the destination chain.
 - **Account age** needs an indexer (FastNEAR / NearBlocks). RPC does not provide it. In live mode the signal is skipped when unavailable.
-- The heuristic injection screen (English and Indonesian patterns) is a first filter and misses paraphrases. The deterministic checks are what actually stop the money.
+- The heuristic injection screen (English and Indonesian patterns) is a first filter and misses paraphrases and other languages. The deterministic checks are what actually stop the money.
+- **Limits can be located by probing,** once, at the price of a frozen wallet. See [Why the policy is secret](#why-the-policy-is-secret).
+- **The enclave check is slow,** about 20 to 60 seconds per decision. It suits payments, not high-frequency trading.
 - Live execution currently supports NEP-141 origin assets on NEAR.
 - **Blocklist reports are self-asserted.** An agent's report with "evidence" only warns until the owner confirms it; the shared list is a signal, not a verdict.
 - Not audited. Do not use with funds you cannot lose.
@@ -248,7 +278,7 @@ fixtures            example policy (offline fixtures live in packages/core/src/f
 ## Roadmap
 
 Anchor receipt hashes on chain with a function-call key · Trezu / Sputnik DAO multisig for WARNs above a threshold ·
-Agent API executor adapter · local DCAP verification · indexer-backed account age · shared blocklist as a signed feed between instances · pay-per-check for other agents.
+Agent API executor adapter · end-to-end encryption to the model key · indexer-backed account age · shared blocklist as a signed feed between instances · pay-per-check for other agents.
 
 ## Pre-hackathon code and attribution
 

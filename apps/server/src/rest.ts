@@ -13,3 +13,9 @@ createRestServer({ ...app, receipts: new ReceiptStore() }).listen(port, host, ()
   if (app.auth.ownerTokenGenerated) console.log(`Owner token for /v1/approve and /v1/reject (set SEALED_OWNER_TOKEN to fix it): ${app.auth.ownerToken}`);
   if (app.offline && !process.env.SEALED_AGENT_TOKENS) console.log("Offline mode: unauthenticated agents are accepted as offline-agent. Set SEALED_AGENT_TOKENS for real agents.");
 });
+
+if (app.watcher) {
+  const tick = () => app.watcher!.tick().catch((err: Error) => console.error(`account watcher: ${err.message}`));
+  void tick();
+  setInterval(tick, Number(process.env.SEALED_WATCH_INTERVAL_MS ?? 30_000)).unref();
+}

@@ -1,11 +1,11 @@
 {
   "runId": "ledger-2026-11-01-a95a75de",
-  "createdAt": "2026-11-01T09:34:20.318Z",
+  "createdAt": "2026-11-01T14:52:16.655Z",
   "chain": "ledger",
   "victim": "scripted",
   "approver": "strict",
-  "policyHash": "75e4167e9482385c8cb4b0a178ddb6ac532beec661d8edc64db756e9688a9029",
-  "catalogHash": "bdab23a54ee07703b7b62415cc229ad6778ff18ad0fc66b729172f8840b8c102",
+  "policyHash": "59d9de8a8a5b2ececcd2110f085844a167612d42dac7442ee8cd53d2c7527bad",
+  "catalogHash": "f88564337745784ad0fba885f36bfb3723c808f61970bca7bdf7438218694503",
   "seed": "default",
   "prices": {
     "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": {
@@ -31,13 +31,13 @@
     "attackers": "drainer-9f3a.arena,payro11-alice.arena,fresh-attacker-7c1e.arena,breach-op.arena,a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
   },
   "realVsSimulated": {
-    "chain": "SIMULATED LEDGER (NEP-141 rules in memory; the near-sandbox adapter is the real chain)",
-    "quotes": "SIMULATED (fixture 1Click quotes signed with a local key)",
-    "tee": "SIMULATED (offline rule-based stand-in)",
-    "custody": "SIMULATED (ledger executor instead of OutLayer)",
+    "chain": "SIMULATED (an in-memory ledger with NEP-141 token rules; another recording runs on real local NEAR nodes)",
+    "quotes": "SIMULATED (test quotes signed with a local key)",
+    "tee": "SIMULATED (a rule-based stand-in; the real enclave check is kept as separate evidence)",
+    "custody": "SIMULATED (the run's own executor instead of OutLayer)",
     "victim": "scripted (no LLM; it follows every message)",
-    "rules": "REAL (the same Sealed Intent code that runs live)"
+    "rules": "REAL (the same code that runs live)"
   },
   "issuer": "70e6e99d689b00104ad1086419fe58ba9c6caa7904bb0adfd858e9b239b6908a",
-  "signature": "951f54d0c6490b57bb9cbdd9f1a358e595e1ec0952669f6e71a15386036d4364621576866d2964a884bef812d4dcc955d235d86fbdaf816e62dc4c107b30f107"
+  "signature": "94489e72bb5ecec279d7ce965d3ffb2ded579dfa39243163becca42f3cf71a7a17de9a6461015e8c9f663a30bcf5d8a0ddbf5bfde6946360cf09b18775e5b701"
 }

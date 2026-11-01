@@ -114,7 +114,7 @@ export async function checkNearReport(
   const expectedLen = report.signing_algo === "ecdsa" ? 20 : 32;
   add("signing identity has the right length", identity.length === expectedLen);
   const fp = report.tls_cert_fingerprint;
-  if (opts.peerSpkiSha256 !== undefined) add("TLS fingerprint matches the peer certificate", (fp ?? "").toLowerCase() === opts.peerSpkiSha256.toLowerCase());
+  if (opts.peerSpkiSha256 !== undefined) add("TLS fingerprint matches the peer certificate", !!fp && fp.toLowerCase() === opts.peerSpkiSha256.toLowerCase());
   const bound = fp ? hash("sha256", identity, hexBytes(fp)) : Buffer.concat([identity, Buffer.alloc(Math.max(0, 32 - identity.length))]);
   add("report data binds the signer and our nonce", Buffer.from(q.reportData).equals(Buffer.concat([bound, hexBytes(nonceHex)])));
   add("echoed nonce matches", (report.request_nonce ?? "").toLowerCase() === nonceHex.toLowerCase());

@@ -1,7 +1,8 @@
 import { ASSET } from "@sealed-intent/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { AccountWatcher } from "@sealed-intent/core";
 import { SCENARIOS, TASKS } from "../src/catalog";
-import type { LaneId } from "../src/lanes";
+import { SealedLane, type LaneId } from "../src/lanes";
 import { runScenario } from "../src/runner";
 import { SandboxChain, startSandboxWorlds } from "../src/sandbox";
 import { ACC, ARENA_POLICY, usdc } from "../src/world";
@@ -33,6 +34,26 @@ describe.skipIf(!enabled)("near-sandbox chain", () => {
     await c.reset();
     expect(await c.balance(ASSET.USDC, ACC.vendor)).toBe(0n);
   }, 120_000);
+
+  it("a key added behind the checker's back freezes the wallet within one watcher round", async () => {
+    const c = chains.sealed;
+    await c.reset();
+    const lane = await new SealedLane(c, ARENA_POLICY, () => "owner").init();
+    const watcher = new AccountWatcher(":memory:", {
+      accounts: [ACC.agent],
+      reader: { state: async (a) => ({ keys: (await c.keys(a)).map((k) => k.publicKey).sort(), codeHash: await c.codeHash(a) }) },
+      onChange: (f) => lane.env.preflight.freeze(`account watcher: ${f.account} changed`, "watcher"),
+    });
+    expect((await watcher.tick())[0]?.status).toBe("baseline");
+    expect((await watcher.tick())[0]?.status).toBe("ok");
+    await c.addKey(ACC.agent, "ed25519:ForeignKeyOnRealNode", "full");
+    const [round] = await watcher.tick();
+    expect(round?.status).toBe("changed");
+    expect(lane.env.preflight.status().frozen).toBe(true);
+    const r = await lane.request({ kind: "transfer", token: ASSET.USDC, amount: usdc(1), recipient: ACC.vendor }, "Pay Bob 1 USDC.");
+    expect(r.codes).toEqual(["WALLET_FROZEN"]);
+    await c.reset();
+  }, 180_000);
 
   it("gives the referee the same verdicts as the ledger", async () => {
     for (const id of PARITY) {

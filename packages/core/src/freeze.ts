@@ -1,5 +1,6 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import type { Vault } from "@sealed-intent/receipt";
 import { DatabaseSync } from "./sqlite";
 
 /**
@@ -18,7 +19,7 @@ const HOUR = 3_600_000;
 export class FreezeStore {
   private db: DatabaseSync;
 
-  constructor(path: string) {
+  constructor(path: string, private readonly vault?: Vault) {
     if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
     this.db.exec("PRAGMA busy_timeout = 10000;");
@@ -37,11 +38,12 @@ export class FreezeStore {
 
   state(): FreezeState {
     const row = this.db.prepare("SELECT reason, by, at FROM freeze WHERE scope='wallet'").get() as { reason: string; by: string; at: number } | undefined;
-    return row ? { frozen: true, reason: row.reason, by: row.by, at: Number(row.at) } : { frozen: false };
+    if (!row) return { frozen: false };
+    return { frozen: true, reason: this.vault ? this.vault.open<string>(row.reason) : row.reason, by: row.by, at: Number(row.at) };
   }
 
   freeze(reason: string, by: string, now = Date.now()): void {
-    this.db.prepare("INSERT OR REPLACE INTO freeze (scope, reason, by, at) VALUES ('wallet', ?, ?, ?)").run(reason, by, now);
+    this.db.prepare("INSERT OR REPLACE INTO freeze (scope, reason, by, at) VALUES ('wallet', ?, ?, ?)").run(this.vault ? this.vault.seal(reason) : reason, by, now);
   }
 
   unfreeze(): boolean {
@@ -49,7 +51,8 @@ export class FreezeStore {
   }
 
   /** Records a BLOCK and returns this agent's counts for the last hour. "limit" marks a block caused only by a cap. */
-  recordBlock(agentId: string, kind: "block" | "limit" = "block", now = Date.now()): { blocks: number; limitProbes: number } {
+  recordBlock(agent: string, kind: "block" | "limit" = "block", now = Date.now()): { blocks: number; limitProbes: number } {
+    const agentId = this.vault ? this.vault.blind(agent) : agent;
     this.db.prepare("INSERT INTO block_log (agent_id, at, kind) VALUES (?, ?, ?)").run(agentId, now, kind);
     this.db.prepare("DELETE FROM block_log WHERE at < ?").run(now - 24 * HOUR);
     const all = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ?").get(agentId, now - HOUR) as { n: number };

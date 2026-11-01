@@ -40,14 +40,16 @@ describe("limits", () => {
     for (let i = 0; i < 2; i++) expect((await env.preflight.evaluate({ agentId: "a", intent: pay({ amount: usdc(1) }) })).verdict).toBe("ALLOW");
     const third = await env.preflight.evaluate({ agentId: "a", intent: pay({ amount: usdc(1) }) });
     expect(third.verdict).toBe("BLOCK");
-    expect(third.reasonCodes).toContain("TX_RATE_EXCEEDED");
+    expect(third.reasonCodes).toEqual(["LIMIT_EXCEEDED"]);
+    expect(third.detailCodes).toEqual(["TX_RATE_EXCEEDED"]);
   });
 
   it("an agent that probes for the exact cap is frozen before it learns it", async () => {
     const env = build({ ...DEMO_POLICY, freeze: { ...DEMO_POLICY.freeze, maxLimitProbesPerHour: 3 } });
     for (const amount of [80, 60, 55]) {
       const d = await env.preflight.evaluate({ agentId: "a", intent: pay({ amount: usdc(amount) }) });
-      expect(d.reasonCodes).toContain("ABOVE_PER_TX_LIMIT");
+      expect(d.reasonCodes).toEqual(["LIMIT_EXCEEDED"]);
+      expect(d.detailCodes).toEqual(["ABOVE_PER_TX_LIMIT"]);
     }
     expect(env.preflight.status().frozen).toBe(true);
     expect(env.preflight.status().reason).toMatch(/probed/);

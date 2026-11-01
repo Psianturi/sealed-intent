@@ -21,4 +21,6 @@ jobs:
       - run: pnpm arena:run
       - run: pnpm arena:verify
       - run: pnpm arena:verify official-sandbox
+      - run: pnpm arena:verify official-lazy
       - run: pnpm web:build
+      - run: sudo env "PATH=$PATH" bash scripts/isolation-check.sh

@@ -89,6 +89,8 @@ export const DEMO_POLICY: Policy = {
   contracts: { [DEMO_ACCOUNTS.pool]: { methods: ["deposit", "claim"], maxDepositYocto: "1000000000000000000000000" } },
   freeze: { onForbiddenAction: true, maxBlocksPerHour: 20, maxLimitProbesPerHour: 6 },
   velocity: { maxTxPerHour: 30 },
+  retention: { privateDays: 30 },
+  secrecy: { perTxJitterPct: 0 },
 };
 
 // Deterministic ed25519 "1Click manager" key for offline quotes.

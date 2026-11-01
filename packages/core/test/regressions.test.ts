@@ -1,7 +1,7 @@
 // Regression tests for the defects found in the 1 Nov review.
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildPreflight } from "../src/config";
 import type { Executor, ExecutionResult } from "../src/executor";
@@ -15,7 +15,8 @@ const intent = (over: Partial<SwapIntent> & Record<string, unknown> = {}) => ({
 });
 const tmp = () => mkdtempSync(join(tmpdir(), "sealed-reg-"));
 const build = (opts: { ledgerPath?: string; executor?: Executor } = {}) => {
-  const d = tmp();
+  // processes sharing a database share one data key
+  const d = opts.ledgerPath ? dirname(opts.ledgerPath) : tmp();
   return buildPreflight({ offline: true, home: join(d, ".sealed"), outDir: join(d, "out"), ledgerPath: opts.ledgerPath ?? ":memory:", executor: opts.executor });
 };
 const fixed = (status: ExecutionResult["status"]): Executor => ({ mode: "offline", execute: async () => ({ status, txHash: status === "not_sent" ? undefined : "tx" }) });

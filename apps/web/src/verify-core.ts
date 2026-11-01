@@ -39,9 +39,9 @@ export function verifyReceipt(r: Record<string, any>, trusted: string, disclosur
   try {
     sigOk = ed25519.verify(hexToBytes(signature), utf8ToBytes(canonical(unsigned)), hexToBytes(r.issuer.publicKey));
   } catch {}
-  checks.push({ name: "Issuer signature (ed25519 over canonical JSON)", ok: sigOk });
-  if (trusted) checks.push({ name: "Issuer key is the one you trust", ok: trusted.toLowerCase() === String(r.issuer.publicKey).toLowerCase() });
-  else checks.push({ name: "Issuer identity", ok: "unchecked", detail: "no trusted key given: this receipt is self-signed by an unknown operator key" });
+  checks.push({ name: "Signed by the operator's key and not edited since", ok: sigOk });
+  if (trusted) checks.push({ name: "The operator's key is the one you trust", ok: trusted.toLowerCase() === String(r.issuer.publicKey).toLowerCase() });
+  else checks.push({ name: "Who the operator is", ok: "unchecked", detail: "not confirmed: paste the operator's published key under Advanced" });
 
   let teeOk = true;
   if (r.tee) {
@@ -54,12 +54,12 @@ export function verifyReceipt(r: Record<string, any>, trusted: string, disclosur
     } catch {}
     const simulated = e.kind === "offline-simulated";
     const bound = Boolean(e.attestation?.signingAddressMatched && e.attestation?.quoteVerifiedLocally);
-    checks.push({ name: "Enclave signed text = model:sha256(request):sha256(response)", ok: textOk });
-    checks.push({ name: `Enclave signature recovers to ${e.signingAddress}`, ok: sOk });
-    if (simulated) checks.push({ name: "Enclave", ok: "unchecked", detail: "offline-simulated: a local stand-in, not a real TEE" });
+    checks.push({ name: "The enclave signed exactly this question and answer", ok: textOk });
+    checks.push({ name: "The enclave's signature is valid", ok: sOk, detail: String(e.signingAddress) });
+    if (simulated) checks.push({ name: "Real enclave", ok: "unchecked", detail: "no: a local stand-in, labelled as simulated" });
     else {
-      checks.push({ name: "Enclave bound to a locally verified attestation (Intel TDX, NVIDIA)", ok: bound, detail: e.attestation?.tcbStatus ? `TCB ${e.attestation.tcbStatus}, ${e.attestation.gpus ?? "?"} GPUs` : undefined });
-      for (const c of e.attestation?.checks ?? []) checks.push({ name: `  recorded at decision time: ${c.name}`, ok: c.ok });
+      checks.push({ name: "Tied to hardware evidence checked at decision time (Intel TDX, NVIDIA)", ok: bound, detail: e.attestation?.tcbStatus ? `Intel status ${e.attestation.tcbStatus}, ${e.attestation.gpus ?? "?"} GPUs` : undefined });
+      for (const c of e.attestation?.checks ?? []) checks.push({ name: `  ${c.name}`, ok: c.ok });
     }
     teeOk = textOk && sOk && (simulated || bound);
   }
@@ -68,7 +68,7 @@ export function verifyReceipt(r: Record<string, any>, trusted: string, disclosur
   if (disclosure) {
     const commitment = disclosure.field === "policy" ? r.policyCommitment : r.commitments?.[disclosure.field];
     const ok = disclosure.receiptId === r.receiptId && commitment === sha256Hex(`${disclosure.opening.salt}:${canonical(disclosure.opening.value)}`);
-    checks.push({ name: `Disclosed ${disclosure.field} matches its commitment`, ok, detail: ok ? JSON.stringify(disclosure.opening.value) : undefined });
+    checks.push({ name: `Opened field "${disclosure.field}" matches its seal`, ok, detail: ok ? JSON.stringify(disclosure.opening.value) : undefined });
     discOk = ok;
   }
   return { valid: sigOk && teeOk && discOk && (!trusted || checks[1]!.ok === true), checks };
@@ -80,8 +80,8 @@ export function verifyExecution(r: Record<string, any>, trusted: string): { vali
   try {
     ok = ed25519.verify(hexToBytes(signature), utf8ToBytes(canonical(unsigned)), hexToBytes(r.issuer.publicKey));
   } catch {}
-  const checks: Check[] = [{ name: "Issuer signature", ok }, { name: `Execution of decision ${r.decisionId}: ${r.status}${r.txHash ? `, tx ${r.txHash}` : ""}`, ok: "unchecked" }];
-  if (trusted) checks.push({ name: "Issuer key is the one you trust", ok: trusted.toLowerCase() === String(r.issuer.publicKey).toLowerCase() });
+  const checks: Check[] = [{ name: "Signed by the operator's key and not edited since", ok }, { name: `Execution of decision ${r.decisionId}: ${r.status}${r.txHash ? `, tx ${r.txHash}` : ""}`, ok: "unchecked" }];
+  if (trusted) checks.push({ name: "The operator's key is the one you trust", ok: trusted.toLowerCase() === String(r.issuer.publicKey).toLowerCase() });
   return { valid: ok && (!trusted || checks[2]!.ok === true), checks };
 }
 

@@ -32,7 +32,8 @@ const DAY = 86_400_000;
 export class BudgetLedger {
   private db: DatabaseSync;
 
-  constructor(path: string, private readonly reservationTtlMs = 10 * 60_000) {
+  /** blind turns the agent name into a keyed hash before it reaches the database */
+  constructor(path: string, private readonly reservationTtlMs = 10 * 60_000, private readonly blind: (agentId: string) => string = (a) => a) {
     if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
     this.db.exec("PRAGMA busy_timeout = 10000;");
@@ -50,8 +51,9 @@ export class BudgetLedger {
     `);
   }
 
-  reserve(agentId: string, usdCents: number, limits: BudgetLimits, now = Date.now()): ReserveResult {
+  reserve(agent: string, usdCents: number, limits: BudgetLimits, now = Date.now()): ReserveResult {
     if (!Number.isInteger(usdCents) || usdCents < 0) throw new Error("usdCents must be a non-negative integer");
+    const agentId = this.blind(agent);
     this.db.exec("BEGIN IMMEDIATE");
     try {
       this.db.prepare("UPDATE reservations SET status='released' WHERE status='reserved' AND expires_at < ?").run(now);
@@ -110,9 +112,14 @@ export class BudgetLedger {
       (
         this.db
           .prepare("SELECT COALESCE(SUM(usd_cents),0) AS s FROM reservations WHERE agent_id=? AND status IN ('reserved','committed') AND created_at >= ?")
-          .get(agentId, now - windowMs) as { s: number }
+          .get(this.blind(agentId), now - windowMs) as { s: number }
       ).s,
     );
+  }
+
+  /** Spend older than the longest window is no longer needed. */
+  purge(now = Date.now()): number {
+    return Number(this.db.prepare("DELETE FROM reservations WHERE created_at < ?").run(now - 2 * DAY).changes);
   }
 
   close(): void {

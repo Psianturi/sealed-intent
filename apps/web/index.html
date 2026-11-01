@@ -3,126 +3,160 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SeIn · Sealed Intent</title>
-  <meta name="description" content="SeIn (Sealed Intent) checks every payment an AI agent wants to make on NEAR before the money moves. The agent can ask; only SeIn can let money move." />
-  <meta property="og:title" content="SeIn · Sealed Intent" />
-  <meta property="og:description" content="SeIn (Sealed Intent) checks every payment an AI agent wants to make on NEAR before the money moves. The agent can ask; only SeIn can let money move." />
+  <title>SeIn: your AI agent can ask for money, it can't take it</title>
+  <meta name="description" content="SeIn (Sealed Intent) checks every payment an AI agent wants to make on NEAR before the money moves, keeps the rules secret, and leaves a sealed receipt anyone can verify." />
+  <meta property="og:title" content="SeIn: your AI agent can ask for money, it can't take it" />
+  <meta property="og:description" content="Five checks before any payment, a secret policy, and sealed receipts. Three identical agents faced the same attacks; see what got through." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sein-near.vercel.app/" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Scoreboard: three identical AI agents faced the same attacks. No guard stopped none in scope, limits only stopped one, SeIn stopped all nine." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
   <meta name="theme-color" content="#2747c4" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <header class="top">
-    <a class="brand" href="/" aria-label="SeIn, Sealed Intent, home"><svg class="mark" width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span class="word">Se<b>In</b></span><span class="full">Sealed Intent</span></a>
-    <nav>
-      <a href="/" aria-current="page">Overview</a>
-      <a href="/arena.html">Arena</a>
-      <a href="/verify.html">Verify a receipt</a>
-      <a href="https://github.com/Psianturi/sealed-intent">For builders</a>
-    </nav>
-  </header>
+  <!--header:home-->
   <main>
     <section class="hero">
-      <div>
-        <p class="eyebrow"><svg class="mark" width="18" height="18" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg> SeIn · Sealed Intent · built on NEAR</p>
+      <div class="hero-copy">
         <h1>Your AI agent can ask for money. It can't take it.</h1>
-        <p class="lead short">SeIn sits between an AI agent and its wallet. Every payment is checked before it moves: is the deal real, who gets the money, was the agent tricked, is it within budget.</p>
+        <p class="lead">SeIn, short for Sealed Intent, stands between an AI agent and its wallet on NEAR. Every payment is checked before it moves, the rules stay secret, and each decision leaves a sealed receipt.</p>
         <div class="btns">
-          <a class="btn primary big" href="/arena.html">Watch attacks fail in the Arena</a>
-          <a class="btn" href="#how">How it works</a>
-          <a class="btn" href="/verify.html">Verify a receipt</a>
+          <a class="btn primary big" href="/arena.html">Watch the attacks in the Arena</a>
+          <a class="btn big" href="#how">How it works</a>
         </div>
         <p class="pitch">Signers check format. SeIn checks meaning.</p>
-        <div class="strip">
-          <span class="status live">Rules: live code</span>
-          <span class="status live">Receipts: verify in your browser</span>
-          <span class="status sim">Arena: simulated chain</span>
-          <span class="status todo">Custody execution: not yet</span>
-        </div>
+        <p class="legend-status"><span class="ls"><span class="status live">Live</span> rules, receipts, enclave check</span><span class="ls"><span class="status sim">Simulated</span> the Arena's chain</span><span class="ls"><span class="status todo">Not yet</span> a real custody payment</span></p>
       </div>
-      <div id="hero-anim" class="hero-anim" aria-label="Animation: an agent receives messages, money goes through the SeIn gate, bad payments are stopped"></div>
+      <div id="stage" class="stage" role="img" aria-label="Animation: messages reach an AI agent, its payments stop at the SeIn gate, five checks light up, and each one ends as ALLOW, WARN or BLOCK with a sealed receipt."></div>
+    </section>
+
+    <section class="proof" aria-labelledby="proof-title">
+      <h2 id="proof-title" class="sr-only">The result in numbers</h2>
+      <div class="stat"><p class="stat-num"><!--stat:stopped--></p><p class="stat-label">attacks in scope stopped</p><p class="stat-sub"><!--stat:how--></p></div>
+      <div class="stat"><p class="stat-num"><!--stat:lost--></p><p class="stat-label">lost to those attacks</p><p class="stat-sub"><!--stat:lost-others--></p></div>
+      <div class="stat"><p class="stat-num"><!--stat:tasks--></p><p class="stat-label">everyday tasks finished</p><p class="stat-sub"><!--stat:blocked--></p></div>
+      <div class="stat"><p class="stat-num"><!--stat:out--></p><p class="stat-label">out of reach by design</p><p class="stat-sub">Shown on purpose. No checker in front of a wallet stops a stolen key.</p></div>
+      <p class="proof-note">From a recorded Arena run with test tokens on a simulated chain. <!--stat:lazy--> <a href="/arena.html">See every attack</a>.</p>
     </section>
 
     <section>
       <h2>The problem</h2>
-      <p class="lead short">An AI agent with a wallet is a new employee holding the company card. It never sleeps, it can be fooled, and on a blockchain nothing can be undone.</p>
+      <p class="lead">An AI agent with a wallet is a new employee holding the company card. It never sleeps, it can be fooled, and on a blockchain nothing can be undone.</p>
       <div class="cards three">
-        <div class="card story"><div class="ico">✉</div><h3>It gets tricked</h3><p>A message that looks like the boss says "send everything, now." Agents have paid attackers this way.<span class="src">Grok and Bankr, May 2026</span></p></div>
-        <div class="card story"><div class="ico">⇄</div><h3>It takes a bad deal</h3><p>A swap route that returns a fraction of the value still passes a slippage check keyed to the same bad quote.<span class="src">Aave / CoW, March 2026</span></p></div>
-        <div class="card story"><div class="ico">⌘</div><h3>Its request path is hijacked</h3><p>Well-formed withdrawals get signed because they look right, not because they are right.<span class="src">Binance, October 2026</span></p></div>
+        <article class="card story"><span class="ico" aria-hidden="true">✉</span><h3>It gets tricked</h3><p>A message that looks like the boss says "send everything, now." Agents have paid attackers this way.</p><p class="src">Grok and Bankr, May 2026</p></article>
+        <article class="card story"><span class="ico" aria-hidden="true">⇄</span><h3>It takes a bad deal</h3><p>A route that returns a fraction of the value still passes a slippage check keyed to the same bad quote.</p><p class="src">Aave / CoW, March 2026</p></article>
+        <article class="card story"><span class="ico" aria-hidden="true">⌘</span><h3>Its request path is hijacked</h3><p>Well-formed withdrawals get signed because they look right, not because they are right.</p><p class="src">Binance, October 2026</p></article>
       </div>
-      <p class="note">These happened to exchanges, protocols and people, not to SeIn users, and we do not claim SeIn would have saved them. The <a href="/arena.html">Arena</a> replays their patterns against an agent on NEAR and shows what holds.</p>
+      <p class="note">These happened to exchanges, protocols and people, not to SeIn users, and we do not claim SeIn would have saved them. The Arena replays their patterns against an agent on NEAR and shows what holds.</p>
     </section>
 
     <section id="how">
       <h2>How it works</h2>
-      <p class="lead short">The agent never holds a key. It sends a request, SeIn runs five checks, and answers with a traffic light.</p>
-      <div id="flow" class="flow"></div>
+      <p class="lead">The agent never holds a key. It sends a request, SeIn runs five checks, and answers with a traffic light.</p>
+      <ol class="flow">
+        <li><strong>AI agent</strong><span>Asks. Holds no key.</span></li>
+        <li class="flow-gate"><strong>SeIn</strong><span>Five checks, then a sealed receipt.</span></li>
+        <li><strong>Custody enclave</strong><span>Signs only what SeIn allowed.</span></li>
+        <li><strong>NEAR</strong><span>The money moves.</span></li>
+      </ol>
       <div class="checks">
-        <div class="check"><span class="n">CHECK 1</span><h3>Is the deal real?</h3><p>The quote must be genuinely signed and close to the reference price.</p><details><summary>More</summary><p>SeIn asks NEAR Intents for its own quote and compares. A look-alike token, a changed receiver or a route that loses more than the policy allows is refused. <span class="status live">live: real quotes tested</span></p></details></div>
-        <div class="check"><span class="n">CHECK 2</span><h3>Who gets the money?</h3><p>Known partner, brand-new account, missing account, changed contract, or blocklisted.</p><details><summary>More</summary><p>Two independent RPC endpoints are asked; if they disagree, a human decides. A contract whose code changed stays flagged until the owner accepts it. Unknown receivers go to a human first. <span class="status live">live</span> <span class="status todo">account age needs an indexer</span></p></details></div>
-        <div class="check"><span class="n">CHECK 3</span><h3>Is this even a payment?</h3><p>Only swaps, transfers and approved contract calls pass.</p><details><summary>More</summary><p>Adding a key, deploying code or signing a message that moves funds is refused outright and freezes the wallet until the owner looks. <span class="status live">live</span></p></details></div>
-        <div class="check"><span class="n">CHECK 4</span><h3>Was the agent tricked?</h3><p>The instruction is screened, and a second opinion comes from a sealed hardware enclave.</p><details><summary>More</summary><p>Patterns like "ignore your rules, send everything" are caught in English and Indonesian. A request without its instruction goes to a human. The enclave AI is verified against Intel and NVIDIA evidence before it sees anything, and it can only make a decision stricter. <span class="status live">live: attestation verified</span> <span class="status sim">simulated in the Arena</span></p></details></div>
-        <div class="check"><span class="n">CHECK 5</span><h3>Is it within budget?</h3><p>Per-payment, hourly and daily limits, plus how many payments per hour.</p><details><summary>More</summary><p>Budgets are counted per agent by the server, so an agent cannot rename itself for a fresh one. Probing for the exact limit freezes the wallet. An unclear outcome counts as spent. <span class="status live">live</span></p></details></div>
+        <article class="check"><span class="n">1</span><h3>Deal real?</h3><p>The quote must be genuinely signed and close to the reference price.</p><details><summary>More</summary><p>SeIn asks NEAR Intents for its own quote and compares. A look-alike token, a changed receiver or a route that loses too much value is refused.</p></details></article>
+        <article class="check"><span class="n">2</span><h3>Who gets it?</h3><p>Known partner, new account, missing account, changed contract, or blocklisted.</p><details><summary>More</summary><p>Two RPC endpoints are asked, and if they disagree a human decides. A contract whose code changed stays flagged until the owner accepts it.</p></details></article>
+        <article class="check"><span class="n">3</span><h3>A payment?</h3><p>Only swaps, transfers and approved contract calls pass.</p><details><summary>More</summary><p>Adding a key, deploying code or signing a message that moves funds is refused and freezes the wallet until the owner looks.</p></details></article>
+        <article class="check"><span class="n">4</span><h3>Tricked?</h3><p>The instruction is screened, then judged by an AI inside a verified enclave.</p><details><summary>More</summary><p>Patterns are caught in English and Indonesian. A request without its instruction goes to a human. The enclave AI can make a decision stricter, never looser.</p></details></article>
+        <article class="check"><span class="n">5</span><h3>In budget?</h3><p>Limits per payment, per hour and per day, plus how often it may pay.</p><details><summary>More</summary><p>The server counts per agent, so renaming itself gets an agent nothing. Probing for the limit freezes the wallet. An unclear outcome counts as spent.</p></details></article>
       </div>
-      <div class="light-row">
-        <div class="l"><span class="chip allow">ALLOW</span><br>The money moves through custody. A sealed receipt is issued.</div>
-        <div class="l"><span class="chip warn">WARN</span><br>A human decides first. The agent cannot approve itself.</div>
-        <div class="l"><span class="chip block">BLOCK</span><br>Nothing leaves the wallet. Repeated blocks freeze it.</div>
-      </div>
-    </section>
-
-    <section>
-      <h2>Sealed receipts <span class="status live">live</span></h2>
-      <div class="split">
-        <div>
-          <p class="lead short">Every decision leaves a receipt anyone can check, but that reveals nothing private. The verdict and reasons are visible; the amount, receiver and instruction are sealed.</p>
-          <ul>
-            <li><strong>Edit one character</strong> and the receipt becomes invalid.</li>
-            <li><strong>An auditor needs one fact?</strong> The owner opens that one field, and the receipt proves it matches.</li>
-            <li><strong>Live receipts</strong> also carry the enclave's signature over the exact question it was asked.</li>
-          </ul>
-          <div class="btns"><a class="btn" href="/verify.html">Verify a receipt yourself</a></div>
-        </div>
-        <div id="receipt-anim" class="receipt-anim" aria-label="Illustration of a sealed receipt"></div>
+      <div class="lights">
+        <div class="light allow"><span class="chip allow">✓ ALLOW</span><p>The money moves through custody.</p></div>
+        <div class="light warn"><span class="chip warn">! WARN</span><p>A human decides first. The agent cannot approve itself.</p></div>
+        <div class="light block"><span class="chip block">✕ BLOCK</span><p>Nothing leaves the wallet. Repeated blocks freeze it.</p></div>
       </div>
     </section>
 
+    <section id="privacy">
+      <h2>Private by default</h2>
+      <p class="lead">A checker that reads your payments must not become the leak. Four layers keep the rules and the money private.</p>
+      <div class="cards four">
+        <article class="card"><h3>A secret policy <span class="status live">Live</span></h3><p>Encrypted at rest. The agent only learns "limit exceeded", never which limit or how much.</p></article>
+        <article class="card"><h3>A private AI opinion <span class="status live">Live</span></h3><p>The enclave is verified against Intel and NVIDIA evidence before it sees anything. The connection is tied to that evidence, and the answer is signed.</p></article>
+        <article class="card"><h3>Sealed receipts <span class="status live">Live</span></h3><p>The verdict is public. Amount, receiver and instruction are sealed. The owner can open one field for an auditor.</p></article>
+        <article class="card"><h3>A private route <span class="status todo">Not yet</span></h3><p>Policy can force payroll onto Confidential Intents. It hides origin and route, not the destination. The check exists; a live quote needs a NEAR Intents login.</p></article>
+      </div>
+      <h3 class="table-title">Who sees what</h3>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Who sees what">
+        <table class="matrix">
+          <thead><tr><th scope="col">Data</th><th scope="col">The agent</th><th scope="col">Public and chain</th><th scope="col">SeIn operator</th><th scope="col">Auditor</th><th scope="col">NEAR AI enclaves</th><th scope="col">Quote and custody services</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Policy: limits, allow-list</th><td>No. Generic reasons only</td><td>No. A commitment only</td><td>Yes, encrypted at rest</td><td>Only if the owner opens it</td><td>Inside the verified enclave</td><td>No</td></tr>
+            <tr><th scope="row">The instruction</th><td>Yes, it is its own input</td><td>No</td><td>Encrypted at rest, then deleted</td><td>One field at a time</td><td>Inside the verified enclave</td><td>No</td></tr>
+            <tr><th scope="row">Amount and receiver</th><td>Yes, it asked for them</td><td>Not in the receipt. On chain once paid</td><td>Encrypted at rest, then deleted</td><td>One field at a time</td><td>Inside the verified enclave</td><td>Yes, to quote and sign</td></tr>
+            <tr><th scope="row">Verdict and reasons</th><td>Yes, generic reasons</td><td>In the receipt, if published</td><td>Yes</td><td>Yes</td><td>Gives its opinion</td><td>No</td></tr>
+            <tr><th scope="row">Wallet key</th><td>Never</td><td>Never</td><td>Never</td><td>Never</td><td>Never</td><td>Stays in the custody enclave</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">One thing stays readable on the operator's disk: how many dollars each hidden agent spent, because the budget must add them up. Each cell is backed by a test in the repository.</p>
+    </section>
+
+    <section class="split">
+      <div>
+        <h2>Check a receipt yourself</h2>
+        <p class="lead">Edit one character and the receipt turns invalid. No account, no upload, nothing to trust but the math in your browser.</p>
+        <div class="btns"><a class="btn primary" href="/verify.html">Try a real receipt</a></div>
+      </div>
+      <figure class="paper" aria-label="A receipt: the verdict and reasons are visible, the amount and receiver are sealed.">
+        <div class="paper-head"><strong>Receipt</strong><span class="chip block">✕ BLOCK</span></div>
+        <dl>
+          <div><dt>Why</dt><dd>Prompt injection suspected</dd></div>
+          <div><dt>Enclave</dt><dd>Agrees it is unsafe, signed</dd></div>
+          <div><dt>Amount</dt><dd><span class="seal">sealed</span></dd></div>
+          <div><dt>Receiver</dt><dd><span class="seal">sealed</span></dd></div>
+          <div><dt>Instruction</dt><dd><span class="seal">sealed</span></dd></div>
+        </dl>
+      </figure>
+    </section>
+
     <section>
-      <h2>Proof: the Arena <span class="status sim">simulated chain</span> <span class="status live">real rules</span></h2>
-      <p class="lead short">Three identical agents, the same tasks, the same attacks. One has no guard, one has spending limits only, one goes through SeIn. A referee that only reads balances keeps score.</p>
-      <div id="score" class="score"><div class="lane"><h4>Loading the official run…</h4></div></div>
-      <p class="note" id="score-note"></p>
+      <h2>Proof: the Arena</h2>
+      <p class="lead">Three identical agents, the same tasks, the same attacks. One has no guard, one has spending limits only, one goes through SeIn. A referee that reads only on-chain state keeps score.</p>
+      <div class="score"><!--score--></div>
+      <p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design.</p>
       <div class="btns"><a class="btn primary" href="/arena.html">Open the Arena</a></div>
     </section>
 
     <section>
-      <h2>Where it fits</h2>
+      <h2>A bridge for any agent</h2>
       <div class="cards three">
-        <div class="card"><h3>Any agent <span class="status live">live</span></h3><p>Agents talk to SeIn through a standard tool interface (MCP) or a plain web API. They get a verdict and generic reasons, never the secret policy.</p></div>
-        <div class="card"><h3>NEAR custody and Intents <span class="status todo">not yet</span></h3><p>Approved payments are meant to be signed inside a custody enclave (OutLayer) and settled through NEAR Intents. The agent never touches a key. The live execution has not been run yet.</p></div>
-        <div class="card"><h3>The owner stays in charge <span class="status live">live</span></h3><p>Only the owner can approve a WARN, freeze or unfreeze the wallet, accept a changed contract, or confirm a blocklist report. A freeze survives restarts.</p></div>
+        <article class="card"><h3>Any agent <span class="status live">Live</span></h3><p>Agents connect through a standard tool interface (MCP) or a plain web API, and get a verdict with generic reasons.</p></article>
+        <article class="card"><h3>No keys near the agent <span class="status live">Live</span></h3><p>The agent holds neither the wallet key nor the custody API key. A check run on every build proves its OS user cannot reach them.</p></article>
+        <article class="card"><h3>The owner stays in charge <span class="status live">Live</span></h3><p>Only the owner can approve a WARN or lift a freeze. A watcher freezes the wallet if a key appears on the account by another path.</p></article>
       </div>
     </section>
 
     <section>
       <h2>What is real, what is simulated, what is not done</h2>
-      <div class="legend">
-        <div class="col"><span class="status live">Real today</span><ul><li>The rules on this site are the same code that runs live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>Hardware attestation of the AI enclave, verified on our own machine.</li><li>Key behaviour confirmed on a local NEAR node.</li><li>Receipts, approvals, freeze, owner tools.</li></ul></div>
-        <div class="col"><span class="status sim">Simulated in the Arena</span><ul><li>The chain: an in-memory ledger, or a local NEAR node with real token contracts.</li><li>Quotes, the enclave opinion and custody are stand-ins.</li><li>The agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled.</li></ul></div>
-        <div class="col"><span class="status todo">Not yet</span><ul><li>A real custody execution and a mainnet swap.</li><li>Binding the network connection to the enclave.</li><li>Isolating the SeIn host from the agent.</li><li>By design out of reach: a stolen key, a bug inside a token contract, a compromised SeIn host. The Arena shows these as escapes on purpose.</li></ul></div>
+      <div class="honest">
+        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li></ul></div>
+        <div class="col"><span class="status sim">Simulated in the Arena</span><ul><li>The chain is a ledger, or local NEAR nodes with real token contracts. Both recordings match.</li><li>Quotes, the enclave opinion and custody are stand-ins there.</li><li>The agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled.</li></ul></div>
+        <div class="col"><span class="status todo">Not yet</span><ul><li>A real custody payment and a mainnet swap.</li><li>A live confidential route.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen key, a bug inside a token, a compromised SeIn host.</p></div>
       </div>
     </section>
 
     <section class="builders">
       <h2>For builders</h2>
-      <p>Open source, MIT. The repository has a sixty-second offline demo, the test suite, the red-team catalog and the Arena recorder. <a href="https://github.com/Psianturi/sealed-intent">Read the code on GitHub</a>.</p>
+      <p>Open source, MIT. A sixty-second offline demo, the test suite, the red-team catalog and the Arena recorder are in the <a href="https://github.com/Psianturi/sealed-intent">repository</a>.</p>
     </section>
 
-    <footer><div class="foot-brand"><svg class="mark" width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="14" fill="var(--accent)"/><path d="M33 21C30 15.5 15 15.5 15 23.5C15 31.5 33 29.5 33 38.5C33 46.5 17 48.5 13 42" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/><rect x="41" y="24" width="7" height="25" rx="3.5" fill="#fff"/><circle cx="44.5" cy="16.5" r="4" fill="#7ee2a4"/></svg><span>Se<b>In</b> · Sealed Intent</span></div><div>Built at NEAR HACKATHON, November 2026. Not audited. Do not use with funds you cannot lose.</div></footer>
+    <!--footer:home-->
   </main>
   <script type="module" src="/src/landing.ts"></script>
 </body>

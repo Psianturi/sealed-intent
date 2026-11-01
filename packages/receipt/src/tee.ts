@@ -32,6 +32,8 @@ export interface TeeEvidence {
     measurements?: { mrTd: string; rtMr3: string; mrConfigId: string };
     gatewaySigner?: string;
     gpus?: number;
+    /** the prompt went over the same TLS connection whose certificate key the gateway quote binds */
+    tlsBound?: boolean;
     /** Human-readable list of what WAS checked (the "Verified" panel). */
     checks?: { name: string; ok: boolean }[];
     note?: string;

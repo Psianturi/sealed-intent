@@ -1,0 +1,8 @@
+{
+  "receiptId": "21d30480-ba46-430b-9f82-a1c94c2d1112",
+  "field": "recipient",
+  "opening": {
+    "value": "fresh-vendor-2026.near",
+    "salt": "5771c3658cf9d5f232d47e1baa75aae5"
+  }
+}

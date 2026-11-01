@@ -24,7 +24,10 @@
     "arena:verify": "tsx packages/arena/src/cli.ts verify",
     "web:dev": "pnpm --filter @sealed-intent/web dev",
     "web:build": "pnpm --filter @sealed-intent/web build",
-    "owner": "tsx scripts/owner.ts"
+    "owner": "tsx scripts/owner.ts",
+    "mcp:agent": "tsx apps/server/src/mcp-agent.ts",
+    "tee:live": "tsx scripts/tee-live.ts",
+    "isolation:check": "bash scripts/isolation-check.sh"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

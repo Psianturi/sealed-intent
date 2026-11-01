@@ -10,7 +10,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { ASSET, buildPreflight, DEMO_ACCOUNTS, SealedWallet, type SwapIntent } from "@sealed-intent/core";
-import { makeDisclosure, verifyReceipt, type PrivateOpenings, type Receipt } from "@sealed-intent/receipt";
+import { makeDisclosure, verifyReceipt, type Receipt } from "@sealed-intent/receipt";
 import { defaultDirs, runScenarios, toTable } from "@sealed-intent/redteam";
 
 const args = process.argv.slice(2);
@@ -83,7 +83,7 @@ async function offlineDemo() {
   const report = verifyReceipt(receipt);
   say(`receipt ${receipt.receiptId}: ${report.valid ? "VALID" : "INVALID"}, verdict ${receipt.verdict}, reasons ${receipt.reasonCodes.join(", ")}`);
   say(`public file contains the attacker's name? ${readFileSync(receiptPath, "utf8").includes(DEMO_ACCOUNTS.attacker) ? "yes" : "no (only a salted hash)"}`);
-  const openings = JSON.parse(readFileSync(join(dirs.home, "openings", `${receipt.receiptId}.json`), "utf8")) as PrivateOpenings;
+  const openings = env.store.loadOpenings(receipt.receiptId)!;
   const disclosure = makeDisclosure(openings, "recipient");
   mkdirSync(join(dirs.outDir, "disclosures"), { recursive: true });
   const dPath = relative(process.cwd(), join(dirs.outDir, "disclosures", `${receipt.receiptId}.recipient.json`));
