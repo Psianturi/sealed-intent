@@ -1,0 +1,155 @@
+{
+  "ranAt": "2026-11-01T17:38:06.318Z",
+  "network": "testnet",
+  "passed": 26,
+  "total": 26,
+  "results": [
+    {
+      "name": "the gateway starts in live mode from an empty folder",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "mode": "live"
+      }
+    },
+    {
+      "name": "the owner issues an agent token",
+      "ok": true
+    },
+    {
+      "name": "a stolen token alone is refused",
+      "ok": true
+    },
+    {
+      "name": "a routine payment is allowed by the enclave and the rules",
+      "ok": true,
+      "detail": {
+        "verdict": "ALLOW",
+        "warn": []
+      }
+    },
+    {
+      "name": "repeating the request returns the first decision",
+      "ok": true
+    },
+    {
+      "name": "the agent is told nothing about receipts on disk or metrics",
+      "ok": true
+    },
+    {
+      "name": "answers carry the API version",
+      "ok": true
+    },
+    {
+      "name": "the payment goes through custody and is final on chain",
+      "ok": true,
+      "detail": {
+        "status": "submitted",
+        "tx": "Dhx8ZsyT2Y2Gpxhws9jZVoB2Yf48hZqircMt55Kcsq9w",
+        "signer": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21"
+      }
+    },
+    {
+      "name": "repeating the payment does not pay twice",
+      "ok": true
+    },
+    {
+      "name": "the public receipt names the network and the registered agent, and seals the rest",
+      "ok": true
+    },
+    {
+      "name": "reconciliation stays quiet about a payment SeIn sent",
+      "ok": true
+    },
+    {
+      "name": "a new receiver needs the owner",
+      "ok": true,
+      "detail": {
+        "verdict": "WARN",
+        "codes": [],
+        "warn": [
+          "COUNTERPARTY_FIRST_CONTACT",
+          "RECIPIENT_NOT_ALLOWLISTED",
+          "TEE_SIGNAL_BLOCK"
+        ]
+      }
+    },
+    {
+      "name": "the owner token alone cannot approve",
+      "ok": true
+    },
+    {
+      "name": "the owner can read what is being asked",
+      "ok": true,
+      "detail": {
+        "kind": "transfer",
+        "usd": 0.01
+      }
+    },
+    {
+      "name": "a changed signature is refused",
+      "ok": true
+    },
+    {
+      "name": "the owner's wallet signature approves",
+      "ok": true
+    },
+    {
+      "name": "the approved payment is sent",
+      "ok": true,
+      "detail": {
+        "tx": "Do2B4o48z3UCnqzXvyGbpRa5DXpLNSJySLfqgLZs1338"
+      }
+    },
+    {
+      "name": "the bridge lists its tools and none approves",
+      "ok": true,
+      "detail": [
+        "preflight_swap",
+        "preflight_transfer",
+        "preflight_call",
+        "execute_swap",
+        "report_counterparty",
+        "get_receipt"
+      ]
+    },
+    {
+      "name": "a signed request through the bridge reaches a decision",
+      "ok": true,
+      "detail": "\"verdict\": \"ALLOW\""
+    },
+    {
+      "name": "receipts are anchored by the running gateway",
+      "ok": true,
+      "detail": {
+        "anchorIndex": 1,
+        "tx": "HiAgYZaHyH4yYLNtXoHxayrxBaQXU8baXRvJYWDa4nWj"
+      }
+    },
+    {
+      "name": "the owner revokes the agent",
+      "ok": true
+    },
+    {
+      "name": "the revoked token stops working at once",
+      "ok": true
+    },
+    {
+      "name": "the owner's freeze reaches custody on chain",
+      "ok": true,
+      "detail": "BS1voRAzMuVGHHevCTiRGg6RhEyXiQNVnAXBQ4KHbDTR"
+    },
+    {
+      "name": "custody now reports the wallet as frozen",
+      "ok": true
+    },
+    {
+      "name": "the owner unfreezes",
+      "ok": true
+    },
+    {
+      "name": "the gateway's log holds no secret and no receiver",
+      "ok": true
+    }
+  ]
+}

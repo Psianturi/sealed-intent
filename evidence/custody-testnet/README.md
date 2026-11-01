@@ -62,3 +62,9 @@ A policy shaped like the planned mainnet swap (`policy-token-lane.json`: one tok
 ## A payment that skips SeIn
 
 One transfer was sent straight to custody ([tx](https://testnet.nearblocks.io/txns/3JERjb5v8jd9ZGg6qEwmW2GnYsUzATzBjHVVmuYPnZyy)). Reconciliation runs every 60 seconds. It reported the transaction with no receipt after **62 seconds**, and the wallet was frozen on chain after **64 seconds** ([tx](https://testnet.nearblocks.io/txns/7Hb2tPHBUuU3MQ1eLTWegjorc26Kv5rcBZ2fpfFhD62S)), using a key that can do nothing but freeze. The next direct transfer got HTTP 403 `wallet_frozen`.
+
+## The real gateway
+
+`pnpm gateway:check` starts the REST gateway in live mode from an empty folder and drives it the way an agent and an owner would, including the MCP bridge with only the agent's own token and key. File: `gateway-run.json`. 26 of 26 as expected: a stolen token alone is refused, a repeated request does not pay twice, the owner token alone cannot approve, a changed wallet signature is refused, the running gateway anchors receipts, revoking takes effect at once, the owner's freeze reaches custody on chain, and the log holds no secret and no receiver.
+
+That run uses its own throwaway receipt signing key, so its batches on the registry are not linked from the site.

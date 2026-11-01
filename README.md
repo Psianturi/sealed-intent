@@ -220,6 +220,7 @@ pnpm policy:seal fixtures/policy.example.json   # prints a SEALED_POLICY_KEY the
 pnpm demo --live --usd 1          # preflight only
 pnpm demo --live --usd 1 --yes    # preflight + execute through OutLayer custody
 SEALED_MODE=live pnpm rest        # REST in live mode (binds 127.0.0.1); set SEALED_AGENT_TOKENS and SEALED_OWNER_TOKEN
+pnpm gateway:check                # testnet: the real gateway end to end, including the agent bridge
 ```
 
 NEAR Intents has no testnet, so swaps can only be tried on mainnet. Set `SEALED_NETWORK=testnet` and the testnet OutLayer host for transfers and calls. Store the custody policy before anything else: the first account to store one becomes its controller. Use a separate dev account and tiny amounts. Live mode refuses to start without `OUTLAYER_API_KEY` (set `SEALED_ALLOW_SIMULATED_EXECUTOR=1` for a preflight-only run), and the example policy requires a verified TEE opinion.
