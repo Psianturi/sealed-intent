@@ -5,6 +5,7 @@ export * from "./counterparty";
 export * from "./wallet";
 export * from "./executor";
 export * from "./fixtures";
+export * from "./freeze";
 export * from "./injection";
 export * from "./intent";
 export * from "./oneclick";

@@ -8,6 +8,9 @@ import { bearer, type Auth } from "./auth";
  *   POST /v1/execute            agent token   { decisionId }          -> { status, txHash }
  *   POST /v1/approve            owner token   { decisionId, approver }
  *   POST /v1/reject             owner token   { decisionId, approver }
+ *   POST /v1/freeze             owner token   { reason }
+ *   POST /v1/unfreeze           owner token
+ *   GET  /v1/status                           -> { frozen, reason, mode }
  *   POST /v1/blocklist/report   agent token   { account, reason, evidence[], reportedBy }
  *   GET  /v1/blocklist                        -> shared blocklist (signed entries)
  *   GET  /v1/receipts/:id                     -> public receipt
@@ -53,6 +56,14 @@ export function createRestServer(deps: RestDeps): Server {
       const isOwner = sameToken(token, auth.ownerToken);
 
       if (route === "GET /health") return send(res, 200, { ok: true, mode: offline ? "offline" : "live" });
+      if (route === "GET /v1/status") return send(res, 200, preflight.status());
+      if (route === "POST /v1/freeze" || route === "POST /v1/unfreeze") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        if (route.endsWith("unfreeze")) return send(res, 200, { ok: preflight.unfreeze("owner"), ...preflight.status() });
+        const { reason } = (await body(req)) as { reason?: string };
+        preflight.freeze(reason || "owner request", "owner");
+        return send(res, 200, preflight.status());
+      }
 
       if (route === "POST /v1/preflight") {
         if (!agentId) return send(res, 401, { error: "agent token required" });

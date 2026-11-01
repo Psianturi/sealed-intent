@@ -1,4 +1,4 @@
-import type { DeclaredIntent } from "./intent";
+import type { DeclaredIntent, SwapIntent } from "./intent";
 import type { Decision, Preflight } from "./preflight";
 import type { ExecutionResult } from "./executor";
 import type { QuoteResponse } from "./oneclick";
@@ -28,8 +28,12 @@ export class SealedWallet {
     private readonly log: (line: string) => void = () => {},
   ) {}
 
-  async swap(intent: DeclaredIntent, agentQuote?: QuoteResponse): Promise<WalletOutcome> {
-    this.log(`[agent ${this.agentId}] wants to swap ${intent.amountIn} ${short(intent.tokenIn)} -> ${short(intent.tokenOut)} for ${intent.recipient}`);
+  swap(intent: SwapIntent, agentQuote?: QuoteResponse): Promise<WalletOutcome> {
+    return this.submit(intent, agentQuote);
+  }
+
+  async submit(intent: DeclaredIntent, agentQuote?: QuoteResponse): Promise<WalletOutcome> {
+    this.log(`[agent ${this.agentId}] wants to ${describe(intent)}`);
     const decision = await this.preflight.evaluate({ agentId: this.agentId, intent, agentQuote });
     const why = [...decision.reasonCodes, ...decision.warnCodes].join(", ") || "all checks passed";
     this.log(`[sealed-intent] ${decision.verdict}  (${why})  receipt ${decision.decisionId.slice(0, 8)}`);
@@ -54,6 +58,13 @@ export class SealedWallet {
     this.log(`[wallet] ${failed ? "execution failed" : "signed in custody enclave"}: ${execution.status}${execution.txHash ? ` tx=${execution.txHash}` : ""}`);
     return failed ? { outcome: "failed", decision, execution } : { outcome: "executed", decision, execution };
   }
+}
+
+function describe(i: DeclaredIntent): string {
+  if (i.kind === "swap") return `swap ${i.amountIn} ${short(i.tokenIn)} -> ${short(i.tokenOut)} for ${i.recipient}`;
+  if (i.kind === "transfer") return `transfer ${i.amount} ${short(i.token)} to ${i.recipient}`;
+  if (i.kind === "call") return `call ${i.contract}.${i.method}`;
+  return i.kind;
 }
 
 function short(assetId: string): string {

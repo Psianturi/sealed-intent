@@ -6,10 +6,10 @@ import { describe, expect, it } from "vitest";
 import { buildPreflight } from "../src/config";
 import type { Executor, ExecutionResult } from "../src/executor";
 import { ASSET, DEMO_ACCOUNTS, DEMO_POLICY } from "../src/fixtures";
-import type { DeclaredIntent } from "../src/intent";
+import type { SwapIntent } from "../src/intent";
 
 const usdc = (d: number) => String(Math.round(d * 1e6));
-const intent = (over: Partial<DeclaredIntent> & Record<string, unknown> = {}) => ({
+const intent = (over: Partial<SwapIntent> & Record<string, unknown> = {}) => ({
   kind: "swap" as const, tokenIn: ASSET.USDC, tokenOut: ASSET.wNEAR, amountIn: usdc(45),
   recipient: DEMO_ACCOUNTS.self, refundTo: DEMO_ACCOUNTS.self, purpose: "general", ...over,
 });

@@ -52,4 +52,13 @@ describe("REST server auth", () => {
     const exec = await json(post("/v1/execute", { decisionId: d.decisionId }, "agent-token"));
     expect(exec.status).toBe("simulated");
   });
+
+  it("the owner kill switch freezes every agent until unfreeze", async () => {
+    expect((await post("/v1/freeze", { reason: "test" }, "agent-token")).status).toBe(401);
+    expect((await json(post("/v1/freeze", { reason: "incident" }, "owner-secret"))).frozen).toBe(true);
+    const d = await json(post("/v1/preflight", { intent: intent({ recipient: DEMO_ACCOUNTS.self }) }, "agent-token"));
+    expect(d.reasonCodes).toEqual(["WALLET_FROZEN"]);
+    expect((await json(post("/v1/unfreeze", {}, "owner-secret"))).frozen).toBe(false);
+    expect((await json(post("/v1/preflight", { intent: intent({ recipient: DEMO_ACCOUNTS.self }) }, "agent-token"))).verdict).toBe("ALLOW");
+  });
 });

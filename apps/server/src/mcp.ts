@@ -41,10 +41,50 @@ server.registerTool(
 );
 
 server.registerTool(
+  "preflight_transfer",
+  {
+    title: "Check a token transfer before any money moves",
+    description: "Declare a NEP-141 transfer. Returns ALLOW, WARN or BLOCK with generic reason codes. Execute with execute_swap after ALLOW or human approval.",
+    inputSchema: {
+      token: z.string().describe("1Click assetId, e.g. nep141:wrap.near"),
+      amount: z.string().describe("smallest units"),
+      recipient: z.string(),
+      memo: z.string().optional(),
+      purpose: z.string().optional(),
+      taskText: z.string().optional().describe("the instruction you received, verbatim"),
+    },
+  },
+  async (args) => {
+    const { metrics: _m, receiptPath: _p, ...decision } = await preflight.evaluate({ agentId, intent: { kind: "transfer", ...args } });
+    return text({ mode: offline ? "offline" : "live", ...decision });
+  },
+);
+
+server.registerTool(
+  "preflight_call",
+  {
+    title: "Check a contract call before it is signed",
+    description: "Declare a function call. Only allow-listed contracts and methods pass. Returns ALLOW, WARN or BLOCK.",
+    inputSchema: {
+      contract: z.string(),
+      method: z.string(),
+      args: z.record(z.unknown()).optional(),
+      depositYocto: z.string().optional(),
+      purpose: z.string().optional(),
+      taskText: z.string().optional(),
+    },
+  },
+  async (args) => {
+    const { metrics: _m, receiptPath: _p, ...decision } = await preflight.evaluate({ agentId, intent: { kind: "call", ...args } });
+    return text({ mode: offline ? "offline" : "live", ...decision });
+  },
+);
+
+server.registerTool(
   "execute_swap",
   {
-    title: "Execute an allowed swap",
-    description: "Executes a decision that preflight_swap ALLOWed. Keys never leave the custody enclave.",
+    title: "Execute an allowed decision",
+    description: "Executes a decision that a preflight tool ALLOWed (or a human approved). Keys never leave the custody enclave.",
     inputSchema: { decisionId: z.string() },
   },
   async ({ decisionId }) => text(await preflight.execute(decisionId, agentId)),

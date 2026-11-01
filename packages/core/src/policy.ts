@@ -34,6 +34,22 @@ export const Policy = z.object({
     /** if the private TEE check says "block", block (true) or only record it (false) */
     obeyBlockSignal: z.boolean(),
   }),
+  /** Action classes the agent may request. Anything in "never" is refused and freezes the wallet. */
+  actions: z
+    .object({
+      allowed: z.array(z.string()).default(["swap", "transfer", "call"]),
+      never: z.array(z.string()).default(["sign_message", "add_key", "delete_key", "deploy", "delete_account", "stake"]),
+    })
+    .default({}),
+  /** Contracts the agent may call, with the methods and the largest attached deposit (yoctoNEAR). */
+  contracts: z.record(z.object({ methods: z.array(z.string()).min(1), maxDepositYocto: z.string().regex(/^\d+$/).default("0") })).default({}),
+  freeze: z
+    .object({
+      onForbiddenAction: z.boolean().default(true),
+      /** this many BLOCKs for one agent within an hour freezes the wallet */
+      maxBlocksPerHour: z.number().int().positive().default(20),
+    })
+    .default({}),
 });
 export type Policy = z.infer<typeof Policy>;
 

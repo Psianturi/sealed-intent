@@ -18,6 +18,10 @@ export const PRIVATE_FIELDS = [
   "refundTo",
   "depositAddress",
   "taskText",
+  "contract",
+  "method",
+  "args",
+  "details",
 ] as const;
 export type PrivateField = (typeof PRIVATE_FIELDS)[number];
 
@@ -31,7 +35,7 @@ export interface Receipt {
   /** Codes that caused a WARN (human review) rather than a BLOCK. */
   warnCodes?: string[];
   public: {
-    intentKind: "swap";
+    intentKind: string;
     route: "public" | "confidential-basic" | "confidential-advanced";
     mode: "live" | "offline";
     quote?: {

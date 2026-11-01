@@ -14,7 +14,7 @@ import type { Policy } from "./policy";
  */
 export interface TeeCheckInput {
   intent: DeclaredIntent;
-  quote: QuoteResponse;
+  quote?: QuoteResponse;
   policy: Policy;
   injectionCodes: string[];
 }
@@ -38,15 +38,17 @@ export function buildTeePrompt(input: TeeCheckInput): { system: string; user: st
   const user = JSON.stringify({
     SECRET_POLICY: policy,
     DECLARED_INTENT: { ...intent, taskText: undefined },
-    QUOTE: {
-      originAsset: quote.quoteRequest.originAsset,
-      destinationAsset: quote.quoteRequest.destinationAsset,
-      amountIn: quote.quote.amountIn,
-      minAmountOut: quote.quote.minAmountOut,
-      recipient: quote.quoteRequest.recipient,
-      refundTo: quote.quoteRequest.refundTo,
-      confidentiality: quote.quoteRequest.confidentiality ?? "public",
-    },
+    QUOTE: quote
+      ? {
+          originAsset: quote.quoteRequest.originAsset,
+          destinationAsset: quote.quoteRequest.destinationAsset,
+          amountIn: quote.quote.amountIn,
+          minAmountOut: quote.quote.minAmountOut,
+          recipient: quote.quoteRequest.recipient,
+          refundTo: quote.quoteRequest.refundTo,
+          confidentiality: quote.quoteRequest.confidentiality ?? "public",
+        }
+      : null,
     HEURISTIC_FLAGS: injectionCodes,
     TASK_TEXT: intent.taskText ?? "",
   });
@@ -201,8 +203,8 @@ export class SimulatedTeeChecker implements TeeChecker {
     const requestBody = JSON.stringify({ model, messages: [{ role: "system", content: system }, { role: "user", content: user }] });
     const codes: string[] = [];
     if (input.injectionCodes.length > 0) codes.push("SUSPICIOUS_TASK_TEXT");
-    const q = input.quote.quoteRequest;
-    if (q.recipient !== input.intent.recipient || q.destinationAsset !== input.intent.tokenOut || q.originAsset !== input.intent.tokenIn) {
+    const q = input.quote?.quoteRequest;
+    if (q && input.intent.kind === "swap" && (q.recipient !== input.intent.recipient || q.destinationAsset !== input.intent.tokenOut || q.originAsset !== input.intent.tokenIn)) {
       codes.push("INTENT_QUOTE_MISMATCH");
     }
     const signal: TeeEvidence["signal"] = codes.length ? "block" : "allow";

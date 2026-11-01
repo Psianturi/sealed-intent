@@ -35,6 +35,8 @@ export const DEMO_ACCOUNTS = {
   upgradedContract: "vault-upgraded.near",
   /** does not exist on chain */
   ghost: "typo-paymnts.near",
+  /** a contract the agent may call, but only its allow-listed methods */
+  pool: "payout-pool.near",
 };
 
 const daysAgo = (d: number) => new Date(Date.now() - d * 86_400_000).toISOString();
@@ -46,6 +48,7 @@ export const FIXTURE_CHAIN: Record<string, ChainAccountInfo> = {
   [DEMO_ACCOUNTS.attacker]: { exists: true, isContract: false, createdAt: daysAgo(2) },
   [DEMO_ACCOUNTS.newVendor]: { exists: true, isContract: false, createdAt: daysAgo(3) },
   [DEMO_ACCOUNTS.upgradedContract]: { exists: true, isContract: true, codeHash: "9xNewCodeHashAfterUpgrade1111111111111111111", createdAt: daysAgo(300) },
+  [DEMO_ACCOUNTS.pool]: { exists: true, isContract: true, codeHash: "7pPoolCodeHash111111111111111111111111111111", createdAt: daysAgo(200) },
 };
 /** what we "saw" for vault-upgraded.near before (seeded into memory offline) */
 export const FIXTURE_PREVIOUS_CODE_HASH: Record<string, string> = {
@@ -65,7 +68,7 @@ export const FIXTURE_BLOCKLIST: BlocklistEntry[] = [
 export const DEMO_POLICY: Policy = {
   version: 1,
   allowedAssets: [ASSET.wNEAR, ASSET.USDC, ASSET.USDT],
-  allowedRecipients: [DEMO_ACCOUNTS.self, DEMO_ACCOUNTS.payroll],
+  allowedRecipients: [DEMO_ACCOUNTS.self, DEMO_ACCOUNTS.payroll, DEMO_ACCOUNTS.pool],
   unknownRecipient: "warn",
   minAccountAgeDays: 30,
   ownAccounts: [DEMO_ACCOUNTS.self],
@@ -81,6 +84,9 @@ export const DEMO_POLICY: Policy = {
   confidentialLevel: "basic",
   injection: { block: true },
   tee: { required: false, obeyBlockSignal: true },
+  actions: { allowed: ["swap", "transfer", "call"], never: ["sign_message", "add_key", "delete_key", "deploy", "delete_account", "stake"] },
+  contracts: { [DEMO_ACCOUNTS.pool]: { methods: ["deposit", "claim"], maxDepositYocto: "1000000000000000000000000" } },
+  freeze: { onForbiddenAction: true, maxBlocksPerHour: 20 },
 };
 
 // Deterministic ed25519 "1Click manager" key for offline quotes.

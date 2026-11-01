@@ -9,7 +9,7 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
-import { ASSET, buildPreflight, DEMO_ACCOUNTS, SealedWallet, type DeclaredIntent } from "@sealed-intent/core";
+import { ASSET, buildPreflight, DEMO_ACCOUNTS, SealedWallet, type SwapIntent } from "@sealed-intent/core";
 import { makeDisclosure, verifyReceipt, type PrivateOpenings, type Receipt } from "@sealed-intent/receipt";
 import { defaultDirs, runScenarios, toTable } from "@sealed-intent/redteam";
 
@@ -29,7 +29,7 @@ else await offlineDemo();
 async function offlineDemo() {
   const env = buildPreflight({ offline: true, home: dirs.home, outDir: dirs.outDir, ledgerPath: ":memory:" });
   const usdc = (d: number) => String(Math.round(d * 1e6));
-  const intent = (over: Partial<DeclaredIntent>): DeclaredIntent => ({
+  const intent = (over: Partial<SwapIntent>): SwapIntent => ({
     kind: "swap",
     tokenIn: ASSET.USDC,
     tokenOut: ASSET.wNEAR,
@@ -110,7 +110,7 @@ async function liveDemo() {
   const self = get("--account", env.preflight.policy.ownAccounts[0])!;
   const dollars = Number(get("--usd", "1"));
   const agentId = get("--agent", "live-agent")!;
-  const intent: DeclaredIntent = {
+  const intent: SwapIntent = {
     kind: "swap",
     tokenIn: get("--in", ASSET.USDC)!,
     tokenOut: get("--out", ASSET.wNEAR)!,

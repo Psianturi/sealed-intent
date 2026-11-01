@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import type { ExecutableAction } from "./executor";
 import type { DeclaredIntent } from "./intent";
-import type { QuoteResponse } from "./oneclick";
 import { DatabaseSync } from "./sqlite";
 
 /**
@@ -12,7 +12,7 @@ export interface PendingDecision {
   decisionId: string;
   agentId: string;
   intent: DeclaredIntent;
-  live: QuoteResponse;
+  action: ExecutableAction;
   reservationId: string;
   inCents: number;
   verdict: "ALLOW" | "WARN";
@@ -45,7 +45,7 @@ export class PendingStore {
   put(p: PendingDecision): void {
     this.db
       .prepare("INSERT INTO pending (decision_id, agent_id, verdict, payload, reservation_id, in_cents, approved_by, created_at) VALUES (?,?,?,?,?,?,?,?)")
-      .run(p.decisionId, p.agentId, p.verdict, JSON.stringify({ intent: p.intent, live: p.live }), p.reservationId, p.inCents, p.approvedBy ?? null, p.createdAt);
+      .run(p.decisionId, p.agentId, p.verdict, JSON.stringify({ intent: p.intent, action: p.action }), p.reservationId, p.inCents, p.approvedBy ?? null, p.createdAt);
   }
 
   get(decisionId: string): PendingDecision | undefined {
@@ -53,12 +53,12 @@ export class PendingStore {
       | { decision_id: string; agent_id: string; verdict: string; payload: string; reservation_id: string; in_cents: number; approved_by: string | null; created_at: number }
       | undefined;
     if (!row) return undefined;
-    const payload = JSON.parse(row.payload) as { intent: DeclaredIntent; live: QuoteResponse };
+    const payload = JSON.parse(row.payload) as { intent: DeclaredIntent; action: ExecutableAction };
     return {
       decisionId: row.decision_id,
       agentId: row.agent_id,
       intent: payload.intent,
-      live: payload.live,
+      action: payload.action,
       reservationId: row.reservation_id,
       inCents: Number(row.in_cents),
       verdict: row.verdict as "ALLOW" | "WARN",
@@ -71,7 +71,7 @@ export class PendingStore {
     return Number(this.db.prepare("UPDATE pending SET approved_by=? WHERE decision_id=? AND verdict='WARN'").run(approver, decisionId).changes) === 1;
   }
 
-  /** Removes the row. Returns the decision, so a concurrent second execute gets nothing. */
+  /** Removes the row and returns it, so a concurrent second execute gets nothing. */
   take(decisionId: string): PendingDecision | undefined {
     const p = this.get(decisionId);
     if (!p) return undefined;

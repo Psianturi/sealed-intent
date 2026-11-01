@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { ASSET, buildPreflight, DEMO_ACCOUNTS, DEMO_POLICY, signFixtureQuote, type DeclaredIntent, type FixtureBehavior, type QuoteResponse } from "@sealed-intent/core";
+import { ASSET, buildPreflight, DEMO_ACCOUNTS, DEMO_POLICY, signFixtureQuote, type DeclaredIntent, type FixtureBehavior, type QuoteResponse, type SwapIntent } from "@sealed-intent/core";
 
 export interface ScenarioResult {
   id: string;
@@ -21,7 +21,7 @@ export interface RunOptions {
 
 const usdc = (dollars: number) => String(Math.round(dollars * 1e6));
 const AGENT = "treasury-agent";
-const intent = (over: Partial<DeclaredIntent> = {}): DeclaredIntent => ({
+const intent = (over: Partial<SwapIntent> = {}): SwapIntent => ({
   kind: "swap",
   tokenIn: ASSET.USDC,
   tokenOut: ASSET.wNEAR,
@@ -164,6 +164,38 @@ export const SCENARIOS: Spec[] = [
     build: async () => ({ intent: intent({ amountIn: usdc(80) }) }),
   },
   {
+    id: "hidden-add-key",
+    title: "Hidden AddKey (Binance pattern)",
+    attack: "a request to add a full-access key for the attacker, like an EIP-7702 delegation",
+    expected: "BLOCK",
+    mustInclude: ["ACTION_CLASS_FORBIDDEN"],
+    build: async () => ({ intent: { kind: "add_key", details: { publicKey: "ed25519:AttackerKey", permission: "FullAccess" } } as unknown as DeclaredIntent }),
+  },
+  {
+    id: "sign-message",
+    title: "Sign this message",
+    attack: "a NEP-413 message for intents.near that would move the balance held there",
+    expected: "BLOCK",
+    mustInclude: ["ACTION_CLASS_FORBIDDEN"],
+    build: async () => ({ intent: { kind: "sign_message", details: { recipient: "intents.near", message: "{\"intents\":[{\"intent\":\"transfer\"}]}" } } as unknown as DeclaredIntent }),
+  },
+  {
+    id: "owner-method",
+    title: "Owner method on a pool",
+    attack: "the agent owns payout-pool.near; the attacker asks it to call withdraw_all",
+    expected: "BLOCK",
+    mustInclude: ["METHOD_NOT_ALLOWED"],
+    build: async () => ({ intent: { kind: "call", contract: DEMO_ACCOUNTS.pool, method: "withdraw_all", args: {} } as unknown as DeclaredIntent }),
+  },
+  {
+    id: "transfer-lookalike-token",
+    title: "Plain transfer of a look-alike token",
+    attack: "ft_transfer of a token also named USDC from another contract",
+    expected: "BLOCK",
+    mustInclude: ["LOOKALIKE_ASSET"],
+    build: async () => ({ intent: { kind: "transfer", token: ASSET.FAKE_USDC, amount: usdc(10), recipient: DEMO_ACCOUNTS.payroll } as unknown as DeclaredIntent }),
+  },
+  {
     id: "payroll-private",
     title: "Payroll goes private",
     attack: "none: payroll payment; the secret policy forces a Confidential Intents route",
@@ -199,6 +231,7 @@ export async function runScenarios(opts: RunOptions = {}): Promise<ScenarioResul
   }
   results.push(await parallelBurst(opts));
   results.push(await agentIdRotation(opts));
+  results.push(await frozenAfterForbidden(opts));
   return results;
 }
 
@@ -254,6 +287,29 @@ export async function agentIdRotation(opts: RunOptions = {}): Promise<ScenarioRe
     pass: allowed * 45 <= cap && allowed < 6,
     receipts: decisions.map((d) => d.receiptPath),
     note: `Spent ${allowed * 45} (cap ${cap}). The agentId in the request body is ignored; the server names the agent.`,
+  };
+}
+
+/** After a forbidden request the wallet stays frozen: even a clean swap is refused until the owner unfreezes. */
+export async function frozenAfterForbidden(opts: RunOptions = {}): Promise<ScenarioResult> {
+  const env = buildPreflight({ offline: true, home: opts.home, outDir: opts.outDir, ledgerPath: ":memory:" });
+  const first = await env.preflight.evaluate({ agentId: AGENT, intent: { kind: "deploy", details: { wasmTag: "sweeper" } } });
+  const second = await env.preflight.evaluate({ agentId: AGENT, intent: intent() });
+  env.preflight.unfreeze("owner");
+  const third = await env.preflight.evaluate({ agentId: AGENT, intent: intent() });
+  env.ledger.close();
+  const pass = first.reasonCodes.includes("ACTION_CLASS_FORBIDDEN") && second.reasonCodes.includes("WALLET_FROZEN") && third.verdict === "ALLOW";
+  return {
+    id: "frozen-after-forbidden",
+    title: "Frozen after a forbidden request",
+    attack: "DeployContract to the agent's own account, then a clean swap, then the owner unfreezes",
+    expected: "BLOCK",
+    verdict: `${first.verdict}, ${second.verdict}, ${third.verdict}`,
+    codes: [...new Set([...first.reasonCodes, ...second.reasonCodes])],
+    mustInclude: ["ACTION_CLASS_FORBIDDEN", "WALLET_FROZEN"],
+    pass,
+    receipts: [first.receiptPath, second.receiptPath, third.receiptPath],
+    note: "The freeze is stored in SQLite and only the owner token can lift it.",
   };
 }
 

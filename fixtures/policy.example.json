@@ -31,5 +31,14 @@
   "tee": {
     "required": false,
     "obeyBlockSignal": true
+  },
+  "actions": {
+    "allowed": ["swap", "transfer", "call"],
+    "never": ["sign_message", "add_key", "delete_key", "deploy", "delete_account", "stake"]
+  },
+  "contracts": {},
+  "freeze": {
+    "onForbiddenAction": true,
+    "maxBlocksPerHour": 20
   }
 }

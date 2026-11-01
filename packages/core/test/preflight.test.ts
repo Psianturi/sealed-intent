@@ -5,7 +5,7 @@ import { verifyReceipt } from "@sealed-intent/receipt";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildPreflight } from "../src/config";
 import { ASSET, DEMO_ACCOUNTS, signFixtureQuote } from "../src/fixtures";
-import type { DeclaredIntent } from "../src/intent";
+import type { SwapIntent } from "../src/intent";
 
 function setup() {
   const dir = mkdtempSync(join(tmpdir(), "sealed-pf-"));
@@ -13,7 +13,7 @@ function setup() {
 }
 
 const usdc = (dollars: number) => String(Math.round(dollars * 1e6));
-const base = (over: Partial<DeclaredIntent> = {}): DeclaredIntent => ({
+const base = (over: Partial<SwapIntent> = {}): SwapIntent => ({
   kind: "swap",
   tokenIn: ASSET.USDC,
   tokenOut: ASSET.wNEAR,

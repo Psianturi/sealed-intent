@@ -1,4 +1,4 @@
-import type { DeclaredIntent } from "./intent";
+import type { CallIntent, SwapIntent, TransferIntent } from "./intent";
 import type { QuoteResponse, TokenResponse } from "./oneclick";
 import type { Policy } from "./policy";
 import type { QuoteSignatureStatus } from "./quote-signature";
@@ -8,7 +8,7 @@ import type { QuoteSignatureStatus } from "./quote-signature";
  * the secret policy allows. These decide the verdict. No LLM is involved here.
  */
 export interface QuoteCheckInput {
-  intent: DeclaredIntent;
+  intent: SwapIntent;
   policy: Policy;
   tokens: TokenResponse[];
   quote: QuoteResponse;
@@ -57,15 +57,8 @@ export function checkQuote(input: QuoteCheckInput): QuoteCheckResult {
 
   // 3. the assets themselves: allowed, known, and not a look-alike of an allowed one
   for (const assetId of [intent.tokenIn, intent.tokenOut]) {
-    if (policy.allowedAssets.includes(assetId)) continue;
-    const token = findToken(tokens, assetId);
-    const lookalike =
-      token &&
-      policy.allowedAssets.some((allowedId) => {
-        const allowed = findToken(tokens, allowedId);
-        return allowed && allowed.symbol.toUpperCase() === token.symbol.toUpperCase();
-      });
-    block.push(lookalike ? "LOOKALIKE_ASSET" : token ? "ASSET_NOT_ALLOWED" : "UNKNOWN_ASSET");
+    const code = assetCode(assetId, policy, tokens);
+    if (code) block.push(code);
   }
 
   // 4. refunds must come back to the owner (the recipient is judged by the counterparty check)
@@ -103,6 +96,57 @@ export function checkQuote(input: QuoteCheckInput): QuoteCheckResult {
   }
 
   return { block: [...new Set(block)], warn: [...new Set(warn)], metrics };
+}
+
+/** Allowed, known, and not a look-alike of an allowed asset. Returns the block code or null. */
+export function assetCode(assetId: string, policy: Policy, tokens: TokenResponse[]): string | null {
+  if (policy.allowedAssets.includes(assetId)) return null;
+  const token = findToken(tokens, assetId);
+  const lookalike =
+    token &&
+    policy.allowedAssets.some((allowedId) => {
+      const allowed = findToken(tokens, allowedId);
+      return allowed && allowed.symbol.toUpperCase() === token.symbol.toUpperCase();
+    });
+  return lookalike ? "LOOKALIKE_ASSET" : token ? "ASSET_NOT_ALLOWED" : "UNKNOWN_ASSET";
+}
+
+/** A plain NEP-141 transfer: asset, per-transaction cap, reference price. */
+export function checkTransfer(input: { intent: TransferIntent; policy: Policy; tokens: TokenResponse[] }): QuoteCheckResult {
+  const { intent, policy, tokens } = input;
+  const block: string[] = [];
+  const code = assetCode(intent.token, policy, tokens);
+  if (code) block.push(code);
+  const t = findToken(tokens, intent.token);
+  let metrics: QuoteMetrics | undefined;
+  if (!t || !(t.price > 0)) block.push("NO_REFERENCE_PRICE");
+  else {
+    const inUsd = units(intent.amount, t.decimals) * t.price;
+    metrics = { inUsd, minOutUsd: inUsd, lossBps: 0 };
+    if (inUsd > policy.perTxUsd) block.push("ABOVE_PER_TX_LIMIT");
+  }
+  return { block: [...new Set(block)], warn: [], metrics };
+}
+
+/** A contract call: the contract and method must be allow-listed, and the deposit capped. */
+export function checkCall(input: { intent: CallIntent; policy: Policy; tokens: TokenResponse[] }): QuoteCheckResult {
+  const { intent, policy, tokens } = input;
+  const block: string[] = [];
+  const rule = policy.contracts[intent.contract];
+  if (!rule) block.push("CONTRACT_NOT_ALLOWED");
+  else if (!rule.methods.includes(intent.method)) block.push("METHOD_NOT_ALLOWED");
+  else if (BigInt(intent.depositYocto) > BigInt(rule.maxDepositYocto)) block.push("DEPOSIT_TOO_LARGE");
+  let metrics: QuoteMetrics = { inUsd: 0, minOutUsd: 0, lossBps: 0 };
+  if (BigInt(intent.depositYocto) > 0n) {
+    const near = findToken(tokens, "nep141:wrap.near");
+    if (!near || !(near.price > 0)) block.push("NO_REFERENCE_PRICE");
+    else {
+      const inUsd = units(intent.depositYocto, 24) * near.price;
+      metrics = { inUsd, minOutUsd: inUsd, lossBps: 0 };
+      if (inUsd > policy.perTxUsd) block.push("ABOVE_PER_TX_LIMIT");
+    }
+  }
+  return { block: [...new Set(block)], warn: [], metrics };
 }
 
 /** Compare the dry quote with the live quote that carries the deposit address. */

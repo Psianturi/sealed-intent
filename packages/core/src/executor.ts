@@ -2,13 +2,13 @@ import { createHash } from "node:crypto";
 import type { OneClickClient, QuoteResponse } from "./oneclick";
 
 /**
- * Executes an ALLOWed quote. The agent never holds keys.
+ * Executes an ALLOWed action. The agent never holds keys.
  *
  * Status semantics matter for the budget:
  *  - not_sent: nothing left the wallet, the reservation can be released
  *  - submitted / simulated: funds moved (or were simulated to move)
  *  - pending_approval: custody holds it for a human; funds may still move
- *  - unknown: a transfer request was issued and its outcome is unclear; treated as spent
+ *  - unknown: a request was issued and its outcome is unclear; treated as spent
  */
 export type ExecutionStatus = "submitted" | "pending_approval" | "simulated" | "not_sent" | "unknown";
 
@@ -18,23 +18,28 @@ export interface ExecutionResult {
   details?: unknown;
 }
 
+export type ExecutableAction =
+  | { kind: "swap"; quote: QuoteResponse }
+  | { kind: "transfer"; token: string; recipient: string; amount: string; memo?: string }
+  | { kind: "call"; contract: string; method: string; args: Record<string, unknown>; depositYocto: string };
+
 export interface Executor {
   readonly mode: "live" | "offline";
-  execute(quote: QuoteResponse): Promise<ExecutionResult>;
+  execute(action: ExecutableAction): Promise<ExecutionResult>;
 }
 
 export class SimulatedExecutor implements Executor {
   readonly mode = "offline" as const;
-  async execute(quote: QuoteResponse): Promise<ExecutionResult> {
-    const txHash = `sim-${createHash("sha256").update(quote.correlationId).digest("hex").slice(0, 16)}`;
-    return { status: "simulated", txHash, details: { depositAddress: quote.quote.depositAddress } };
+  async execute(action: ExecutableAction): Promise<ExecutionResult> {
+    const seed = action.kind === "swap" ? action.quote.correlationId : JSON.stringify(action);
+    const txHash = `sim-${createHash("sha256").update(seed).digest("hex").slice(0, 16)}`;
+    return { status: "simulated", txHash, details: action.kind === "swap" ? { depositAddress: action.quote.quote.depositAddress } : { kind: action.kind } };
   }
 }
 
 /**
- * Live path: transfer the origin NEP-141 token from the OutLayer custody wallet to
- * the 1Click deposit address (ft_transfer), then submit the tx hash to 1Click.
- * Scope: origin assets that are NEP-141 tokens on NEAR.
+ * Live path through OutLayer custody. Swaps move the origin NEP-141 token to the 1Click
+ * deposit address and report the tx; transfers call ft_transfer; calls go to /wallet/v1/call.
  */
 export class OutLayerExecutor implements Executor {
   readonly mode = "live" as const;
@@ -75,51 +80,61 @@ export class OutLayerExecutor implements Executor {
     return JSON.parse(Buffer.from(json.result.result).toString("utf8"));
   }
 
-  async execute(quote: QuoteResponse): Promise<ExecutionResult> {
-    const depositAddress = quote.quote.depositAddress;
-    if (!depositAddress) return { status: "not_sent", details: "live quote has no depositAddress" };
-    const origin = quote.quoteRequest.originAsset;
-    if (!origin.startsWith("nep141:")) return { status: "not_sent", details: `origin ${origin} is not a NEP-141 token on NEAR` };
-    const contract = origin.slice("nep141:".length);
+  private txHashOf(r: Record<string, unknown>): string | undefined {
+    return [r.tx_hash, r.transaction_hash, r.hash].find((v): v is string => typeof v === "string");
+  }
 
+  /** Registers storage if needed (nothing sent yet), then issues the transfer. */
+  private async ftTransfer(contract: string, to: string, amount: string, memo?: string): Promise<ExecutionResult> {
     try {
-      const storage = await this.viewCall(contract, "storage_balance_of", { account_id: depositAddress });
+      const storage = await this.viewCall(contract, "storage_balance_of", { account_id: to });
       if (storage === null) {
         await this.outlayer("/wallet/v1/call", {
           receiver_id: contract,
           method_name: "storage_deposit",
-          args: { account_id: depositAddress, registration_only: true },
+          args: { account_id: to, registration_only: true },
           deposit: "1250000000000000000000",
         });
       }
     } catch (err) {
       return { status: "not_sent", details: (err as Error).message };
     }
+    return this.call(contract, "ft_transfer", { receiver_id: to, amount, memo }, "1");
+  }
 
-    // From here on a transfer request has been issued: any failure is "unknown", not "not_sent".
-    let transfer: Record<string, unknown>;
+  /** From the moment the request is issued, any failure is "unknown", never "not_sent". */
+  private async call(receiverId: string, method: string, args: Record<string, unknown>, depositYocto: string): Promise<ExecutionResult> {
+    let r: Record<string, unknown>;
     try {
-      transfer = await this.outlayer<Record<string, unknown>>("/wallet/v1/call", {
-        receiver_id: contract,
-        method_name: "ft_transfer",
-        args: { receiver_id: depositAddress, amount: quote.quote.amountIn, memo: quote.quote.depositMemo },
-        deposit: "1",
-      });
+      r = await this.outlayer<Record<string, unknown>>("/wallet/v1/call", { receiver_id: receiverId, method_name: method, args, deposit: depositYocto });
     } catch (err) {
       return { status: "unknown", details: (err as Error).message };
     }
-    if (transfer.status === "pending_approval") return { status: "pending_approval", details: transfer };
+    if (r.status === "pending_approval") return { status: "pending_approval", details: r };
+    const txHash = this.txHashOf(r);
+    return txHash ? { status: "submitted", txHash, details: r } : { status: "unknown", details: r };
+  }
 
-    const txHash = [transfer.tx_hash, transfer.transaction_hash, transfer.hash].find((v): v is string => typeof v === "string");
-    if (!txHash) return { status: "unknown", details: transfer };
+  async execute(action: ExecutableAction): Promise<ExecutionResult> {
+    if (action.kind === "call") return this.call(action.contract, action.method, action.args, action.depositYocto);
 
+    const asset = action.kind === "swap" ? action.quote.quoteRequest.originAsset : action.token;
+    if (!asset.startsWith("nep141:")) return { status: "not_sent", details: `${asset} is not a NEP-141 token on NEAR` };
+    const contract = asset.slice("nep141:".length);
+
+    if (action.kind === "transfer") return this.ftTransfer(contract, action.recipient, action.amount, action.memo);
+
+    const depositAddress = action.quote.quote.depositAddress;
+    if (!depositAddress) return { status: "not_sent", details: "live quote has no depositAddress" };
+    const result = await this.ftTransfer(contract, depositAddress, action.quote.quote.amountIn, action.quote.quote.depositMemo);
+    if (result.status !== "submitted") return result;
     const notes: string[] = [];
     try {
       const sender = await this.outlayer<{ address?: string; near_account_id?: string }>("/wallet/v1/address?chain=near");
-      await this.oneclick.submitDeposit?.(txHash, depositAddress, sender.address ?? sender.near_account_id);
+      await this.oneclick.submitDeposit?.(result.txHash!, depositAddress, sender.address ?? sender.near_account_id);
     } catch (err) {
       notes.push(`deposit submit failed, funds already sent: ${(err as Error).message}`);
     }
-    return { status: "submitted", txHash, details: { ...transfer, notes } };
+    return { ...result, details: { ...(result.details as object), notes } };
   }
 }

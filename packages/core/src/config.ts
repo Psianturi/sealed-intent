@@ -15,6 +15,7 @@ import {
 } from "./fixtures";
 import { HttpOneClickClient } from "./oneclick";
 import { PendingStore } from "./pending";
+import { FreezeStore } from "./freeze";
 import { readSealedPolicy, type Policy } from "./policy";
 import { Preflight } from "./preflight";
 import { ReceiptStore } from "./store";
@@ -39,6 +40,7 @@ export interface Built {
   preflight: Preflight;
   ledger: BudgetLedger;
   pending: PendingStore;
+  freeze: FreezeStore;
   oneclick: FixtureOneClickClient | HttpOneClickClient;
   blocklist: SharedBlocklist;
   memory: CounterpartyMemory;
@@ -51,6 +53,7 @@ export function buildPreflight(opts: BuildOptions): Built {
   const ledgerPath = opts.ledgerPath ?? join(home, "budget.db");
   const ledger = new BudgetLedger(ledgerPath);
   const pending = new PendingStore(ledgerPath);
+  const freeze = new FreezeStore(ledgerPath);
   const memory = new CounterpartyMemory(opts.ledgerPath === ":memory:" ? ":memory:" : join(home, "counterparty.db"));
 
   if (opts.offline) {
@@ -64,6 +67,7 @@ export function buildPreflight(opts: BuildOptions): Built {
       policy: opts.policy ?? DEMO_POLICY,
       ledger,
       pending,
+      freeze,
       issuer,
       store,
       executor: opts.executor ?? new SimulatedExecutor(),
@@ -71,7 +75,7 @@ export function buildPreflight(opts: BuildOptions): Built {
       tee: new SimulatedTeeChecker(join(home, "sim-enclave.key")),
       quoteManagerPublicKey: FIXTURE_MANAGER_PUBLIC_KEY,
     });
-    return { preflight, ledger, pending, oneclick, blocklist, memory };
+    return { preflight, ledger, pending, freeze, oneclick, blocklist, memory };
   }
 
   const key = process.env.SEALED_POLICY_KEY;
@@ -88,13 +92,14 @@ export function buildPreflight(opts: BuildOptions): Built {
     policy,
     ledger,
     pending,
+    freeze,
     issuer,
     store,
     executor: process.env.OUTLAYER_API_KEY ? new OutLayerExecutor(oneclick) : new SimulatedExecutor(),
     counterparty: { blocklist, chain: new RpcChainReader(), memory },
     tee: process.env.NEARAI_API_KEY ? new NearAiCloudChecker() : undefined,
   });
-  return { preflight, ledger, pending, oneclick, blocklist, memory };
+  return { preflight, ledger, pending, freeze, oneclick, blocklist, memory };
 }
 
 export function newPolicyKey(): string {
