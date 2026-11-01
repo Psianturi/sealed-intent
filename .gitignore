@@ -1,10 +1,46 @@
+# dependencies and build
 node_modules/
+dist/
+*.tsbuildinfo
+
+# runtime state (receipts, openings, ledgers, keys)
 .sealed/
 out/
+replays/*/
+!replays/official/
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+*.pem
+*.key
+
+# secrets
 .env
 .env.*
 !.env.example
+*.secret
+*secrets*.json
+
+# internal notes and AI tool folders
+docs/
+notes/
+agent/
+agents/
+.agent/
+.agents/
+.kilo/
+.kilocode/
+.claude/
+.cursor/
+.codex/
+.aider*
+CLAUDE.md
+AGENTS.md
+
+# editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

@@ -20,8 +20,8 @@ export interface RunOptions {
 }
 
 const usdc = (dollars: number) => String(Math.round(dollars * 1e6));
+const AGENT = "treasury-agent";
 const intent = (over: Partial<DeclaredIntent> = {}): DeclaredIntent => ({
-  agentId: "treasury-agent",
   kind: "swap",
   tokenIn: ASSET.USDC,
   tokenOut: ASSET.wNEAR,
@@ -178,7 +178,7 @@ export async function runScenarios(opts: RunOptions = {}): Promise<ScenarioResul
   for (const spec of SCENARIOS) {
     const fresh = buildPreflight({ offline: true, home: opts.home, outDir: opts.outDir, ledgerPath: ":memory:" });
     if (spec.behavior && "behavior" in fresh.oneclick) fresh.oneclick.behavior = spec.behavior;
-    const d = await fresh.preflight.evaluate(await spec.build());
+    const d = await fresh.preflight.evaluate({ agentId: AGENT, ...(await spec.build()) });
     if (d.verdict === "ALLOW") await fresh.preflight.execute(d.decisionId);
     const codes = [...d.reasonCodes, ...d.warnCodes];
     const pass = d.verdict === spec.expected && spec.mustInclude.every((c) => codes.includes(c));
@@ -198,6 +198,7 @@ export async function runScenarios(opts: RunOptions = {}): Promise<ScenarioResul
     fresh.memory.close();
   }
   results.push(await parallelBurst(opts));
+  results.push(await agentIdRotation(opts));
   return results;
 }
 
@@ -207,7 +208,7 @@ export async function runScenarios(opts: RunOptions = {}): Promise<ScenarioResul
  */
 export async function parallelBurst(opts: RunOptions = {}): Promise<ScenarioResult> {
   const env = buildPreflight({ offline: true, home: opts.home, outDir: opts.outDir, ledgerPath: ":memory:" });
-  const decisions = await Promise.all(Array.from({ length: 10 }, () => env.preflight.evaluate({ intent: intent({ amountIn: usdc(15) }) })));
+  const decisions = await Promise.all(Array.from({ length: 10 }, () => env.preflight.evaluate({ agentId: AGENT, intent: intent({ amountIn: usdc(15) }) })));
   env.ledger.close();
   const allowed = decisions.filter((d) => d.verdict === "ALLOW").length;
   const naive = await naiveCounterBurst(10, 1500, DEMO_POLICY.dailyUsd * 100);
@@ -224,6 +225,35 @@ export async function parallelBurst(opts: RunOptions = {}): Promise<ScenarioResu
     pass: allowed * 15 <= cap && allowed + budgetBlocked === 10 && budgetBlocked > 0,
     receipts: decisions.map((d) => d.receiptPath),
     note: `Sealed Intent spent $${allowed * 15} (cap $${cap}). A read-then-write counter, as described in OutLayer's docs, let ${naive.allowed}/10 through = $${naive.allowed * 15}.`,
+  };
+}
+
+/**
+ * The agent writes a different agentId into every request, hoping for a fresh budget.
+ * Identity comes from the server, so the cap must still hold.
+ */
+export async function agentIdRotation(opts: RunOptions = {}): Promise<ScenarioResult> {
+  const env = buildPreflight({ offline: true, home: opts.home, outDir: opts.outDir, ledgerPath: ":memory:" });
+  const decisions = [];
+  for (let i = 0; i < 6; i++) {
+    const d = await env.preflight.evaluate({ agentId: AGENT, intent: { ...intent({ amountIn: usdc(45) }), agentId: `agent-${i}` } });
+    if (d.verdict === "ALLOW") await env.preflight.execute(d.decisionId);
+    decisions.push(d);
+  }
+  env.ledger.close();
+  const allowed = decisions.filter((d) => d.verdict === "ALLOW").length;
+  const cap = Math.min(DEMO_POLICY.hourlyUsd, DEMO_POLICY.dailyUsd);
+  return {
+    id: "agent-id-rotation",
+    title: "Agent rotates its id",
+    attack: `6 x $45 with a different agentId in every request, against a secret ${cap} cap`,
+    expected: "BLOCK",
+    verdict: `${allowed}/6 ALLOW`,
+    codes: [...new Set(decisions.flatMap((d) => d.reasonCodes))],
+    mustInclude: [],
+    pass: allowed * 45 <= cap && allowed < 6,
+    receipts: decisions.map((d) => d.receiptPath),
+    note: `Spent ${allowed * 45} (cap ${cap}). The agentId in the request body is ignored; the server names the agent.`,
   };
 }
 

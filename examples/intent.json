@@ -1,0 +1,12 @@
+{
+  "intent": {
+    "kind": "swap",
+    "tokenIn": "nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+    "tokenOut": "nep141:wrap.near",
+    "amountIn": "10000000",
+    "recipient": "sealed-demo.near",
+    "refundTo": "sealed-demo.near",
+    "purpose": "general",
+    "taskText": "Swap 10 USDC to wNEAR for the treasury"
+  }
+}

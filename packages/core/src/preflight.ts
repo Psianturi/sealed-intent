@@ -4,8 +4,9 @@ import { checkDryLiveDrift, checkQuote, type QuoteMetrics } from "./checks";
 import { assessCounterparty, type CounterpartyDeps } from "./counterparty";
 import type { Executor, ExecutionResult } from "./executor";
 import { scanTaskText } from "./injection";
-import { DeclaredIntent } from "./intent";
+import { AgentId, DeclaredIntent } from "./intent";
 import type { OneClickClient, QuoteRequest, QuoteResponse } from "./oneclick";
+import type { PendingStore } from "./pending";
 import type { Policy } from "./policy";
 import { checkQuoteSignature } from "./quote-signature";
 import type { ReceiptStore } from "./store";
@@ -15,6 +16,7 @@ export interface PreflightDeps {
   oneclick: OneClickClient;
   policy: Policy;
   ledger: BudgetLedger;
+  pending: PendingStore;
   issuer: IssuerKey;
   store: ReceiptStore;
   executor: Executor;
@@ -28,26 +30,20 @@ export interface PreflightDeps {
 export interface Decision {
   decisionId: string;
   verdict: Verdict;
-  /** why it was blocked */
   reasonCodes: string[];
-  /** why a human must look at it (WARN) */
   warnCodes: string[];
   route: Receipt["public"]["route"];
   receiptPath: string;
 }
 
-interface Pending {
-  intent: DeclaredIntent;
-  live: QuoteResponse;
-  reservationId: string;
-  inCents: number;
-  verdict: "ALLOW" | "WARN";
-  approvedBy?: string;
+export interface EvaluateInput {
+  /** Who is asking. Set by the server from the caller's credential, never from the request body. */
+  agentId: string;
+  intent: unknown;
+  agentQuote?: QuoteResponse;
 }
 
 export class Preflight {
-  private pending = new Map<string, Pending>();
-
   constructor(private readonly deps: PreflightDeps) {}
 
   get mode(): "live" | "offline" {
@@ -58,16 +54,18 @@ export class Preflight {
     return this.deps.policy;
   }
 
-  async evaluate(input: { intent: unknown; agentQuote?: QuoteResponse }): Promise<Decision & { metrics?: QuoteMetrics }> {
+  async evaluate(input: EvaluateInput): Promise<Decision & { metrics?: QuoteMetrics }> {
     const { policy, oneclick } = this.deps;
     const block = new Set<string>();
     const review = new Set<string>();
     const notes: string[] = [];
 
+    const agent = AgentId.safeParse(input.agentId);
     const parsed = DeclaredIntent.safeParse(input.intent);
-    if (!parsed.success) {
-      return this.finish({ verdict: "BLOCK", block: ["INVALID_INTENT"], review: [], route: "public" });
+    if (!agent.success || !parsed.success) {
+      return this.finish({ verdict: "BLOCK", block: ["INVALID_INTENT"], review: [], route: "public", agentId: agent.success ? agent.data : "invalid" });
     }
+    const agentId = agent.data;
     const intent = parsed.data;
     const tokens = await oneclick.getTokens();
     const route: Receipt["public"]["route"] = policy.privatePurposes.includes(intent.purpose) ? `confidential-${policy.confidentialLevel}` : "public";
@@ -79,7 +77,6 @@ export class Preflight {
       r.block.forEach((c) => block.add(c === "QUOTE_SIGNATURE_INVALID" ? "AGENT_QUOTE_FORGED" : `AGENT_${c}`));
     }
 
-    // Our own dry quote, built from the declared intent only.
     const deadlineSec = Math.min(policy.maxDeadlineSec, 600);
     const req: QuoteRequest = {
       dry: true,
@@ -112,12 +109,10 @@ export class Preflight {
       notes.push(`quote error: ${(err as Error).message}`);
     }
 
-    // Who receives the money
-    const cp = await assessCounterparty({ agentId: intent.agentId, account: intent.recipient, policy }, this.deps.counterparty);
+    const cp = await assessCounterparty({ agentId, account: intent.recipient, policy }, this.deps.counterparty);
     cp.block.forEach((c) => block.add(c));
     cp.review.forEach((c) => review.add(c));
 
-    // Untrusted task text
     const scan = scanTaskText(intent.taskText, [...policy.allowedRecipients, ...policy.ownAccounts, intent.recipient, intent.refundTo]);
     if (scan.codes.length) (policy.injection.block ? block : review).add("PROMPT_INJECTION_SUSPECTED");
 
@@ -137,7 +132,6 @@ export class Preflight {
       }
     }
 
-    // Private second opinion inside a TEE
     let tee: TeeEvidence | undefined;
     const quoteForTee = input.agentQuote ?? live ?? dry;
     if (this.deps.tee && quoteForTee) {
@@ -157,15 +151,15 @@ export class Preflight {
     let reservationId: string | undefined;
     const inCents = metrics ? Math.ceil(metrics.inUsd * 100) : 0;
     if (block.size === 0 && metrics) {
-      const res = this.reserve(intent.agentId, inCents);
+      const res = this.reserve(agentId, inCents);
       if (res.ok) reservationId = res.reservationId;
       else block.add(res.reason);
     }
 
     const verdict: Verdict = block.size ? "BLOCK" : review.size ? "WARN" : "ALLOW";
-    const decision = await this.finish({ verdict, block: [...block], review: [...review], intent, route, dry, live, tee, reservationId });
+    const decision = await this.finish({ verdict, block: [...block], review: [...review], intent, agentId, route, dry, live, tee, reservationId });
     if (verdict !== "BLOCK" && live && reservationId) {
-      this.pending.set(decision.decisionId, { intent, live, reservationId, inCents, verdict });
+      this.deps.pending.put({ decisionId: decision.decisionId, agentId, intent, live, reservationId, inCents, verdict, createdAt: Date.now() });
     }
     return { ...decision, metrics };
   }
@@ -182,6 +176,7 @@ export class Preflight {
     block: string[];
     review: string[];
     intent?: DeclaredIntent;
+    agentId: string;
     route: Receipt["public"]["route"];
     dry?: QuoteResponse;
     live?: QuoteResponse;
@@ -204,7 +199,7 @@ export class Preflight {
         },
         privateValues: args.intent
           ? {
-              agentId: args.intent.agentId,
+              agentId: args.agentId,
               tokenIn: args.intent.tokenIn,
               tokenOut: args.intent.tokenOut,
               amountIn: args.intent.amountIn,
@@ -214,7 +209,7 @@ export class Preflight {
               depositAddress: args.live?.quote.depositAddress,
               taskText: args.intent.taskText,
             }
-          : {},
+          : { agentId: args.agentId },
         policy: this.deps.policy,
         tee: args.tee,
       },
@@ -231,57 +226,63 @@ export class Preflight {
     };
   }
 
-  /** A human approves a WARN decision. The approval is logged next to the receipt. */
+  /** A human approves a WARN decision. Callers must authenticate the human before calling this. */
   approve(decisionId: string, approver: string): { ok: boolean; details?: string } {
-    const p = this.pending.get(decisionId);
+    const p = this.deps.pending.get(decisionId);
     if (!p) return { ok: false, details: "unknown, blocked or already executed decision" };
     if (p.verdict !== "WARN") return { ok: false, details: "decision does not need approval" };
-    p.approvedBy = approver;
+    this.deps.pending.approve(decisionId, approver);
     this.deps.store.saveExecution(`${decisionId}.approval`, { decisionId, approvedBy: approver, at: new Date().toISOString() });
     return { ok: true };
   }
 
   /** A human rejects a WARN decision: budget is released immediately. */
   reject(decisionId: string, approver: string): { ok: boolean } {
-    const p = this.pending.get(decisionId);
+    const p = this.deps.pending.take(decisionId);
     if (!p) return { ok: false };
-    this.pending.delete(decisionId);
     this.deps.ledger.release(p.reservationId);
     this.deps.store.saveExecution(`${decisionId}.approval`, { decisionId, rejectedBy: approver, at: new Date().toISOString() });
     return { ok: true };
   }
 
-  /** Execute an ALLOWed (or WARN + approved) decision. Budget is committed on success, released on failure. */
-  async execute(decisionId: string): Promise<ExecutionResult & { decisionId: string }> {
-    const p = this.pending.get(decisionId);
-    if (!p) return { decisionId, status: "failed", details: "unknown, blocked or already executed decision" };
-    if (p.verdict === "WARN" && !p.approvedBy) return { decisionId, status: "failed", details: "WARN decision needs human approval first" };
-    this.pending.delete(decisionId);
+  /**
+   * Execute an ALLOWed (or WARN + approved) decision. The budget stays spent unless the
+   * executor says nothing left the wallet. If agentId is given it must match the decision.
+   */
+  async execute(decisionId: string, agentId?: string): Promise<ExecutionResult & { decisionId: string }> {
+    const peek = this.deps.pending.get(decisionId);
+    if (!peek) return { decisionId, status: "not_sent", details: "unknown, blocked or already executed decision" };
+    if (agentId !== undefined && peek.agentId !== agentId) return { decisionId, status: "not_sent", details: "decision belongs to another agent" };
+    if (peek.verdict === "WARN" && !peek.approvedBy) return { decisionId, status: "not_sent", details: "WARN decision needs human approval first" };
+    const p = this.deps.pending.take(decisionId);
+    if (!p) return { decisionId, status: "not_sent", details: "already being executed" };
+
     const deadline = Date.parse(p.live.quote.deadline ?? p.live.quoteRequest.deadline);
     if (Number.isFinite(deadline) && deadline < Date.now()) {
       this.deps.ledger.release(p.reservationId);
-      return { decisionId, status: "failed", details: "quote expired; run preflight again" };
+      return { decisionId, status: "not_sent", details: "quote expired; run preflight again" };
     }
     if ((await checkQuoteSignature(p.live, this.deps.quoteManagerPublicKey)) !== "valid") {
       this.deps.ledger.release(p.reservationId);
-      return { decisionId, status: "failed", details: "quote signature no longer verifies" };
+      return { decisionId, status: "not_sent", details: "quote signature no longer verifies" };
     }
     // a WARN that waited for a human may have outlived its reservation: re-check the budget
     if (!this.deps.ledger.commit(p.reservationId)) {
-      const again = this.reserve(p.intent.agentId, p.inCents);
-      if (!again.ok) return { decisionId, status: "failed", details: again.reason };
+      const again = this.reserve(p.agentId, p.inCents);
+      if (!again.ok) return { decisionId, status: "not_sent", details: again.reason };
       p.reservationId = again.reservationId;
       this.deps.ledger.commit(p.reservationId);
     }
+
+    let result: ExecutionResult;
     try {
-      const result = await this.deps.executor.execute(p.live);
-      if (result.status === "failed") this.deps.ledger.uncommit(p.reservationId);
-      else this.deps.counterparty.memory.recordInteraction(p.intent.agentId, p.intent.recipient);
-      this.deps.store.saveExecution(decisionId, { decisionId, at: new Date().toISOString(), approvedBy: p.approvedBy, ...result });
-      return { decisionId, ...result };
+      result = await this.deps.executor.execute(p.live);
     } catch (err) {
-      this.deps.ledger.uncommit(p.reservationId);
-      return { decisionId, status: "failed", details: (err as Error).message };
+      result = { status: "unknown", details: (err as Error).message };
     }
+    if (result.status === "not_sent") this.deps.ledger.uncommit(p.reservationId);
+    else if (result.status !== "unknown") this.deps.counterparty.memory.recordInteraction(p.agentId, p.intent.recipient);
+    this.deps.store.saveExecution(decisionId, { decisionId, agentId: p.agentId, at: new Date().toISOString(), approvedBy: p.approvedBy, ...result });
+    return { decisionId, ...result };
   }
 }

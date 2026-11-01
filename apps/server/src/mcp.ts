@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
- * MCP server (stdio). Give these tools to an agent INSTEAD of raw wallet/swap tools:
- * the agent can ask, but only Sealed Intent can move money.
+ * MCP server (stdio). One process serves one agent, named by SEALED_AGENT_ID.
+ * Give these tools to an agent INSTEAD of raw wallet/swap tools.
  *
  * Claude Code:  claude mcp add sealed-intent -- pnpm --dir /path/to/sealed-intent -s mcp
  */
@@ -12,6 +12,7 @@ import { z } from "zod";
 import { createApp } from "./app";
 
 const { preflight, blocklist, offline } = createApp();
+const agentId = process.env.SEALED_AGENT_ID ?? "mcp-agent";
 const receipts = new ReceiptStore();
 const server = new McpServer({ name: "sealed-intent", version: "0.1.0" });
 
@@ -24,7 +25,6 @@ server.registerTool(
     description:
       "Declare what you want to swap. Sealed Intent fetches and checks the NEAR Intents quote and the receiver against a secret policy and returns ALLOW, WARN (a human must approve first) or BLOCK with generic reason codes. Call execute_swap with the decisionId only after ALLOW, or after a human approved a WARN.",
     inputSchema: {
-      agentId: z.string(),
       tokenIn: z.string().describe("1Click assetId, e.g. nep141:wrap.near"),
       tokenOut: z.string(),
       amountIn: z.string().describe("smallest units"),
@@ -35,7 +35,7 @@ server.registerTool(
     },
   },
   async (args) => {
-    const { metrics: _m, receiptPath: _p, ...decision } = await preflight.evaluate({ intent: { kind: "swap", ...args } });
+    const { metrics: _m, receiptPath: _p, ...decision } = await preflight.evaluate({ agentId, intent: { kind: "swap", ...args } });
     return text({ mode: offline ? "offline" : "live", ...decision });
   },
 );
@@ -47,7 +47,7 @@ server.registerTool(
     description: "Executes a decision that preflight_swap ALLOWed. Keys never leave the custody enclave.",
     inputSchema: { decisionId: z.string() },
   },
-  async ({ decisionId }) => text(await preflight.execute(decisionId)),
+  async ({ decisionId }) => text(await preflight.execute(decisionId, agentId)),
 );
 
 server.registerTool(
@@ -55,13 +55,12 @@ server.registerTool(
   {
     title: "Report a bad counterparty to the shared blocklist",
     description: "Add an account to the shared blocklist. Evidence (tx hash, receipt id, URL) is required. Other agents will be blocked from paying it.",
-    inputSchema: { account: z.string(), reason: z.string(), evidence: z.array(z.string()).min(1), reportedBy: z.string() },
+    inputSchema: { account: z.string(), reason: z.string(), evidence: z.array(z.string()).min(1) },
   },
-  async (args) => text(blocklist.report(args)),
+  async (args) => text(blocklist.report({ ...args, reportedBy: agentId })),
 );
 
-// Note: there is deliberately no "approve" tool. Approving a WARN is a human action
-// (REST /v1/approve on localhost, or the SealedWallet HumanApprover callback).
+// There is deliberately no approve tool: approving a WARN is a human action with the owner token.
 
 server.registerTool(
   "get_receipt",

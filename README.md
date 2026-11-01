@@ -35,7 +35,7 @@ pnpm verify out/receipts
 | `pnpm verify out/receipts` | One `VALID` line per receipt, with verdict and reason codes |
 | `pnpm verify <receipt> --disclose out/disclosures/<id>.recipient.json` | Only the recipient is revealed, and it is proven to match the receipt |
 | Edit `"verdict"` in any receipt, then `pnpm verify` it | `INVALID ... issuer signature invalid` |
-| `pnpm server` then `curl -X POST localhost:8787/v1/preflight -d @intent.json` | JSON decision (`ALLOW` / `WARN` / `BLOCK`) |
+| `pnpm rest` then `curl -X POST localhost:8787/v1/preflight -H 'Content-Type: application/json' -d @examples/intent.json` | JSON decision (`ALLOW` / `WARN` / `BLOCK`). Approving a WARN needs the owner token printed at startup |
 | `pnpm mcp` | MCP server with tools `preflight_swap`, `execute_swap`, `report_counterparty`, `get_receipt` |
 
 ---
@@ -165,7 +165,7 @@ cp .env.example .env              # fill ONECLICK_JWT (optional), NEARAI_API_KEY
 pnpm policy:seal fixtures/policy.example.json   # prints a SEALED_POLICY_KEY the first time; put it in .env
 pnpm demo --live --usd 1          # preflight only
 pnpm demo --live --usd 1 --yes    # preflight + execute through OutLayer custody
-SEALED_MODE=live pnpm server      # REST in live mode (binds 127.0.0.1)
+SEALED_MODE=live pnpm rest        # REST in live mode (binds 127.0.0.1); set SEALED_AGENT_TOKENS and SEALED_OWNER_TOKEN
 ```
 
 NEAR Intents has no testnet. Use a separate dev account and tiny amounts.

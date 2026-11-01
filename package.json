@@ -14,7 +14,7 @@
     "redteam": "tsx packages/redteam/src/cli.ts",
     "verify": "tsx packages/receipt/src/cli.ts",
     "disclose": "tsx packages/receipt/src/disclose-cli.ts",
-    "server": "tsx apps/server/src/rest.ts",
+    "rest": "tsx apps/server/src/rest.ts",
     "mcp": "tsx apps/server/src/mcp.ts",
     "policy:seal": "tsx scripts/seal-policy.ts",
     "test": "vitest run",

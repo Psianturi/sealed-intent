@@ -3,9 +3,9 @@ import { z } from "zod";
 /**
  * What the agent SAYS it wants to do. Everything else (the quote, the route, the
  * deposit address) is fetched and checked by Sealed Intent, never trusted from the agent.
+ * The agent's identity is not part of the intent: the server decides who is asking.
  */
 export const DeclaredIntent = z.object({
-  agentId: z.string().min(1),
   kind: z.literal("swap"),
   tokenIn: z.string().min(3).describe("1Click assetId, e.g. nep141:wrap.near"),
   tokenOut: z.string().min(3),
@@ -18,3 +18,5 @@ export const DeclaredIntent = z.object({
   taskText: z.string().max(4000).optional(),
 });
 export type DeclaredIntent = z.infer<typeof DeclaredIntent>;
+
+export const AgentId = z.string().min(1).max(128);

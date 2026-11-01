@@ -2,13 +2,18 @@ import { createHash } from "node:crypto";
 import type { OneClickClient, QuoteResponse } from "./oneclick";
 
 /**
- * Executes an ALLOWed quote. The agent never holds keys:
- *  - live: OutLayer Agent Custody signs inside a TDX enclave (its own policy is a
- *    second layer), then the deposit tx is reported to 1Click.
- *  - offline: simulated, so the demo runs without funds.
+ * Executes an ALLOWed quote. The agent never holds keys.
+ *
+ * Status semantics matter for the budget:
+ *  - not_sent: nothing left the wallet, the reservation can be released
+ *  - submitted / simulated: funds moved (or were simulated to move)
+ *  - pending_approval: custody holds it for a human; funds may still move
+ *  - unknown: a transfer request was issued and its outcome is unclear; treated as spent
  */
+export type ExecutionStatus = "submitted" | "pending_approval" | "simulated" | "not_sent" | "unknown";
+
 export interface ExecutionResult {
-  status: "submitted" | "pending_approval" | "simulated" | "failed";
+  status: ExecutionStatus;
   txHash?: string;
   details?: unknown;
 }
@@ -29,9 +34,7 @@ export class SimulatedExecutor implements Executor {
 /**
  * Live path: transfer the origin NEP-141 token from the OutLayer custody wallet to
  * the 1Click deposit address (ft_transfer), then submit the tx hash to 1Click.
- *
- * Scope: origin assets that are NEP-141 tokens on NEAR (e.g. USDC, USDT, wNEAR).
- * Built from the public OutLayer and 1Click docs; run it first with a tiny amount.
+ * Scope: origin assets that are NEP-141 tokens on NEAR.
  */
 export class OutLayerExecutor implements Executor {
   readonly mode = "live" as const;
@@ -74,35 +77,49 @@ export class OutLayerExecutor implements Executor {
 
   async execute(quote: QuoteResponse): Promise<ExecutionResult> {
     const depositAddress = quote.quote.depositAddress;
-    if (!depositAddress) return { status: "failed", details: "live quote has no depositAddress" };
+    if (!depositAddress) return { status: "not_sent", details: "live quote has no depositAddress" };
     const origin = quote.quoteRequest.originAsset;
-    if (!origin.startsWith("nep141:")) return { status: "failed", details: `origin ${origin} is not a NEP-141 token on NEAR` };
+    if (!origin.startsWith("nep141:")) return { status: "not_sent", details: `origin ${origin} is not a NEP-141 token on NEAR` };
     const contract = origin.slice("nep141:".length);
 
-    // the deposit account needs storage on the token contract before it can receive
-    const storage = await this.viewCall(contract, "storage_balance_of", { account_id: depositAddress });
-    if (storage === null) {
-      await this.outlayer("/wallet/v1/call", {
-        receiver_id: contract,
-        method_name: "storage_deposit",
-        args: { account_id: depositAddress, registration_only: true },
-        deposit: "1250000000000000000000",
-      });
+    try {
+      const storage = await this.viewCall(contract, "storage_balance_of", { account_id: depositAddress });
+      if (storage === null) {
+        await this.outlayer("/wallet/v1/call", {
+          receiver_id: contract,
+          method_name: "storage_deposit",
+          args: { account_id: depositAddress, registration_only: true },
+          deposit: "1250000000000000000000",
+        });
+      }
+    } catch (err) {
+      return { status: "not_sent", details: (err as Error).message };
     }
 
-    const transfer = await this.outlayer<Record<string, unknown>>("/wallet/v1/call", {
-      receiver_id: contract,
-      method_name: "ft_transfer",
-      args: { receiver_id: depositAddress, amount: quote.quote.amountIn, memo: quote.quote.depositMemo },
-      deposit: "1",
-    });
+    // From here on a transfer request has been issued: any failure is "unknown", not "not_sent".
+    let transfer: Record<string, unknown>;
+    try {
+      transfer = await this.outlayer<Record<string, unknown>>("/wallet/v1/call", {
+        receiver_id: contract,
+        method_name: "ft_transfer",
+        args: { receiver_id: depositAddress, amount: quote.quote.amountIn, memo: quote.quote.depositMemo },
+        deposit: "1",
+      });
+    } catch (err) {
+      return { status: "unknown", details: (err as Error).message };
+    }
     if (transfer.status === "pending_approval") return { status: "pending_approval", details: transfer };
 
     const txHash = [transfer.tx_hash, transfer.transaction_hash, transfer.hash].find((v): v is string => typeof v === "string");
-    if (!txHash) return { status: "failed", details: transfer };
+    if (!txHash) return { status: "unknown", details: transfer };
 
-    const sender = await this.outlayer<{ address?: string; near_account_id?: string }>("/wallet/v1/address?chain=near");
-    await this.oneclick.submitDeposit?.(txHash, depositAddress, sender.address ?? sender.near_account_id);
-    return { status: "submitted", txHash, details: transfer };
+    const notes: string[] = [];
+    try {
+      const sender = await this.outlayer<{ address?: string; near_account_id?: string }>("/wallet/v1/address?chain=near");
+      await this.oneclick.submitDeposit?.(txHash, depositAddress, sender.address ?? sender.near_account_id);
+    } catch (err) {
+      notes.push(`deposit submit failed, funds already sent: ${(err as Error).message}`);
+    }
+    return { status: "submitted", txHash, details: { ...transfer, notes } };
   }
 }

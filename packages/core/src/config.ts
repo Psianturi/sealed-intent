@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { loadOrCreateIssuerKey } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
 import { CounterpartyMemory, FixtureChainReader, RpcChainReader, SharedBlocklist } from "./counterparty";
-import { OutLayerExecutor, SimulatedExecutor } from "./executor";
+import { OutLayerExecutor, SimulatedExecutor, type Executor } from "./executor";
 import {
   DEMO_POLICY,
   FIXTURE_BLOCKLIST,
@@ -14,6 +14,7 @@ import {
   FixtureOneClickClient,
 } from "./fixtures";
 import { HttpOneClickClient } from "./oneclick";
+import { PendingStore } from "./pending";
 import { readSealedPolicy, type Policy } from "./policy";
 import { Preflight } from "./preflight";
 import { ReceiptStore } from "./store";
@@ -25,6 +26,8 @@ export interface BuildOptions {
   outDir?: string;
   policy?: Policy;
   ledgerPath?: string;
+  /** test hook: replace the executor */
+  executor?: Executor;
 }
 
 /**
@@ -35,6 +38,7 @@ export interface BuildOptions {
 export interface Built {
   preflight: Preflight;
   ledger: BudgetLedger;
+  pending: PendingStore;
   oneclick: FixtureOneClickClient | HttpOneClickClient;
   blocklist: SharedBlocklist;
   memory: CounterpartyMemory;
@@ -44,7 +48,9 @@ export function buildPreflight(opts: BuildOptions): Built {
   const home = opts.home ?? ".sealed";
   const issuer = loadOrCreateIssuerKey(join(home, "issuer.pem"));
   const store = new ReceiptStore(opts.outDir ?? "out", home);
-  const ledger = new BudgetLedger(opts.ledgerPath ?? join(home, "budget.db"));
+  const ledgerPath = opts.ledgerPath ?? join(home, "budget.db");
+  const ledger = new BudgetLedger(ledgerPath);
+  const pending = new PendingStore(ledgerPath);
   const memory = new CounterpartyMemory(opts.ledgerPath === ":memory:" ? ":memory:" : join(home, "counterparty.db"));
 
   if (opts.offline) {
@@ -57,14 +63,15 @@ export function buildPreflight(opts: BuildOptions): Built {
       oneclick,
       policy: opts.policy ?? DEMO_POLICY,
       ledger,
+      pending,
       issuer,
       store,
-      executor: new SimulatedExecutor(),
+      executor: opts.executor ?? new SimulatedExecutor(),
       counterparty: { blocklist, chain: new FixtureChainReader(FIXTURE_CHAIN), memory },
       tee: new SimulatedTeeChecker(join(home, "sim-enclave.key")),
       quoteManagerPublicKey: FIXTURE_MANAGER_PUBLIC_KEY,
     });
-    return { preflight, ledger, oneclick, blocklist, memory };
+    return { preflight, ledger, pending, oneclick, blocklist, memory };
   }
 
   const key = process.env.SEALED_POLICY_KEY;
@@ -80,13 +87,14 @@ export function buildPreflight(opts: BuildOptions): Built {
     oneclick,
     policy,
     ledger,
+    pending,
     issuer,
     store,
     executor: process.env.OUTLAYER_API_KEY ? new OutLayerExecutor(oneclick) : new SimulatedExecutor(),
     counterparty: { blocklist, chain: new RpcChainReader(), memory },
     tee: process.env.NEARAI_API_KEY ? new NearAiCloudChecker() : undefined,
   });
-  return { preflight, ledger, oneclick, blocklist, memory };
+  return { preflight, ledger, pending, oneclick, blocklist, memory };
 }
 
 export function newPolicyKey(): string {

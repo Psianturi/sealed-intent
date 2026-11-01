@@ -23,13 +23,14 @@ export type WalletOutcome =
 export class SealedWallet {
   constructor(
     private readonly preflight: Preflight,
+    private readonly agentId: string,
     private readonly human: HumanApprover,
     private readonly log: (line: string) => void = () => {},
   ) {}
 
   async swap(intent: DeclaredIntent, agentQuote?: QuoteResponse): Promise<WalletOutcome> {
-    this.log(`[agent ${intent.agentId}] wants to swap ${intent.amountIn} ${short(intent.tokenIn)} -> ${short(intent.tokenOut)} for ${intent.recipient}`);
-    const decision = await this.preflight.evaluate({ intent, agentQuote });
+    this.log(`[agent ${this.agentId}] wants to swap ${intent.amountIn} ${short(intent.tokenIn)} -> ${short(intent.tokenOut)} for ${intent.recipient}`);
+    const decision = await this.preflight.evaluate({ agentId: this.agentId, intent, agentQuote });
     const why = [...decision.reasonCodes, ...decision.warnCodes].join(", ") || "all checks passed";
     this.log(`[sealed-intent] ${decision.verdict}  (${why})  receipt ${decision.decisionId.slice(0, 8)}`);
 
@@ -48,9 +49,10 @@ export class SealedWallet {
       this.preflight.approve(decision.decisionId, approver);
       this.log(`[human] approved by ${approver}.`);
     }
-    const execution = await this.preflight.execute(decision.decisionId);
-    this.log(`[wallet] ${execution.status === "failed" ? "execution failed" : "signed in custody enclave"}: ${execution.status}${execution.txHash ? ` tx=${execution.txHash}` : ""}`);
-    return execution.status === "failed" ? { outcome: "failed", decision, execution } : { outcome: "executed", decision, execution };
+    const execution = await this.preflight.execute(decision.decisionId, this.agentId);
+    const failed = execution.status === "not_sent";
+    this.log(`[wallet] ${failed ? "execution failed" : "signed in custody enclave"}: ${execution.status}${execution.txHash ? ` tx=${execution.txHash}` : ""}`);
+    return failed ? { outcome: "failed", decision, execution } : { outcome: "executed", decision, execution };
   }
 }
 

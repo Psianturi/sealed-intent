@@ -8,6 +8,7 @@ export * from "./fixtures";
 export * from "./injection";
 export * from "./intent";
 export * from "./oneclick";
+export * from "./pending";
 export * from "./policy";
 export * from "./preflight";
 export * from "./quote-signature";
