@@ -33,6 +33,17 @@ export interface PreflightDeps {
   quoteManagerPublicKey?: string;
   /** keys the hourly draw when policy.secrecy.perTxJitterPct is on */
   vault?: Vault;
+  /** which chain this instance pays on; recorded in receipts */
+  network?: string;
+  /** told about every payment, so an unexplained transaction stands out */
+  spendLog?: SpendLog;
+  /** the public id on the registry for agents whose owner made them public */
+  registryIdOf?: (agentId: string) => string | undefined;
+}
+
+export interface SpendLog {
+  begin(decisionId: string): void;
+  end(decisionId: string, hashes: string[]): void;
 }
 
 /** What the agent gets back. Deliberately thin: no thresholds, no amounts, no policy. */
@@ -231,6 +242,10 @@ export class Preflight {
       });
   }
 
+  review(decisionId: string): OwnerReview | undefined {
+    return this.reviewQueue().find((r) => r.decisionId === decisionId);
+  }
+
   /** Deletes private records past the retention window. */
   purgeExpired(now = Date.now()): number {
     const days = this.deps.policy.retention.privateDays;
@@ -361,6 +376,8 @@ export class Preflight {
           intentKind: args.kind,
           route: args.route,
           mode: this.mode,
+          network: this.deps.network,
+          registeredAgent: this.deps.registryIdOf?.(args.agentId),
           quote: q ? { correlationId: q.correlationId, signatureVerified: sigOk, dry: !args.live } : undefined,
           budgetReservationId: args.reservationId,
         },
@@ -436,15 +453,19 @@ export class Preflight {
     }
 
     let result: ExecutionResult;
+    this.deps.spendLog?.begin(decisionId);
     try {
-      result = await this.deps.executor.execute(p.action);
+      result = await this.deps.executor.execute(p.action, { idempotencyKey: decisionId });
     } catch (err) {
       result = { status: "unknown", details: (err as Error).message };
     }
+    const hashes = result.txHashes ?? (result.txHash ? [result.txHash] : []);
+    // an unknown outcome with no hash stays in flight: if a transaction shows up later it is reviewed, not assumed
+    if (result.status !== "unknown" || hashes.length) this.deps.spendLog?.end(decisionId, hashes);
     const counterparty = p.action.kind === "call" ? p.action.contract : p.action.kind === "transfer" ? p.action.recipient : p.action.quote.quoteRequest.recipient;
-    if (result.status === "not_sent") this.deps.ledger.uncommit(p.reservationId);
+    if (result.status === "not_sent" || result.status === "failed_on_chain") this.deps.ledger.uncommit(p.reservationId);
     else if (result.status !== "unknown") this.deps.counterparty.memory.recordInteraction(p.agentId, counterparty);
-    const record = buildExecutionReceipt({ decisionId, kind: p.action.kind, status: result.status, txHash: result.txHash, executedAt: new Date().toISOString(), approvedBy: p.approvedBy }, this.deps.issuer);
+    const record = buildExecutionReceipt({ decisionId, kind: p.action.kind, status: result.status, txHash: result.txHash, txHashes: hashes.length > 1 ? hashes : undefined, network: this.deps.network, chain: result.chain, refusedByCustody: result.refusedByCustody, executedAt: new Date().toISOString(), approvedBy: p.approvedBy }, this.deps.issuer);
     this.deps.store.savePublic(record.receiptId, record);
     this.deps.store.saveAudit(`${decisionId}.execution`, { ...record, agentId: p.agentId, details: result.details });
     return { decisionId, ...result, executionReceiptId: record.receiptId };

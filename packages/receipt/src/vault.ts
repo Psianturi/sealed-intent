@@ -61,6 +61,7 @@ export function loadVault(home: string, opts: { requireEnvKey?: boolean; env?: N
 
 /** Reads KEY=value lines without overriding the real environment. Values are never printed. */
 export function loadEnv(path = ".env"): void {
+  if (process.env.SEALED_SKIP_DOTENV) return;
   if (!existsSync(path)) return;
   for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
     const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);

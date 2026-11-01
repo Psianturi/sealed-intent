@@ -149,14 +149,14 @@ describe("the private route", () => {
 });
 
 /** The best an agent can do: bisect on BLOCK versus anything else. It only reads what it is given. */
-async function bisect(env: ReturnType<typeof buildPreflight>, start: number) {
+async function bisect(env: ReturnType<typeof buildPreflight>, start: number, agentId = "prober") {
   let lo = 0;
   let hi = start;
   let asked = 0;
   let frozen = false;
   for (; asked < 30; asked++) {
     const mid = (lo + hi) / 2;
-    const d = agentView(await env.preflight.evaluate({ agentId: "prober", intent: pay({ amount: usdc(mid), recipient: DEMO_ACCOUNTS.payroll }) }));
+    const d = agentView(await env.preflight.evaluate({ agentId, intent: pay({ amount: usdc(mid), recipient: DEMO_ACCOUNTS.payroll }) }));
     if (d.reasonCodes.includes("WALLET_FROZEN")) {
       frozen = true;
       break;
@@ -185,7 +185,7 @@ describe("probing for the limit", () => {
   it("with jitter on, even a good guess only finds the hourly draw, never the cap", async () => {
     const errors: number[] = [];
     for (let i = 0; i < 12; i++) {
-      const r = await bisect(setup({ ...DEMO_POLICY, secrecy: { perTxJitterPct: 50 } }).env, 120);
+      const r = await bisect(setup({ ...DEMO_POLICY, secrecy: { perTxJitterPct: 50 } }).env, 120, `prober-${i}`);
       expect(r.frozen).toBe(true);
       errors.push(r.relativeError);
     }

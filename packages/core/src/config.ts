@@ -17,7 +17,8 @@ import { HttpOneClickClient } from "./oneclick";
 import { PendingStore } from "./pending";
 import { FreezeStore } from "./freeze";
 import { readSealedPolicy, type Policy } from "./policy";
-import { Preflight } from "./preflight";
+import { TestnetCatalogClient } from "./testnet-catalog";
+import { Preflight, type SpendLog } from "./preflight";
 import { ReceiptStore } from "./store";
 import { NearAiCloudChecker, SimulatedTeeChecker, type TeeChecker } from "./tee-check";
 
@@ -35,6 +36,8 @@ export interface BuildOptions {
   chain?: ChainReader;
   /** test hook: replace the 1Click client (offline only) */
   oneclick?: FixtureOneClickClient;
+  spendLog?: SpendLog;
+  registryIdOf?: (agentId: string) => string | undefined;
 }
 
 /**
@@ -47,7 +50,7 @@ export interface Built {
   ledger: BudgetLedger;
   pending: PendingStore;
   freeze: FreezeStore;
-  oneclick: FixtureOneClickClient | HttpOneClickClient;
+  oneclick: FixtureOneClickClient | HttpOneClickClient | TestnetCatalogClient;
   blocklist: SharedBlocklist;
   memory: CounterpartyMemory;
   store: ReceiptStore;
@@ -104,7 +107,8 @@ export function buildPreflight(opts: BuildOptions): Built {
     if (!key || !existsSync(policyPath)) throw new Error("live mode needs SEALED_POLICY_KEY and .sealed/policy.sealed.json (run `pnpm policy:seal`)");
     policy = readSealedPolicy(policyPath, key);
   }
-  const oneclick = new HttpOneClickClient();
+  const network = process.env.SEALED_NETWORK === "testnet" ? "testnet" : "mainnet";
+  const oneclick = network === "testnet" ? new TestnetCatalogClient() : new HttpOneClickClient();
   const blocklist = new SharedBlocklist(process.env.SEALED_BLOCKLIST ?? join(home, "blocklist.json"), issuer);
   const preflight = new Preflight({
     oneclick,
@@ -114,16 +118,27 @@ export function buildPreflight(opts: BuildOptions): Built {
     freeze,
     issuer,
     store,
-    executor: liveExecutor(oneclick),
+    executor: opts.executor ?? liveExecutor(oneclick),
     counterparty: { blocklist, chain: new RpcChainReader(), memory },
     tee: opts.tee ?? (process.env.NEARAI_API_KEY ? new NearAiCloudChecker() : undefined),
     vault,
+    network,
+    spendLog: opts.spendLog,
+    registryIdOf: opts.registryIdOf ?? registryMapFromEnv(),
   });
   preflight.purgeExpired();
   return { preflight, ledger, pending, freeze, oneclick, blocklist, memory, store, vault };
 }
 
-function liveExecutor(oneclick: HttpOneClickClient): Executor {
+/** SEALED_AGENT_REGISTRY="internal-name=agent-1,other=agent-2" */
+function registryMapFromEnv(): ((agentId: string) => string | undefined) | undefined {
+  const raw = process.env.SEALED_AGENT_REGISTRY;
+  if (!raw) return undefined;
+  const map = new Map(raw.split(",").map((p) => p.split("=").map((s) => s.trim()) as [string, string]));
+  return (id) => map.get(id);
+}
+
+function liveExecutor(oneclick: HttpOneClickClient | TestnetCatalogClient): Executor {
   if (process.env.OUTLAYER_API_KEY) return new OutLayerExecutor(oneclick);
   if (process.env.SEALED_ALLOW_SIMULATED_EXECUTOR === "1") return new SimulatedExecutor();
   throw new Error("live mode needs OUTLAYER_API_KEY (or SEALED_ALLOW_SIMULATED_EXECUTOR=1 for a preflight-only run)");

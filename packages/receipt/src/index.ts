@@ -5,3 +5,4 @@ export * from "./keys";
 export * from "./receipt";
 export * from "./tee";
 export * from "./vault";
+export * from "./merkle";

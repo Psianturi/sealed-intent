@@ -87,7 +87,7 @@ export const DEMO_POLICY: Policy = {
   tee: { required: false, obeyBlockSignal: true, acceptedTcbStatuses: ["UpToDate"], requireGpu: true, allowGatewaySignature: false },
   actions: { allowed: ["swap", "transfer", "call"], never: ["sign_message", "add_key", "delete_key", "deploy", "delete_account", "stake"] },
   contracts: { [DEMO_ACCOUNTS.pool]: { methods: ["deposit", "claim"], maxDepositYocto: "1000000000000000000000000" } },
-  freeze: { onForbiddenAction: true, maxBlocksPerHour: 20, maxLimitProbesPerHour: 6 },
+  freeze: { onForbiddenAction: true, maxBlocksPerHour: 20, maxLimitProbesPerHour: 3 },
   velocity: { maxTxPerHour: 30 },
   retention: { privateDays: 30 },
   secrecy: { perTxJitterPct: 0 },

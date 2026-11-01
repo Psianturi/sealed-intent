@@ -42,6 +42,10 @@ export interface Receipt {
     intentKind: string;
     route: "public" | "confidential-basic" | "confidential-advanced";
     mode: "live" | "offline";
+    /** mainnet or testnet, when the receipt came from a live instance */
+    network?: string;
+    /** the agent's id on the public registry; absent for a private profile */
+    registeredAgent?: string;
     quote?: {
       correlationId?: string;
       signatureVerified: boolean;
@@ -131,6 +135,13 @@ export interface ExecutionReceipt {
   kind: string;
   status: string;
   txHash?: string;
+  /** when one action took several transactions, the payment last */
+  txHashes?: string[];
+  network?: string;
+  /** read back from the chain after finality */
+  chain?: { network: string; signer: string; receiver: string; blockHash: string; final: boolean };
+  /** custody refused it on its own policy, nothing was signed */
+  refusedByCustody?: boolean;
   executedAt: string;
   approvedBy?: string;
   issuer: { alg: "ed25519"; publicKey: string };

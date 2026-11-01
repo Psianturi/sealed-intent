@@ -59,7 +59,7 @@ export const Policy = z.object({
       /** this many BLOCKs for one agent within an hour freezes the wallet */
       maxBlocksPerHour: z.number().int().positive().default(20),
       /** BLOCKs caused only by limit codes (an agent probing for the exact cap) freeze sooner */
-      maxLimitProbesPerHour: z.number().int().positive().default(6),
+      maxLimitProbesPerHour: z.number().int().positive().default(3),
     })
     .prefault({}),
   /** Private records (openings, raw enclave exchanges, audit log) are deleted after this many days. */

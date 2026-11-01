@@ -54,7 +54,7 @@ export class SealedWallet {
       this.log(`[human] approved by ${approver}.`);
     }
     const execution = await this.preflight.execute(decision.decisionId, this.agentId);
-    const failed = execution.status === "not_sent";
+    const failed = execution.status === "not_sent" || execution.status === "failed_on_chain";
     this.log(`[wallet] ${failed ? "execution failed" : "signed in custody enclave"}: ${execution.status}${execution.txHash ? ` tx=${execution.txHash}` : ""}`);
     return failed ? { outcome: "failed", decision, execution } : { outcome: "executed", decision, execution };
   }

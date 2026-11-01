@@ -25,6 +25,11 @@
     "web:dev": "pnpm --filter @sealed-intent/web dev",
     "web:build": "pnpm --filter @sealed-intent/web build",
     "owner": "tsx scripts/owner.ts",
+    "secret:scan": "node scripts/secret-scan.mjs",
+    "custody": "tsx scripts/custody.ts",
+    "registry": "tsx scripts/registry.ts",
+    "custody:check": "tsx scripts/custody-check.ts",
+    "custody:flow": "tsx scripts/custody-flow.ts",
     "mcp:agent": "tsx apps/server/src/mcp-agent.ts",
     "tee:live": "tsx scripts/tee-live.ts",
     "isolation:check": "bash scripts/isolation-check.sh"
@@ -36,6 +41,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "near-kit": "^0.20.2",
     "tsx": "4.20.3",
     "typescript": "5.9.3",
     "vitest": "4.1.12"

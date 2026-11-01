@@ -33,6 +33,11 @@ export class ReceiptStore {
     return this.savePublic(receipt.receiptId, receipt);
   }
 
+  loadProof(receiptId: string): unknown {
+    const path = join(this.outDir, "proofs", `${receiptId}.json`);
+    return existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : undefined;
+  }
+
   savePublic(receiptId: string, record: unknown): string {
     const path = join(this.outDir, "receipts", `${receiptId}.json`);
     writeFileSync(path, JSON.stringify(record, null, 2));
