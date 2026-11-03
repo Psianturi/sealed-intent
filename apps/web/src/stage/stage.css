@@ -201,5 +201,5 @@
 /* presentation mode: only the stage */
 body.present header.top, body.present .arena-intro, body.present main:not(.arena-intro), body.present footer { display: none; }
 body.present { background: #05070c; }
-body.present .vr { margin: 0 auto; min-height: 100vh; border-radius: 0; }
+body.present .vr { margin: 0 auto; min-height: 100vh; border-radius: 0; max-width: none; }
 body.present .vr-caption { font-size: 28px; }
