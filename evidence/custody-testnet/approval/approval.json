@@ -1,0 +1,52 @@
+{
+  "ranAt": "2026-11-03T17:41:22.553Z",
+  "network": "testnet",
+  "decisionId": "12fb9dda-7f4f-4e13-8c16-f828b39e10ff",
+  "verdict": "WARN",
+  "warnCodes": [
+    "RECIPIENT_NOT_ALLOWLISTED",
+    "TEE_SIGNAL_BLOCK"
+  ],
+  "receiptValid": true,
+  "shownToOwner": {
+    "decisionId": "12fb9dda-7f4f-4e13-8c16-f828b39e10ff",
+    "createdAt": "2026-11-03T17:41:16.499Z",
+    "agentId": "testnet-agent",
+    "kind": "transfer",
+    "token": "native",
+    "amount": "2000000000000000000000",
+    "recipient": "sein-owner-mvy1eh5f.testnet",
+    "usd": 0.01,
+    "warnCodes": [
+      "RECIPIENT_NOT_ALLOWLISTED",
+      "TEE_SIGNAL_BLOCK"
+    ],
+    "route": "public"
+  },
+  "reviewHash": "ee7ecb8b5436fcb6ff307894df309e8a21072ffe69bdd508235b1a66445dbd58",
+  "message": "SeIn approve 12fb9dda-7f4f-4e13-8c16-f828b39e10ff ee7ecb8b5436fcb6ff307894df309e8a21072ffe69bdd508235b1a66445dbd58",
+  "recipient": "sein-approval",
+  "signed": {
+    "action": "approve",
+    "decisionId": "12fb9dda-7f4f-4e13-8c16-f828b39e10ff",
+    "accountId": "sein-owner-mvy1eh5f.testnet",
+    "publicKey": "ed25519:hfhCdk29dNgB2xcyKNQQxg2XJMgwznS68szeEit225n",
+    "signature": "iQ8k8QkrkxzAAj4RRuRs6DNV8kLoNNUxxQeq2QffDZoqhzZKanzT0GC0vLxZniwJEeJKo3hFmj1phe38Or5NCw==",
+    "nonce": "AAABoaKAQFfs7ES+4zca26peWGBanSsvFH0BEOsHNJc="
+  },
+  "checks": {
+    "acceptedForOwner": true,
+    "refusedForAnotherAccount": true
+  },
+  "execution": {
+    "status": "submitted",
+    "txHash": "3WhRAUtLowVNW4zrCninFxSc5u58ZAr8xkKnSAyPGouw",
+    "explorer": "https://testnet.nearblocks.io/txns/3WhRAUtLowVNW4zrCninFxSc5u58ZAr8xkKnSAyPGouw",
+    "custodyWallet": "f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21",
+    "executionReceiptId": "deb80ec1-443a-4b6b-ba15-3afb46e0906e"
+  },
+  "anchor": {
+    "index": 3,
+    "txHash": "A135eNeHJakCoCKa5k7gUfzKh7BnEytSNyFJ67NL9Hp8"
+  }
+}

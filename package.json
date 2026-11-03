@@ -32,6 +32,7 @@
     "registry": "tsx scripts/registry.ts",
     "custody:check": "tsx scripts/custody-check.ts",
     "custody:flow": "tsx scripts/custody-flow.ts",
+    "custody:approval": "tsx scripts/approval-evidence.ts",
     "mcp:agent": "tsx apps/server/src/mcp-agent.ts",
     "tee:live": "tsx scripts/tee-live.ts",
     "isolation:check": "bash scripts/isolation-check.sh"

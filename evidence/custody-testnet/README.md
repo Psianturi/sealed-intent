@@ -68,3 +68,9 @@ One transfer was sent straight to custody ([tx](https://testnet.nearblocks.io/tx
 `pnpm gateway:check` starts the REST gateway in live mode from an empty folder and drives it the way an agent and an owner would, including the MCP bridge with only the agent's own token and key. File: `gateway-run.json`. 26 of 26 as expected: a stolen token alone is refused, a repeated request does not pay twice, the owner token alone cannot approve, a changed wallet signature is refused, the running gateway anchors receipts, revoking takes effect at once, the owner's freeze reaches custody on chain, and the log holds no secret and no receiver.
 
 That run uses its own throwaway receipt signing key, so its batches on the registry are not linked from the site.
+
+## An owner approval anyone can recheck
+
+`pnpm custody:approval` makes one decision that needs the owner, signs the approval with the owner's key as a NEP-413 message, checks it against the chain and lets custody pay. Folder `approval/`: `approval.json` holds what the owner was shown, the signed message, the signature and the [payment](https://testnet.nearblocks.io/txns/3WhRAUtLowVNW4zrCninFxSc5u58ZAr8xkKnSAyPGouw). Both receipts are in a batch on the registry ([tx](https://testnet.nearblocks.io/txns/A135eNeHJakCoCKa5k7gUfzKh7BnEytSNyFJ67NL9Hp8)). A script holds the owner's key here; on the approve page the owner signs in their own wallet.
+
+`setup.json` lists the registry and custody setup transactions. `../intents/quote.json` is a real NEAR Intents quote with its signature. The proof page at https://sein-near.vercel.app/proof checks all of it from the browser.

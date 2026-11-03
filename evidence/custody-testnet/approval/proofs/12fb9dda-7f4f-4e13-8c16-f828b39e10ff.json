@@ -1,0 +1,16 @@
+{
+  "version": "sein/proof@1",
+  "receiptId": "12fb9dda-7f4f-4e13-8c16-f828b39e10ff",
+  "network": "testnet",
+  "registry": "sein-registry-mvy2i59w.testnet",
+  "anchorIndex": 3,
+  "anchorTx": "A135eNeHJakCoCKa5k7gUfzKh7BnEytSNyFJ67NL9Hp8",
+  "root": "36f0be1efd6ad01be9e04c78f40bd98a2ef280e19f67cbfb6830a8a028cf9ee0",
+  "leaf": "3ebbd4f6eabd981cb20e743d60de180f7f626f1f6d9aa48f2103cb03291fe738",
+  "path": [
+    {
+      "side": "right",
+      "hash": "eed29bfac36de99b663092249b1af93a576501eb51975bb0e4b36e6f94fb930d"
+    }
+  ]
+}

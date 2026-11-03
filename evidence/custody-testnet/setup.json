@@ -1,0 +1,11 @@
+{
+  "note": "Setup transactions on NEAR testnet, each checked against the archive on 2026-11-04.",
+  "transactions": [
+    { "part": "contract", "label": "Registry contract deployed", "hash": "HsiXdyTk57Q3aAt9nFsZs5GqkKpVqzdd8zfY4WBKrwgp", "signer": "sein-registry-mvy2i59w.testnet" },
+    { "part": "contract", "label": "Agent registered by its owner", "hash": "9jBDQWdvxonDx4spaQoCY7ECC95z9nNagAp4t8mYETBz", "signer": "sein-owner-mvy1eh5f.testnet" },
+    { "part": "contract", "label": "Fingerprint of the secret policy committed", "hash": "6Wc1EK2oNQ95nZRzEJgg1otFSXaqyVxb1TXG3J52hM9f", "signer": "sein-owner-mvy1eh5f.testnet" },
+    { "part": "contract", "label": "First batch of receipts anchored", "hash": "CjmAwijPato9is1Kv7HD4Y2ey9HULJA778SXVB8DAhqb", "signer": "sein-operator-mvy2i59w.testnet" },
+    { "part": "contract", "label": "Owner approval receipts anchored", "hash": "A135eNeHJakCoCKa5k7gUfzKh7BnEytSNyFJ67NL9Hp8", "signer": "sein-operator-mvy2i59w.testnet" },
+    { "part": "custody", "label": "Spending policy stored with OutLayer", "hash": "6t4AtfUrmWJE4LL44SZ46pLyZrip3gRBQf6ADBjAtF8t", "signer": "sein-owner-mvy1eh5f.testnet" }
+  ]
+}
