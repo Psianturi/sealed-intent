@@ -15,6 +15,8 @@ let ownerReads = true;
 let index = 0;
 let mounted: Mounted | undefined;
 let autoplayed = false;
+// before the first Play the stage shows the finished frame, like a poster
+let poster = false;
 
 const board = () => boards[ownerReads ? base : "official-lazy"] ?? boards[base]!;
 const order = () => (present ? board().featured : board().cases.map((c) => c.id));
@@ -35,7 +37,7 @@ function mount(i: number, play = false) {
   const c = caseAt(index);
   const next = caseAt(index + 1);
   const all = board().cases.filter((x) => x.kind === "attack");
-  mounted = mountCase({ screen: $("vr-screen"), caption: $("vr-caption"), chapters: $("vr-chapters"), title: $("vr-title") }, board(), c, {
+  mounted = mountCase({ screen: $("vr-screen"), caption: $("vr-caption"), chapters: $("vr-chapters"), title: $("vr-title"), next: $("vr-nextcase") }, board(), c, {
     mobile: narrow.matches,
     reduced: reduced.matches,
     index: Math.max(all.indexOf(c) + 1, 0),
@@ -59,21 +61,37 @@ function mount(i: number, play = false) {
   };
   tl.onTick(0);
   if (play) tl.play();
+  else {
+    const verdict = mounted.acts.find(([n]) => n === "Verdict")?.[1] ?? 0;
+    tl.seek(verdict + 1.2);
+    poster = true;
+  }
+}
+
+function start() {
+  const tl = mounted?.timeline;
+  if (!tl) return;
+  if (poster) {
+    poster = false;
+    tl.seek(0);
+  }
+  tl.play();
 }
 
 function wire() {
   const stage = $("stage");
-  $("vr-play").addEventListener("click", () => (mounted?.timeline.playing ? mounted.timeline.pause() : mounted?.timeline.play()));
+  $("vr-play").addEventListener("click", () => (mounted?.timeline.playing ? mounted.timeline.pause() : start()));
   $("vr-prev").addEventListener("click", () => mount(index - 1, true));
   $("vr-next").addEventListener("click", () => mount(index + 1, true));
   $("vr-skip").addEventListener("click", () => {
     const tl = mounted?.timeline;
     const at = mounted?.acts.find(([n]) => n === "Verdict")?.[1];
-    if (tl && at !== undefined) (tl.pause(), tl.seek(at), tl.play());
+    if (tl && at !== undefined) (poster = false, tl.pause(), tl.seek(at), tl.play());
   });
   $<HTMLInputElement>("vr-scrub").addEventListener("input", (e) => {
     const tl = mounted?.timeline;
     if (!tl) return;
+    poster = false;
     tl.pause();
     tl.seek((Number((e.target as HTMLInputElement).value) / 1000) * tl.duration);
   });
@@ -99,13 +117,21 @@ function wire() {
     stage.scrollIntoView({ behavior: reduced.matches ? "auto" : "smooth", block: "start" });
   });
   document.addEventListener("visibilitychange", () => document.hidden && mounted?.timeline.pause());
+  $("vr-full").addEventListener("click", () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void stage.requestFullscreen?.().catch(() => undefined);
+  });
+  document.addEventListener("fullscreenchange", () => {
+    $("vr-full").setAttribute("aria-label", document.fullscreenElement ? "Exit full screen" : "Full screen");
+    mount(index);
+  });
   narrow.addEventListener("change", () => mount(index));
   // play the featured case once, when the stage first comes into view
   new IntersectionObserver(
     (entries) => {
       if (autoplayed || !entries.some((x) => x.isIntersecting) || document.hidden) return;
       autoplayed = true;
-      mounted?.timeline.play();
+      start();
     },
     { threshold: 0.5 },
   ).observe(stage);
@@ -140,9 +166,9 @@ async function main() {
     return;
   }
   wire();
-  const start = present ? 0 : Math.max(order().indexOf(params.get("case") ?? "S-MORSE"), 0);
-  mount(start);
-  if (present) mounted?.timeline.play();
+  const first = present ? 0 : Math.max(order().indexOf(params.get("case") ?? "S-MORSE"), 0);
+  mount(first);
+  if (present) start();
   if (base !== "official") renderTallies();
 }
 // lets an automated check jump to any moment

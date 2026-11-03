@@ -48,7 +48,7 @@ const ICONS = [
 const KEY = "M7 14a5 5 0 1 1 3.5-8.5L21 16v3h-3v-2h-2v-2h-2l-1.5-1.5A5 5 0 0 1 7 14z";
 const PEN = "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z";
 
-interface GateEls { g: SVGGElement; inner: SVGGElement; pass: El; fail: El; warn: El; doors: El[]; check: El; scan: El; x: number }
+interface GateEls { g: SVGGElement; inner: SVGGElement; pass: El; fail: El; warn: El; doors: El[]; check: El; scan: El; note: SVGGElement; x: number }
 interface LaneEls { doneAt?: number; g: SVGGElement; capsule: SVGGElement; trail: El; trailBad: El; gates: GateEls[]; vaultDoor: El; balance: SVGTextElement; destCount: SVGTextElement; destPulse: El; result: SVGGElement; resultMain: SVGTextElement; resultSub: SVGTextElement; bubble: SVGGElement; bubbleText: SVGTextElement; key?: El }
 
 export interface Mounted {
@@ -59,6 +59,8 @@ export interface Mounted {
 
 export interface StageHost {
   screen: HTMLElement;
+  /** where "Next: …" is written at the end */
+  next?: HTMLElement;
   caption: HTMLElement;
   chapters: HTMLElement;
   title: HTMLElement;
@@ -72,12 +74,12 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   const svg = s("svg", { viewBox: `0 0 ${g.w} ${g.h}`, class: "vr-svg", role: "img", "aria-label": `${c.title}: three lanes, the same request` }, host.screen);
   const defs = s("defs", {}, svg);
   defs.innerHTML = `
-    <radialGradient id="vr-glow"><stop offset="0" stop-color="#6E8BFF" stop-opacity=".55"/><stop offset="1" stop-color="#6E8BFF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vr-glow"><stop offset="0" stop-color="#6E8BFF" stop-opacity=".9"/><stop offset=".45" stop-color="#6E8BFF" stop-opacity=".35"/><stop offset="1" stop-color="#6E8BFF" stop-opacity="0"/></radialGradient>
     <radialGradient id="vr-glow-mint"><stop offset="0" stop-color="#3EE6A8" stop-opacity=".5"/><stop offset="1" stop-color="#3EE6A8" stop-opacity="0"/></radialGradient>
     <radialGradient id="vr-glow-ember"><stop offset="0" stop-color="#FF5A4E" stop-opacity=".5"/><stop offset="1" stop-color="#FF5A4E" stop-opacity="0"/></radialGradient>
     <radialGradient id="vr-vignette" cx=".5" cy=".55" r=".75"><stop offset=".55" stop-color="#05070C" stop-opacity="0"/><stop offset="1" stop-color="#05070C" stop-opacity=".9"/></radialGradient>
     <pattern id="vr-hazard" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#FF5A4E"/><rect width="5" height="10" fill="#1a0b0a"/></pattern>
-    <linearGradient id="vr-beam" x1="0" x2="1"><stop offset="0" stop-color="#6E8BFF" stop-opacity="0"/><stop offset=".5" stop-color="#6E8BFF" stop-opacity=".85"/><stop offset="1" stop-color="#6E8BFF" stop-opacity="0"/></linearGradient>`;
+    <linearGradient id="vr-beam" x1="0" x2="1"><stop offset="0" stop-color="#9fb2ff" stop-opacity="0"/><stop offset=".5" stop-color="#dfe6ff" stop-opacity="1"/><stop offset="1" stop-color="#9fb2ff" stop-opacity="0"/></linearGradient>`;
 
   // floor with a perspective grid
   s("rect", { width: g.w, height: g.h, class: "vr-floor" }, svg);
@@ -122,15 +124,23 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     const vault = s("g", { class: "vr-vault", transform: `translate(${vX} ${y})` }, lg);
     s("circle", { r: 40 * k, class: "vr-vault-ring" }, vault);
     const door = s("g", { class: "vr-vault-door" }, vault);
-    s("circle", { r: 30 * k, class: "vr-vault-face" }, door);
-    for (let a = 0; a < 6; a++) s("line", { x1: 0, y1: 0, x2: Math.cos((a * Math.PI) / 3) * 22 * k, y2: Math.sin((a * Math.PI) / 3) * 22 * k, class: "vr-vault-spoke" }, door);
-    s("circle", { r: 7 * k, class: "vr-vault-hub" }, door);
+    s("circle", { r: 31 * k, class: "vr-vault-face" }, door);
+    for (let a = 0; a < 8; a++) s("circle", { cx: Math.cos((a * Math.PI) / 4 + Math.PI / 8) * 26 * k, cy: Math.sin((a * Math.PI) / 4 + Math.PI / 8) * 26 * k, r: 2.4 * k, class: "vr-vault-bolt" }, door);
+    s("circle", { r: 15 * k, class: "vr-vault-dial" }, door);
+    for (let a = 0; a < 3; a++) s("line", { x1: 0, y1: 0, x2: Math.cos((a * 2 * Math.PI) / 3 - Math.PI / 2) * 14 * k, y2: Math.sin((a * 2 * Math.PI) / 3 - Math.PI / 2) * 14 * k, class: "vr-vault-spoke" }, door);
+    s("circle", { r: 4.5 * k, class: "vr-vault-hub" }, door);
+    s("rect", { x: -44 * k, y: -14 * k, width: 7 * k, height: 28 * k, rx: 2, class: "vr-vault-hinge" }, vault);
     const balance = s("text", { x: 0, y: (L.ghost ? 0 : 62) * k + (L.ghost ? 4 : 0), class: `vr-count${L.ghost ? " hidden" : ""}` }, vault, usd(START_CENTS));
     // destination
     const dest = s("g", { class: `vr-dest ${destCls}`, transform: `translate(${dX} ${y})` }, lg);
     const destPulse = s("circle", { r: 36 * k, class: "vr-dest-pulse" }, dest);
     s("circle", { r: 34 * k, class: "vr-dest-ring" }, dest);
     s("circle", { r: 22 * k, class: "vr-dest-face" }, dest);
+    const wallet = s("g", { class: "vr-wallet", transform: `scale(${k})` }, dest);
+    s("rect", { x: -14, y: -9, width: 28, height: 19, rx: 3 }, wallet);
+    s("path", { d: "M-14 -5h24a4 4 0 0 1 4 4v1" }, wallet);
+    s("rect", { x: 4, y: -2, width: 11, height: 8, rx: 2, class: "vr-wallet-clasp" }, wallet);
+    s("text", { x: 9.5, y: 4.4, class: "vr-wallet-mark" }, wallet, c.destination.attacker ? "?" : "✓");
     if (!L.ghost) s("text", { x: g.mobile ? -10 : 0, y: 56 * k, class: "vr-dest-name" }, dest, g.mobile ? (c.destination.attacker ? "Unknown" : short(c.destination.name, 10)) : short(c.destination.attacker ? "Unknown wallet" : c.destination.name, 18));
     const destCount = s("text", { x: 0, y: -48 * k, class: `vr-count small${L.ghost ? " hidden" : ""}` }, dest, "");
     // agent chip and bubble
@@ -160,21 +170,26 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       const pass = posts("vr-gate-pass");
       const fail = posts("vr-gate-fail");
       const warn = posts("vr-gate-warn");
-      const scan = s("rect", { x: -W / 2, y: -H, width: W, height: H + 6, fill: "url(#vr-beam)", class: "vr-scan" }, gg);
+      const scan = s("rect", { x: -W / 2 - 14, y: -H - 10, width: W + 28, height: H + 22, fill: "url(#vr-beam)", class: "vr-scan" }, gg);
       const doors = [s("rect", { x: -W / 2 + 2, y: -H + 2, width: W / 2 - 2, height: H + 4 * k, fill: "url(#vr-hazard)", class: "vr-door left" }, gg), s("rect", { x: 0, y: -H + 2, width: W / 2 - 2, height: H + 4 * k, fill: "url(#vr-hazard)", class: "vr-door right" }, gg)];
       if (!L.ghost) {
         const icon = s("g", { class: "vr-gate-icon", transform: `translate(-12 ${-H - 40 * k}) scale(${k})` }, gg);
         s("path", { d: id === "sealed" ? ICONS[i]! : ICONS[4]! }, icon);
-        if (!g.mobile) s("text", { x: 0, y: 30 * k, class: "vr-gate-label" }, gg, id === "sealed" ? GATE_NAMES[i]!.toUpperCase() : "LIMIT $50");
+        if (!g.mobile) s("text", { x: 0, y: 46 * k, class: "vr-gate-label" }, gg, id === "sealed" ? GATE_NAMES[i]!.toUpperCase() : "LIMIT $50");
         else s("text", { x: 0, y: 24 * k, class: "vr-gate-label" }, gg, id === "sealed" ? String(i + 1) : "$50");
       }
       const checkAt = s("g", { transform: `translate(0 ${-H / 2 + 2})` }, gg);
       const check = s("path", { d: L.ghost ? "M-3 0l2 2 4-5" : "M-8 0l5 5 10-11", class: "vr-check" }, checkAt);
-      gates.push({ g: outer, inner: gg, pass, fail, warn, doors, check, scan, x });
+      const note = s("g", { class: "vr-note", transform: `translate(0 ${62 * k})` }, gg);
+      if (!L.ghost && !g.mobile) {
+        s("circle", { cx: -46, cy: -4, r: 3.5, class: "vr-note-dot" }, note);
+        s("text", { x: -38, y: 0, class: "vr-note-text" }, note, "");
+      }
+      gates.push({ g: outer, inner: gg, pass, fail, warn, doors, check, scan, note, x });
     });
     // capsule
     const capsule = s("g", { class: "vr-capsule" }, lg);
-    s("circle", { r: (L.ghost ? 14 : 34) * k, fill: "url(#vr-glow)", class: "vr-cap-glow" }, capsule);
+    s("circle", { r: (L.ghost ? 18 : 48) * k, fill: "url(#vr-glow)", class: "vr-cap-glow" }, capsule);
     const pillW = (L.ghost ? 30 : c.ask.form === "money" ? 70 : 54) * k;
     const pillH = (L.ghost ? 14 : 30) * k;
     s("rect", { x: -pillW / 2, y: -pillH / 2, width: pillW, height: pillH, rx: pillH / 2, class: "vr-pill" }, capsule);
@@ -204,7 +219,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     ? h("div", "vr-receipt", host.screen, `<div class="vr-receipt-paper"><p><span>VERDICT</span><b>${esc(c.receipt.verdict)}</b></p><p><span>REASONS</span><em>${esc([...new Set(c.receipt.codes.filter((x) => !c.receipt!.warnCodes.includes(x)).concat(c.receipt.warnCodes))].slice(0, 2).map(reason).join(". "))}.</em></p><p><span>AMOUNT</span><i class="vr-seal"></i></p><p><span>RECEIVER</span><i class="vr-seal"></i></p><p><span>SIGNED</span><em>operator key</em></p><div class="vr-stamp">SEALED</div></div>${opts.verifyHref ? `<a class="vr-verify" href="${opts.verifyHref}">Verify this receipt</a>` : ""}`)
     : undefined;
   const banner = c.outOfScope ? h("div", "vr-banner", host.screen, `<b>Out of scope by design</b><span>${c.moment.kind === "bypass" ? "It went around every check. Only a custody policy or an on-chain guard can hold this." : "The checks ran on false information. Only a custody policy or an on-chain guard can hold this."}</span>`) : undefined;
-  const nextCard = opts.next ? h("div", "vr-next", host.screen, `<span>Next case</span><b>${esc(opts.next.title)}</b>`) : undefined;
+
   const lens = c.moment.kind === "address-diff" ? h("div", "vr-lens", host.screen, `<p>${diffLine(c.moment.real, c.moment.fake, "real")}</p><p>${diffLine(c.moment.fake, c.moment.real, "fake")}</p><span>Same look. A different account.</span>`) : undefined;
   const gauge = c.moment.kind === "budget-gauge" ? h("div", "vr-gauge", host.screen, `<div class="vr-gauge-bar"><i style="width:${Math.min(c.moment.sharePct, 100)}%"></i></div><span>${c.moment.sharePct}% of the balance in one payment</span>`) : undefined;
   const gap = c.moment.kind === "price-gap" ? h("div", "vr-gap", host.screen, `<div><span>Fair price</span><i style="width:100%"></i></div><div><span>This route</span><i class="bad" style="width:${100 - c.moment.lossPct}%"></i></div><b>${c.moment.lossPct}% of the value lost</b>`) : undefined;
@@ -245,7 +260,10 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     tl.to(L.capsule, [{ opacity: 0, transform: `translate(${vaultOf(g, id)}px, ${g.lanes[id].y}px) scale(.6)` }, { opacity: 1, transform: `translate(${vaultOf(g, id)}px, ${g.lanes[id].y}px) scale(1)` }], 4.4, d(0.4), "cubic-bezier(.3,1.6,.5,1)");
     tl.to(L.bubble, [{ opacity: 1 }, { opacity: 0 }], 5.2, d(0.4));
   }
-  if (c.message) tl.to(message, [{ opacity: 1 }, { opacity: g.mobile ? 0 : 0.55 }], 4.6, d(0.4));
+  if (c.message) tl.to(message, [{ opacity: 1 }, { opacity: g.mobile ? 0.95 : 0.55 }], 4.6, d(0.4));
+  let litFrom = Infinity;
+  let litTo = -Infinity;
+  if (c.message && g.mobile) tl.track((t) => message.classList.toggle("chip", t >= 5.2 && !(t >= litFrom && t < litTo)));
   say(3.5, c.ask.what ? `Each agent decides to ${c.ask.what}.` : "No agent asked for anything. The money leaves another way.");
 
   // act 3: the journeys
@@ -310,7 +328,8 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       if (gt.status === "warn" && i !== stop) say(t + 0.5, `Check ${i + 1} · ${GATE_NAMES[i]} ${reasonOf(gt)} Noted, not enough to stop it.`);
       if (i === 3 && c.message && gt.codes.some((x) => /INJECTION|TEE/.test(x))) {
         tl.to(message, [{ opacity: 0.55 }, { opacity: 1 }], t + 0.45, d(0.3));
-        if (g.mobile) tl.to(message, [{ opacity: 1 }, { opacity: 0 }], t + 2.4, d(0.3));
+        litFrom = t + 0.45;
+        litTo = t + 2.6;
       }
       if (i === 3 && c.message) tl.track((tt) => message.classList.toggle("lit", tt >= t + 0.45 && gt.codes.some((x) => /INJECTION|TEE/.test(x))));
       if (i === stop) {
@@ -386,7 +405,9 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   // act 5: the referee
   const F = V + 2.4;
   act("Referee", F);
-  tl.to(ledger, [{ opacity: 0, transform: "translateY(60px)" }, { opacity: 1, transform: "none" }], F, d(0.6));
+  if (!g.mobile) tl.to(world, [{ transform: "scale(1) translate(0,0)" }, { transform: "scale(.8) translate(180px,0)" }], F - 0.5, d(0.6), "cubic-bezier(.45,0,.2,1)");
+  else if (c.message) tl.to(message, [{ opacity: 0.95 }, { opacity: 0 }], F - 0.3, d(0.3));
+  tl.to(ledger, [{ opacity: 0, transform: "translateY(24px)" }, { opacity: 1, transform: "none" }], F, d(0.6));
   ledger.querySelectorAll<HTMLElement>("b[data-lane]").forEach((b, i) => {
     const l = b.dataset.lane as LaneId;
     const st = c.lanes[l];
@@ -408,7 +429,11 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     say(P + 0.3, "Proof that SeIn decided, without revealing the amount or the receiver.");
   } else say(P + 0.3, c.kind === "everyday" ? "Every lane paid. SeIn blocked nothing honest." : "SeIn never saw this request, so there is no receipt for it.");
   const END = P + 2.6;
-  if (nextCard) tl.to(nextCard, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], END - 0.6, d(0.4));
+  if (opts.next && host.next) {
+    const n = host.next;
+    const title = opts.next.title;
+    tl.track((t) => (n.textContent = t >= END - 0.6 ? `Next: ${title}` : ""));
+  }
   tl.track(() => undefined, END);
 
   // captions and chapter rail follow the clock
@@ -447,11 +472,18 @@ function arc(x0: number, x1: number, y: number, lift: number): [number, number][
 }
 
 function gateResult(tl: Timeline, el: GateEls, gate: Gate, at: number, d: (n: number) => number, ghost: boolean, stopping = false) {
-  if (!ghost) tl.to(el.scan, [{ opacity: 0, transform: "translateX(-30px)" }, { opacity: 1, offset: 0.3 }, { opacity: 0, transform: "translateX(30px)" }], at, d(0.35), "linear");
+  if (!ghost) tl.to(el.scan, [{ opacity: 0, transform: "translateX(-46px)" }, { opacity: 1, offset: 0.35 }, { opacity: 0, transform: "translateX(46px)" }], at, d(0.35), "linear");
   const look = gateLook(gate);
-  const target = look === "stopped" ? el.fail : look === "flagged" ? el.warn : look === "passed" ? el.pass : undefined;
+  // amber is for a human being asked; a check that only remarked passes, with a note
+  const noted = look === "flagged" && !stopping;
+  const target = look === "stopped" ? el.fail : look === "flagged" && stopping ? el.warn : look === "passed" || noted ? el.pass : undefined;
   if (target) tl.to(target, [{ opacity: 0 }, { opacity: 1 }], at + 0.35, d(0.3));
-  if (look === "passed") tl.to(el.check, [{ opacity: 0, transform: "scale(.5)" }, { opacity: 1, transform: "scale(1)" }], at + 0.4, d(0.3));
+  if (look === "passed" || noted) tl.to(el.check, [{ opacity: 0, transform: "scale(.5)" }, { opacity: 1, transform: "scale(1)" }], at + 0.4, d(0.3));
+  if (noted) {
+    const text = el.note.querySelector("text");
+    if (text) text.textContent = gate.codes[0] ? reason(gate.codes[0]) : "noted";
+    tl.to(el.note, [{ opacity: 0 }, { opacity: 1 }], at + 0.5, d(0.3));
+  }
   if (look === "stopped" || (look === "flagged" && stopping)) doorsClose(tl, el, at + 0.35, d);
 }
 
@@ -490,6 +522,7 @@ function settle(tl: Timeline, L: LaneEls, st: LaneStory, id: LaneId, at: number)
     : st.outcome === "owner-approved" ? ["Delivered", "the owner approved it", "good"]
     : st.outcome === "delivered" ? ["Delivered", "", "good"]
     : ["Not involved", "", ""];
+  tl.to(L.resultMain, [{ opacity: 0, transform: "scale(1.25)" }, { opacity: 1, transform: "scale(1)" }], at, 0.4, "cubic-bezier(.3,1.4,.4,1)");
   tl.track((t) => {
     const on = t >= at;
     L.resultMain.textContent = on ? main : "";

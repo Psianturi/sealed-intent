@@ -1,4 +1,4 @@
-// Renders public/og.png (link preview) and public/logo.png (README) with a local Chromium browser.
+// Renders public/logo.png (README) with a local Chromium browser. The link preview og.png now comes from og-stage.mjs.
 // Run by hand after a new official recording: node apps/web/scripts/og.mjs   (BROWSER=/path/to/chrome to override)
 import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
