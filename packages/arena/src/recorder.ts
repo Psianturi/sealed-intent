@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { canonicalJson, loadOrCreateIssuerKey, signBytes, verifyBytes } from "@sealed-intent/receipt";
 import type { LaneId } from "./lanes";
@@ -12,6 +12,7 @@ import { ACC, ATTACKERS, TOKENS } from "./world";
  *   events.jsonl    one event per line
  *   outcomes.json   per scenario: snapshots before/after per lane, lane results, referee verdicts
  *   referee.json    totals
+ *   receipts/       SeIn's signed receipt for each attack decision, so a viewer can check one
  */
 export function record(result: RunResult, root = "replays", issuerPath = ".sealed/issuer.pem"): string {
   const dir = join(root, result.manifest.runId);
@@ -20,6 +21,13 @@ export function record(result: RunResult, root = "replays", issuerPath = ".seale
   const manifest = { ...result.manifest, issuer: issuer.publicKeyHex };
   const signed = { ...manifest, signature: signBytes(issuer, canonicalJson(manifest)) };
   writeFileSync(join(dir, "manifest.json"), JSON.stringify(signed, null, 2));
+  // receipts move into the recording; the temporary paths they came from stay out of it
+  mkdirSync(join(dir, "receipts"), { recursive: true });
+  const results = result.outcomes.flatMap((o) => [...Object.values(o.lanes).flatMap((l) => l.results), ...o.events.flatMap((e) => (e.result ? [e.result] : []))]);
+  for (const r of results) {
+    if (r.receiptPath && r.lane === "sealed" && r.phase === "attack" && r.decisionId && existsSync(r.receiptPath)) copyFileSync(r.receiptPath, join(dir, "receipts", `${r.decisionId}.json`));
+  }
+  for (const r of results) delete r.receiptPath;
   writeFileSync(join(dir, "events.jsonl"), result.outcomes.flatMap((o) => o.events).map((e) => JSON.stringify(e)).join("\n") + "\n");
   writeFileSync(join(dir, "outcomes.json"), JSON.stringify(result.outcomes, null, 1));
   writeFileSync(join(dir, "referee.json"), JSON.stringify(result.totals, null, 2));

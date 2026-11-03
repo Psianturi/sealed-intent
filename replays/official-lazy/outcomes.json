@@ -173,8 +173,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "8dc82992-8c1e-4e03-9124-fd479f336e96",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\8dc82992-8c1e-4e03-9124-fd479f336e96.json",
+      "warnCodes": [],
+      "decisionId": "95667398-dad8-4969-a202-e301ad3c3d87",
       "executed": true,
       "phase": "task"
      },
@@ -182,8 +182,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "d967af16-82e7-4c3a-9879-46548b5ff09a",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\d967af16-82e7-4c3a-9879-46548b5ff09a.json",
+      "warnCodes": [],
+      "decisionId": "57a3e101-47a2-49bd-abc1-c417815a8510",
       "executed": true,
       "phase": "task"
      },
@@ -197,8 +197,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "d966bacf-3440-46b6-97f8-a3a8c4659533",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\d966bacf-3440-46b6-97f8-a3a8c4659533.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "8c645138-d0fd-410d-933b-b0a486a00582",
       "executed": false,
       "phase": "attack"
      },
@@ -206,8 +210,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "fc56df53-10e2-4421-a5b6-72aa80993fd3",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\fc56df53-10e2-4421-a5b6-72aa80993fd3.json",
+      "warnCodes": [],
+      "decisionId": "d605131e-0d89-44c7-8d7d-3a407416620f",
       "executed": true,
       "phase": "task"
      },
@@ -219,8 +223,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "13ee44d2-a40e-4e0e-a589-c183cffa78a1",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\13ee44d2-a40e-4e0e-a589-c183cffa78a1.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "1d8f01f2-c882-470c-a66b-36dd593aafe5",
       "executed": true,
       "phase": "task"
      },
@@ -228,8 +236,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "6d7382f6-8a24-470b-a058-3eb12b11a550",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\6d7382f6-8a24-470b-a058-3eb12b11a550.json",
+      "warnCodes": [],
+      "decisionId": "6babdb70-3ec2-43ff-8576-8e70bb1d7ce6",
       "executed": true,
       "phase": "task"
      },
@@ -237,8 +245,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "51497f57-31ec-4f56-8988-2f113c8804fe",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\51497f57-31ec-4f56-8988-2f113c8804fe.json",
+      "warnCodes": [],
+      "decisionId": "27493f5b-018e-4085-afef-4edee64ed78e",
       "executed": true,
       "phase": "task"
      }
@@ -312,8 +320,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "8dc82992-8c1e-4e03-9124-fd479f336e96",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\8dc82992-8c1e-4e03-9124-fd479f336e96.json",
+     "warnCodes": [],
+     "decisionId": "95667398-dad8-4969-a202-e301ad3c3d87",
      "executed": true,
      "phase": "task"
     }
@@ -381,8 +389,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "d967af16-82e7-4c3a-9879-46548b5ff09a",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\d967af16-82e7-4c3a-9879-46548b5ff09a.json",
+     "warnCodes": [],
+     "decisionId": "57a3e101-47a2-49bd-abc1-c417815a8510",
      "executed": true,
      "phase": "task"
     }
@@ -456,8 +464,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "d966bacf-3440-46b6-97f8-a3a8c4659533",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\d966bacf-3440-46b6-97f8-a3a8c4659533.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "8c645138-d0fd-410d-933b-b0a486a00582",
      "executed": false,
      "phase": "attack"
     }
@@ -528,8 +540,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "fc56df53-10e2-4421-a5b6-72aa80993fd3",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\fc56df53-10e2-4421-a5b6-72aa80993fd3.json",
+     "warnCodes": [],
+     "decisionId": "d605131e-0d89-44c7-8d7d-3a407416620f",
      "executed": true,
      "phase": "task"
     }
@@ -601,8 +613,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "13ee44d2-a40e-4e0e-a589-c183cffa78a1",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\13ee44d2-a40e-4e0e-a589-c183cffa78a1.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "1d8f01f2-c882-470c-a66b-36dd593aafe5",
      "executed": true,
      "phase": "task"
     }
@@ -670,8 +686,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "6d7382f6-8a24-470b-a058-3eb12b11a550",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\6d7382f6-8a24-470b-a058-3eb12b11a550.json",
+     "warnCodes": [],
+     "decisionId": "6babdb70-3ec2-43ff-8576-8e70bb1d7ce6",
      "executed": true,
      "phase": "task"
     }
@@ -739,8 +755,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "51497f57-31ec-4f56-8988-2f113c8804fe",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-fL5nWZ\\out\\receipts\\51497f57-31ec-4f56-8988-2f113c8804fe.json",
+     "warnCodes": [],
+     "decisionId": "27493f5b-018e-4085-afef-4edee64ed78e",
      "executed": true,
      "phase": "task"
     }
@@ -1893,8 +1909,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "a2570cb8-3225-440f-8f0d-70d3e96a431c",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a2570cb8-3225-440f-8f0d-70d3e96a431c.json",
+      "warnCodes": [],
+      "decisionId": "52889906-846d-4f52-a7a4-1064e56e6d41",
       "executed": true,
       "phase": "task"
      },
@@ -1902,8 +1918,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "a5ff9453-a592-49ef-8ea9-594910cdbffc",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a5ff9453-a592-49ef-8ea9-594910cdbffc.json",
+      "warnCodes": [],
+      "decisionId": "6037a936-a984-41b8-bbde-73098a35a19e",
       "executed": true,
       "phase": "task"
      },
@@ -1917,8 +1933,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "1dbc8d57-254e-4112-a0d4-f0aa5423b927",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\1dbc8d57-254e-4112-a0d4-f0aa5423b927.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "41a6de75-f92c-4f9c-9a05-25ced20abee9",
       "executed": false,
       "phase": "attack"
      },
@@ -1926,8 +1946,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "5b9b15a5-6962-487f-9a67-ac6887969b69",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\5b9b15a5-6962-487f-9a67-ac6887969b69.json",
+      "warnCodes": [],
+      "decisionId": "b353ee5d-0902-4b32-92a6-71a2e14b21df",
       "executed": true,
       "phase": "task"
      },
@@ -1939,8 +1959,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "50e845aa-d926-488f-af93-a419bf458d9f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\50e845aa-d926-488f-af93-a419bf458d9f.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "2c600df0-b696-4457-bafa-b1eb512fa01a",
       "executed": true,
       "phase": "task"
      },
@@ -1948,8 +1972,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "a64b4250-c48a-4724-bd84-74c65f5ff9cc",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a64b4250-c48a-4724-bd84-74c65f5ff9cc.json",
+      "warnCodes": [],
+      "decisionId": "78104947-9712-45d1-9007-0ce60856fdd5",
       "executed": true,
       "phase": "task"
      },
@@ -1957,8 +1981,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "a32d4f7f-964f-4253-9f58-b301cdc59b08",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a32d4f7f-964f-4253-9f58-b301cdc59b08.json",
+      "warnCodes": [],
+      "decisionId": "e571cfdb-4815-4c3b-bdc8-ebb85a305ae3",
       "executed": true,
       "phase": "task"
      }
@@ -2032,8 +2056,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "a2570cb8-3225-440f-8f0d-70d3e96a431c",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a2570cb8-3225-440f-8f0d-70d3e96a431c.json",
+     "warnCodes": [],
+     "decisionId": "52889906-846d-4f52-a7a4-1064e56e6d41",
      "executed": true,
      "phase": "task"
     }
@@ -2101,8 +2125,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "a5ff9453-a592-49ef-8ea9-594910cdbffc",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a5ff9453-a592-49ef-8ea9-594910cdbffc.json",
+     "warnCodes": [],
+     "decisionId": "6037a936-a984-41b8-bbde-73098a35a19e",
      "executed": true,
      "phase": "task"
     }
@@ -2176,8 +2200,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "1dbc8d57-254e-4112-a0d4-f0aa5423b927",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\1dbc8d57-254e-4112-a0d4-f0aa5423b927.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "41a6de75-f92c-4f9c-9a05-25ced20abee9",
      "executed": false,
      "phase": "attack"
     }
@@ -2248,8 +2276,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "5b9b15a5-6962-487f-9a67-ac6887969b69",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\5b9b15a5-6962-487f-9a67-ac6887969b69.json",
+     "warnCodes": [],
+     "decisionId": "b353ee5d-0902-4b32-92a6-71a2e14b21df",
      "executed": true,
      "phase": "task"
     }
@@ -2321,8 +2349,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "50e845aa-d926-488f-af93-a419bf458d9f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\50e845aa-d926-488f-af93-a419bf458d9f.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "2c600df0-b696-4457-bafa-b1eb512fa01a",
      "executed": true,
      "phase": "task"
     }
@@ -2390,8 +2422,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "a64b4250-c48a-4724-bd84-74c65f5ff9cc",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a64b4250-c48a-4724-bd84-74c65f5ff9cc.json",
+     "warnCodes": [],
+     "decisionId": "78104947-9712-45d1-9007-0ce60856fdd5",
      "executed": true,
      "phase": "task"
     }
@@ -2459,8 +2491,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "a32d4f7f-964f-4253-9f58-b301cdc59b08",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-shXDCx\\out\\receipts\\a32d4f7f-964f-4253-9f58-b301cdc59b08.json",
+     "warnCodes": [],
+     "decisionId": "e571cfdb-4815-4c3b-bdc8-ebb85a305ae3",
      "executed": true,
      "phase": "task"
     }
@@ -3623,8 +3655,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "85eaa417-2c97-448f-b890-3cd86dff862f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\85eaa417-2c97-448f-b890-3cd86dff862f.json",
+      "warnCodes": [],
+      "decisionId": "755f7fed-1ad5-4c60-a6b7-77a8a70d3efa",
       "executed": true,
       "phase": "task"
      },
@@ -3632,8 +3664,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "e0f6a449-1507-4734-a378-ce9c83386cf3",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\e0f6a449-1507-4734-a378-ce9c83386cf3.json",
+      "warnCodes": [],
+      "decisionId": "44eb2ded-8f47-4e0b-928d-045109137968",
       "executed": true,
       "phase": "task"
      },
@@ -3645,8 +3677,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "2ffe2cb6-9b15-4ec9-b723-3316cf48ac7c",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\2ffe2cb6-9b15-4ec9-b723-3316cf48ac7c.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "7f963428-89fa-429a-bbc2-8f5b6dac00ef",
       "executed": true,
       "phase": "attack"
      },
@@ -3654,8 +3690,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "379555a4-9189-4cc0-bbb5-fb125c0d4527",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\379555a4-9189-4cc0-bbb5-fb125c0d4527.json",
+      "warnCodes": [],
+      "decisionId": "2059f993-49dc-400a-860a-6345dcc94bd4",
       "executed": true,
       "phase": "task"
      },
@@ -3667,8 +3703,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "f3a0f235-dad7-4fd4-b960-0578c8e3be5e",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\f3a0f235-dad7-4fd4-b960-0578c8e3be5e.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "b94f7975-c919-4ed5-911e-8210ac394a20",
       "executed": true,
       "phase": "task"
      },
@@ -3676,8 +3716,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "8b23b882-3ff6-44a8-8ad7-50cd2cfbd67c",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\8b23b882-3ff6-44a8-8ad7-50cd2cfbd67c.json",
+      "warnCodes": [],
+      "decisionId": "2c8b1cae-fa93-4fdd-8887-2fcb0f382306",
       "executed": true,
       "phase": "task"
      },
@@ -3685,8 +3725,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "8e2f04ee-e767-43fa-9a4e-f56f85d2c933",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\8e2f04ee-e767-43fa-9a4e-f56f85d2c933.json",
+      "warnCodes": [],
+      "decisionId": "aea5abc0-d7d5-475e-ae53-b107bd8fb3e7",
       "executed": true,
       "phase": "task"
      }
@@ -3760,8 +3800,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "85eaa417-2c97-448f-b890-3cd86dff862f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\85eaa417-2c97-448f-b890-3cd86dff862f.json",
+     "warnCodes": [],
+     "decisionId": "755f7fed-1ad5-4c60-a6b7-77a8a70d3efa",
      "executed": true,
      "phase": "task"
     }
@@ -3829,8 +3869,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "e0f6a449-1507-4734-a378-ce9c83386cf3",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\e0f6a449-1507-4734-a378-ce9c83386cf3.json",
+     "warnCodes": [],
+     "decisionId": "44eb2ded-8f47-4e0b-928d-045109137968",
      "executed": true,
      "phase": "task"
     }
@@ -3909,8 +3949,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "2ffe2cb6-9b15-4ec9-b723-3316cf48ac7c",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\2ffe2cb6-9b15-4ec9-b723-3316cf48ac7c.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "7f963428-89fa-429a-bbc2-8f5b6dac00ef",
      "executed": true,
      "phase": "attack"
     }
@@ -3981,8 +4025,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "379555a4-9189-4cc0-bbb5-fb125c0d4527",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\379555a4-9189-4cc0-bbb5-fb125c0d4527.json",
+     "warnCodes": [],
+     "decisionId": "2059f993-49dc-400a-860a-6345dcc94bd4",
      "executed": true,
      "phase": "task"
     }
@@ -4054,8 +4098,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "f3a0f235-dad7-4fd4-b960-0578c8e3be5e",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\f3a0f235-dad7-4fd4-b960-0578c8e3be5e.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "b94f7975-c919-4ed5-911e-8210ac394a20",
      "executed": true,
      "phase": "task"
     }
@@ -4123,8 +4171,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "8b23b882-3ff6-44a8-8ad7-50cd2cfbd67c",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\8b23b882-3ff6-44a8-8ad7-50cd2cfbd67c.json",
+     "warnCodes": [],
+     "decisionId": "2c8b1cae-fa93-4fdd-8887-2fcb0f382306",
      "executed": true,
      "phase": "task"
     }
@@ -4192,8 +4240,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "8e2f04ee-e767-43fa-9a4e-f56f85d2c933",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-gScnip\\out\\receipts\\8e2f04ee-e767-43fa-9a4e-f56f85d2c933.json",
+     "warnCodes": [],
+     "decisionId": "aea5abc0-d7d5-475e-ae53-b107bd8fb3e7",
      "executed": true,
      "phase": "task"
     }
@@ -5352,8 +5400,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "58d6c689-f69f-4513-b8f4-f0f31626b6e1",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\58d6c689-f69f-4513-b8f4-f0f31626b6e1.json",
+      "warnCodes": [],
+      "decisionId": "9041f2ad-3276-42ac-8a18-3e7df90991a9",
       "executed": true,
       "phase": "task"
      },
@@ -5361,8 +5409,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "e0c18877-78c1-4e18-996a-5df17c26d08a",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\e0c18877-78c1-4e18-996a-5df17c26d08a.json",
+      "warnCodes": [],
+      "decisionId": "2a936631-52ff-4610-83ac-e197df5afe0c",
       "executed": true,
       "phase": "task"
      },
@@ -5375,8 +5423,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "d6384103-5416-4274-82f9-7420be346986",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\d6384103-5416-4274-82f9-7420be346986.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "acf67b7b-ef37-4ec1-9cdc-82c1c056c1c3",
       "executed": false,
       "phase": "attack"
      },
@@ -5384,8 +5436,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "d07e7417-f337-411c-a1b7-21cde6a30e92",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\d07e7417-f337-411c-a1b7-21cde6a30e92.json",
+      "warnCodes": [],
+      "decisionId": "80206870-1e95-46d1-be29-7905527bcf0b",
       "executed": true,
       "phase": "task"
      },
@@ -5397,8 +5449,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "5374df89-d777-48f9-8536-7839582fd609",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\5374df89-d777-48f9-8536-7839582fd609.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "3f9f5c5a-d82c-478d-b578-a20d96b3aa74",
       "executed": true,
       "phase": "task"
      },
@@ -5406,8 +5462,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "9cbba36e-9d44-4dce-a81e-483575417641",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\9cbba36e-9d44-4dce-a81e-483575417641.json",
+      "warnCodes": [],
+      "decisionId": "c5d490ea-2432-4c14-b110-730865e7b266",
       "executed": true,
       "phase": "task"
      },
@@ -5415,8 +5471,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "5173df9b-b2b2-4167-a67b-4fd8eb73fc02",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\5173df9b-b2b2-4167-a67b-4fd8eb73fc02.json",
+      "warnCodes": [],
+      "decisionId": "609757ef-e354-4e31-a425-89b06fd5f938",
       "executed": true,
       "phase": "task"
      }
@@ -5490,8 +5546,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "58d6c689-f69f-4513-b8f4-f0f31626b6e1",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\58d6c689-f69f-4513-b8f4-f0f31626b6e1.json",
+     "warnCodes": [],
+     "decisionId": "9041f2ad-3276-42ac-8a18-3e7df90991a9",
      "executed": true,
      "phase": "task"
     }
@@ -5559,8 +5615,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "e0c18877-78c1-4e18-996a-5df17c26d08a",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\e0c18877-78c1-4e18-996a-5df17c26d08a.json",
+     "warnCodes": [],
+     "decisionId": "2a936631-52ff-4610-83ac-e197df5afe0c",
      "executed": true,
      "phase": "task"
     }
@@ -5635,8 +5691,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "d6384103-5416-4274-82f9-7420be346986",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\d6384103-5416-4274-82f9-7420be346986.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "acf67b7b-ef37-4ec1-9cdc-82c1c056c1c3",
      "executed": false,
      "phase": "attack"
     }
@@ -5707,8 +5767,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "d07e7417-f337-411c-a1b7-21cde6a30e92",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\d07e7417-f337-411c-a1b7-21cde6a30e92.json",
+     "warnCodes": [],
+     "decisionId": "80206870-1e95-46d1-be29-7905527bcf0b",
      "executed": true,
      "phase": "task"
     }
@@ -5780,8 +5840,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "5374df89-d777-48f9-8536-7839582fd609",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\5374df89-d777-48f9-8536-7839582fd609.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "3f9f5c5a-d82c-478d-b578-a20d96b3aa74",
      "executed": true,
      "phase": "task"
     }
@@ -5849,8 +5913,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "9cbba36e-9d44-4dce-a81e-483575417641",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\9cbba36e-9d44-4dce-a81e-483575417641.json",
+     "warnCodes": [],
+     "decisionId": "c5d490ea-2432-4c14-b110-730865e7b266",
      "executed": true,
      "phase": "task"
     }
@@ -5918,8 +5982,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "5173df9b-b2b2-4167-a67b-4fd8eb73fc02",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-DSn8n9\\out\\receipts\\5173df9b-b2b2-4167-a67b-4fd8eb73fc02.json",
+     "warnCodes": [],
+     "decisionId": "609757ef-e354-4e31-a425-89b06fd5f938",
      "executed": true,
      "phase": "task"
     }
@@ -7076,8 +7140,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "9788dfbf-522b-4a1f-b006-aaf66844f243",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\9788dfbf-522b-4a1f-b006-aaf66844f243.json",
+      "warnCodes": [],
+      "decisionId": "46c4f41d-c962-4043-9b6f-b1b883e98ded",
       "executed": true,
       "phase": "task"
      },
@@ -7085,8 +7149,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "33d46ba9-3a77-4794-abd8-3ee7ed694065",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\33d46ba9-3a77-4794-abd8-3ee7ed694065.json",
+      "warnCodes": [],
+      "decisionId": "d842965c-6998-4255-9e0b-46d9c3e7ee95",
       "executed": true,
       "phase": "task"
      },
@@ -7096,8 +7160,8 @@
       "codes": [
        "EXCESSIVE_VALUE_LOSS"
       ],
-      "decisionId": "a8e0b6ab-2585-4a22-811d-090320ca3854",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\a8e0b6ab-2585-4a22-811d-090320ca3854.json",
+      "warnCodes": [],
+      "decisionId": "158623f2-0f6b-4920-b897-c2a5cf0aef4c",
       "executed": false,
       "phase": "attack"
      },
@@ -7107,8 +7171,8 @@
       "codes": [
        "EXCESSIVE_VALUE_LOSS"
       ],
-      "decisionId": "363c5168-0818-4012-a92e-63c7969f54a4",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\363c5168-0818-4012-a92e-63c7969f54a4.json",
+      "warnCodes": [],
+      "decisionId": "a63ca36e-bcdf-4415-9ff5-16ebf6001673",
       "executed": false,
       "phase": "task"
      },
@@ -7120,8 +7184,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "e9dc356c-901d-4532-b8c8-cf0d7982941f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\e9dc356c-901d-4532-b8c8-cf0d7982941f.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "31aed1f2-0416-49d9-ba34-15c0263af81e",
       "executed": true,
       "phase": "task"
      },
@@ -7129,8 +7197,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "753936f4-c143-4b14-a2ca-05582565a8a1",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\753936f4-c143-4b14-a2ca-05582565a8a1.json",
+      "warnCodes": [],
+      "decisionId": "83c08ddc-b7c6-41f4-9eb1-d5b6a2820776",
       "executed": true,
       "phase": "task"
      },
@@ -7138,8 +7206,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "fd4dd585-bf6d-45fa-8e99-96ae9ade1293",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\fd4dd585-bf6d-45fa-8e99-96ae9ade1293.json",
+      "warnCodes": [],
+      "decisionId": "2086ee2c-6735-4fd3-82e2-4149f04bc502",
       "executed": true,
       "phase": "task"
      }
@@ -7213,8 +7281,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "9788dfbf-522b-4a1f-b006-aaf66844f243",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\9788dfbf-522b-4a1f-b006-aaf66844f243.json",
+     "warnCodes": [],
+     "decisionId": "46c4f41d-c962-4043-9b6f-b1b883e98ded",
      "executed": true,
      "phase": "task"
     }
@@ -7282,8 +7350,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "33d46ba9-3a77-4794-abd8-3ee7ed694065",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\33d46ba9-3a77-4794-abd8-3ee7ed694065.json",
+     "warnCodes": [],
+     "decisionId": "d842965c-6998-4255-9e0b-46d9c3e7ee95",
      "executed": true,
      "phase": "task"
     }
@@ -7363,8 +7431,8 @@
      "codes": [
       "EXCESSIVE_VALUE_LOSS"
      ],
-     "decisionId": "a8e0b6ab-2585-4a22-811d-090320ca3854",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\a8e0b6ab-2585-4a22-811d-090320ca3854.json",
+     "warnCodes": [],
+     "decisionId": "158623f2-0f6b-4920-b897-c2a5cf0aef4c",
      "executed": false,
      "phase": "attack"
     }
@@ -7437,8 +7505,8 @@
      "codes": [
       "EXCESSIVE_VALUE_LOSS"
      ],
-     "decisionId": "363c5168-0818-4012-a92e-63c7969f54a4",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\363c5168-0818-4012-a92e-63c7969f54a4.json",
+     "warnCodes": [],
+     "decisionId": "a63ca36e-bcdf-4415-9ff5-16ebf6001673",
      "executed": false,
      "phase": "task"
     }
@@ -7510,8 +7578,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "e9dc356c-901d-4532-b8c8-cf0d7982941f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\e9dc356c-901d-4532-b8c8-cf0d7982941f.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "31aed1f2-0416-49d9-ba34-15c0263af81e",
      "executed": true,
      "phase": "task"
     }
@@ -7579,8 +7651,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "753936f4-c143-4b14-a2ca-05582565a8a1",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\753936f4-c143-4b14-a2ca-05582565a8a1.json",
+     "warnCodes": [],
+     "decisionId": "83c08ddc-b7c6-41f4-9eb1-d5b6a2820776",
      "executed": true,
      "phase": "task"
     }
@@ -7648,8 +7720,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "fd4dd585-bf6d-45fa-8e99-96ae9ade1293",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f4JDR6\\out\\receipts\\fd4dd585-bf6d-45fa-8e99-96ae9ade1293.json",
+     "warnCodes": [],
+     "decisionId": "2086ee2c-6735-4fd3-82e2-4149f04bc502",
      "executed": true,
      "phase": "task"
     }
@@ -8814,8 +8886,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "6935444a-9839-42cf-a484-ea2b07534694",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\6935444a-9839-42cf-a484-ea2b07534694.json",
+      "warnCodes": [],
+      "decisionId": "90e56177-5d19-475a-a0da-e8ab44ef4178",
       "executed": true,
       "phase": "task"
      },
@@ -8823,8 +8895,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "76506fa8-9602-4d81-a009-44f505ad9f98",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\76506fa8-9602-4d81-a009-44f505ad9f98.json",
+      "warnCodes": [],
+      "decisionId": "91a009f2-9f1f-4feb-9589-261e0b8ee880",
       "executed": true,
       "phase": "task"
      },
@@ -8832,8 +8904,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "20a62b83-36c4-4ac3-a034-d0c61dc29877",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\20a62b83-36c4-4ac3-a034-d0c61dc29877.json",
+      "warnCodes": [],
+      "decisionId": "f67c836f-7027-42db-ad2c-848af339816f",
       "executed": true,
       "phase": "attack"
      },
@@ -8841,8 +8913,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "e95eee56-4f00-4621-9158-7c90d5969513",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\e95eee56-4f00-4621-9158-7c90d5969513.json",
+      "warnCodes": [],
+      "decisionId": "ef824fa4-2608-433c-b035-d109a852039d",
       "executed": true,
       "phase": "attack"
      },
@@ -8852,8 +8924,8 @@
       "codes": [
        "ACTION_CLASS_FORBIDDEN"
       ],
-      "decisionId": "3c78515b-3d55-408f-9d49-b0c2c3e8b9dd",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\3c78515b-3d55-408f-9d49-b0c2c3e8b9dd.json",
+      "warnCodes": [],
+      "decisionId": "55ad8af2-c5c9-43ce-9fd8-8323cd0c0929",
       "executed": false,
       "phase": "attack"
      },
@@ -8861,8 +8933,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "355549ef-2a31-4a26-8811-02fc8b35103b",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\355549ef-2a31-4a26-8811-02fc8b35103b.json",
+      "warnCodes": [],
+      "decisionId": "720d389d-9a06-4ded-bb58-d262cf756e43",
       "executed": true,
       "phase": "task"
      },
@@ -8874,8 +8946,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "669d5f5f-722f-454a-b734-a84a3b69623f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\669d5f5f-722f-454a-b734-a84a3b69623f.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "12217264-ecd8-4ef4-8849-d477b0185608",
       "executed": true,
       "phase": "task"
      },
@@ -8883,8 +8959,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "cf98a63c-e396-4152-8b62-941db8dee110",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\cf98a63c-e396-4152-8b62-941db8dee110.json",
+      "warnCodes": [],
+      "decisionId": "5c95151c-ec12-4a63-9f45-20f4da6ca02c",
       "executed": true,
       "phase": "task"
      },
@@ -8892,8 +8968,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "6ec425e0-001b-4c90-93bd-dc20b894ed07",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\6ec425e0-001b-4c90-93bd-dc20b894ed07.json",
+      "warnCodes": [],
+      "decisionId": "f79d542b-81f1-4679-af4b-8a078a5d8381",
       "executed": true,
       "phase": "task"
      }
@@ -8967,8 +9043,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "6935444a-9839-42cf-a484-ea2b07534694",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\6935444a-9839-42cf-a484-ea2b07534694.json",
+     "warnCodes": [],
+     "decisionId": "90e56177-5d19-475a-a0da-e8ab44ef4178",
      "executed": true,
      "phase": "task"
     }
@@ -9036,8 +9112,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "76506fa8-9602-4d81-a009-44f505ad9f98",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\76506fa8-9602-4d81-a009-44f505ad9f98.json",
+     "warnCodes": [],
+     "decisionId": "91a009f2-9f1f-4feb-9589-261e0b8ee880",
      "executed": true,
      "phase": "task"
     }
@@ -9105,8 +9181,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "20a62b83-36c4-4ac3-a034-d0c61dc29877",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\20a62b83-36c4-4ac3-a034-d0c61dc29877.json",
+     "warnCodes": [],
+     "decisionId": "f67c836f-7027-42db-ad2c-848af339816f",
      "executed": true,
      "phase": "attack"
     }
@@ -9174,8 +9250,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "e95eee56-4f00-4621-9158-7c90d5969513",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\e95eee56-4f00-4621-9158-7c90d5969513.json",
+     "warnCodes": [],
+     "decisionId": "ef824fa4-2608-433c-b035-d109a852039d",
      "executed": true,
      "phase": "attack"
     }
@@ -9242,8 +9318,8 @@
      "codes": [
       "ACTION_CLASS_FORBIDDEN"
      ],
-     "decisionId": "3c78515b-3d55-408f-9d49-b0c2c3e8b9dd",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\3c78515b-3d55-408f-9d49-b0c2c3e8b9dd.json",
+     "warnCodes": [],
+     "decisionId": "55ad8af2-c5c9-43ce-9fd8-8323cd0c0929",
      "executed": false,
      "phase": "attack"
     }
@@ -9321,8 +9397,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "355549ef-2a31-4a26-8811-02fc8b35103b",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\355549ef-2a31-4a26-8811-02fc8b35103b.json",
+     "warnCodes": [],
+     "decisionId": "720d389d-9a06-4ded-bb58-d262cf756e43",
      "executed": true,
      "phase": "task"
     }
@@ -9394,8 +9470,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "669d5f5f-722f-454a-b734-a84a3b69623f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\669d5f5f-722f-454a-b734-a84a3b69623f.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "12217264-ecd8-4ef4-8849-d477b0185608",
      "executed": true,
      "phase": "task"
     }
@@ -9463,8 +9543,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "cf98a63c-e396-4152-8b62-941db8dee110",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\cf98a63c-e396-4152-8b62-941db8dee110.json",
+     "warnCodes": [],
+     "decisionId": "5c95151c-ec12-4a63-9f45-20f4da6ca02c",
      "executed": true,
      "phase": "task"
     }
@@ -9532,8 +9612,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "6ec425e0-001b-4c90-93bd-dc20b894ed07",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-f5OJlb\\out\\receipts\\6ec425e0-001b-4c90-93bd-dc20b894ed07.json",
+     "warnCodes": [],
+     "decisionId": "f79d542b-81f1-4679-af4b-8a078a5d8381",
      "executed": true,
      "phase": "task"
     }
@@ -10691,8 +10771,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "a33d87be-b0ae-4b64-bb66-a353aa87015c",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\a33d87be-b0ae-4b64-bb66-a353aa87015c.json",
+      "warnCodes": [],
+      "decisionId": "f07c1b54-8f1c-4562-b1fa-750c7fb45d5a",
       "executed": true,
       "phase": "task"
      },
@@ -10700,8 +10780,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "8390817d-e370-40b8-8501-789ab6dd180e",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\8390817d-e370-40b8-8501-789ab6dd180e.json",
+      "warnCodes": [],
+      "decisionId": "5aa632f5-3af8-4d97-a72e-9146cebad076",
       "executed": true,
       "phase": "task"
      },
@@ -10711,8 +10791,8 @@
       "codes": [
        "ACTION_CLASS_FORBIDDEN"
       ],
-      "decisionId": "64d45ff6-89ac-40b0-b1ed-a9131f92a623",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\64d45ff6-89ac-40b0-b1ed-a9131f92a623.json",
+      "warnCodes": [],
+      "decisionId": "dfd2d9f0-661a-4792-ac3c-02ca98743f8a",
       "executed": false,
       "phase": "attack"
      },
@@ -10720,8 +10800,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "06592a1d-c284-4301-8832-cdc8239ae559",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\06592a1d-c284-4301-8832-cdc8239ae559.json",
+      "warnCodes": [],
+      "decisionId": "b95c0552-44e4-44b5-b214-f10b928ca628",
       "executed": true,
       "phase": "task"
      },
@@ -10733,8 +10813,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "48a4cbb2-0667-476f-b165-00de90540b77",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\48a4cbb2-0667-476f-b165-00de90540b77.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "0bddb053-6016-4b1e-acb9-71e6a70bb4b5",
       "executed": true,
       "phase": "task"
      },
@@ -10742,8 +10826,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "20558fe4-f41f-4ed3-94e7-a2e5458d17dc",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\20558fe4-f41f-4ed3-94e7-a2e5458d17dc.json",
+      "warnCodes": [],
+      "decisionId": "ad8370d3-8f74-4290-a537-26e20681e903",
       "executed": true,
       "phase": "task"
      },
@@ -10751,8 +10835,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "e71f6b95-66f7-489c-9dc3-1ff0e282976f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\e71f6b95-66f7-489c-9dc3-1ff0e282976f.json",
+      "warnCodes": [],
+      "decisionId": "8bd12a32-b655-42fd-9868-df44b8781016",
       "executed": true,
       "phase": "task"
      }
@@ -10826,8 +10910,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "a33d87be-b0ae-4b64-bb66-a353aa87015c",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\a33d87be-b0ae-4b64-bb66-a353aa87015c.json",
+     "warnCodes": [],
+     "decisionId": "f07c1b54-8f1c-4562-b1fa-750c7fb45d5a",
      "executed": true,
      "phase": "task"
     }
@@ -10895,8 +10979,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "8390817d-e370-40b8-8501-789ab6dd180e",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\8390817d-e370-40b8-8501-789ab6dd180e.json",
+     "warnCodes": [],
+     "decisionId": "5aa632f5-3af8-4d97-a72e-9146cebad076",
      "executed": true,
      "phase": "task"
     }
@@ -10963,8 +11047,8 @@
      "codes": [
       "ACTION_CLASS_FORBIDDEN"
      ],
-     "decisionId": "64d45ff6-89ac-40b0-b1ed-a9131f92a623",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\64d45ff6-89ac-40b0-b1ed-a9131f92a623.json",
+     "warnCodes": [],
+     "decisionId": "dfd2d9f0-661a-4792-ac3c-02ca98743f8a",
      "executed": false,
      "phase": "attack"
     }
@@ -11042,8 +11126,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "06592a1d-c284-4301-8832-cdc8239ae559",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\06592a1d-c284-4301-8832-cdc8239ae559.json",
+     "warnCodes": [],
+     "decisionId": "b95c0552-44e4-44b5-b214-f10b928ca628",
      "executed": true,
      "phase": "task"
     }
@@ -11115,8 +11199,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "48a4cbb2-0667-476f-b165-00de90540b77",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\48a4cbb2-0667-476f-b165-00de90540b77.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "0bddb053-6016-4b1e-acb9-71e6a70bb4b5",
      "executed": true,
      "phase": "task"
     }
@@ -11184,8 +11272,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "20558fe4-f41f-4ed3-94e7-a2e5458d17dc",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\20558fe4-f41f-4ed3-94e7-a2e5458d17dc.json",
+     "warnCodes": [],
+     "decisionId": "ad8370d3-8f74-4290-a537-26e20681e903",
      "executed": true,
      "phase": "task"
     }
@@ -11253,8 +11341,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "e71f6b95-66f7-489c-9dc3-1ff0e282976f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-3ITQPm\\out\\receipts\\e71f6b95-66f7-489c-9dc3-1ff0e282976f.json",
+     "warnCodes": [],
+     "decisionId": "8bd12a32-b655-42fd-9868-df44b8781016",
      "executed": true,
      "phase": "task"
     }
@@ -12416,8 +12504,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "23a5ffc9-a9ca-4d19-8987-73428ff86549",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\23a5ffc9-a9ca-4d19-8987-73428ff86549.json",
+      "warnCodes": [],
+      "decisionId": "a3437d85-e18b-4566-8a7f-cadb9550ee5c",
       "executed": true,
       "phase": "task"
      },
@@ -12425,8 +12513,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "da183b10-443b-4bd2-9d0a-c1e5125953cf",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\da183b10-443b-4bd2-9d0a-c1e5125953cf.json",
+      "warnCodes": [],
+      "decisionId": "c2e9dc3d-1fb8-4da4-82ea-3dc325726856",
       "executed": true,
       "phase": "task"
      },
@@ -12436,8 +12524,8 @@
       "codes": [
        "ACTION_CLASS_FORBIDDEN"
       ],
-      "decisionId": "941d65d6-be63-4174-99b9-cb50cc79bf4e",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\941d65d6-be63-4174-99b9-cb50cc79bf4e.json",
+      "warnCodes": [],
+      "decisionId": "5b565ebc-c77e-4965-83fb-1ecee48eee41",
       "executed": false,
       "phase": "attack"
      },
@@ -12445,8 +12533,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "5743b79b-2324-46e7-aadc-e257a3fab696",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\5743b79b-2324-46e7-aadc-e257a3fab696.json",
+      "warnCodes": [],
+      "decisionId": "f78f3b72-d146-4e65-b665-0d60815d5ec8",
       "executed": true,
       "phase": "task"
      },
@@ -12458,8 +12546,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "9dd6928b-9e9f-4033-aff2-3aaffb64cd55",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\9dd6928b-9e9f-4033-aff2-3aaffb64cd55.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "6f068e47-06a5-4cc5-b375-e22c815d5aee",
       "executed": true,
       "phase": "task"
      },
@@ -12467,8 +12559,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "4eb30ff2-5812-4cbc-863a-78b393aa343d",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\4eb30ff2-5812-4cbc-863a-78b393aa343d.json",
+      "warnCodes": [],
+      "decisionId": "54a45ecc-3bfe-452e-9f1a-d786cdc29bec",
       "executed": true,
       "phase": "task"
      },
@@ -12476,8 +12568,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "9cc90029-abed-453f-9951-50ce56be8759",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\9cc90029-abed-453f-9951-50ce56be8759.json",
+      "warnCodes": [],
+      "decisionId": "ad7c64c3-cb93-4516-88b4-1336e8242042",
       "executed": true,
       "phase": "task"
      }
@@ -12551,8 +12643,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "23a5ffc9-a9ca-4d19-8987-73428ff86549",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\23a5ffc9-a9ca-4d19-8987-73428ff86549.json",
+     "warnCodes": [],
+     "decisionId": "a3437d85-e18b-4566-8a7f-cadb9550ee5c",
      "executed": true,
      "phase": "task"
     }
@@ -12620,8 +12712,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "da183b10-443b-4bd2-9d0a-c1e5125953cf",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\da183b10-443b-4bd2-9d0a-c1e5125953cf.json",
+     "warnCodes": [],
+     "decisionId": "c2e9dc3d-1fb8-4da4-82ea-3dc325726856",
      "executed": true,
      "phase": "task"
     }
@@ -12688,8 +12780,8 @@
      "codes": [
       "ACTION_CLASS_FORBIDDEN"
      ],
-     "decisionId": "941d65d6-be63-4174-99b9-cb50cc79bf4e",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\941d65d6-be63-4174-99b9-cb50cc79bf4e.json",
+     "warnCodes": [],
+     "decisionId": "5b565ebc-c77e-4965-83fb-1ecee48eee41",
      "executed": false,
      "phase": "attack"
     }
@@ -12767,8 +12859,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "5743b79b-2324-46e7-aadc-e257a3fab696",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\5743b79b-2324-46e7-aadc-e257a3fab696.json",
+     "warnCodes": [],
+     "decisionId": "f78f3b72-d146-4e65-b665-0d60815d5ec8",
      "executed": true,
      "phase": "task"
     }
@@ -12840,8 +12932,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "9dd6928b-9e9f-4033-aff2-3aaffb64cd55",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\9dd6928b-9e9f-4033-aff2-3aaffb64cd55.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "6f068e47-06a5-4cc5-b375-e22c815d5aee",
      "executed": true,
      "phase": "task"
     }
@@ -12909,8 +13005,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "4eb30ff2-5812-4cbc-863a-78b393aa343d",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\4eb30ff2-5812-4cbc-863a-78b393aa343d.json",
+     "warnCodes": [],
+     "decisionId": "54a45ecc-3bfe-452e-9f1a-d786cdc29bec",
      "executed": true,
      "phase": "task"
     }
@@ -12978,8 +13074,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "9cc90029-abed-453f-9951-50ce56be8759",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-uWuHnu\\out\\receipts\\9cc90029-abed-453f-9951-50ce56be8759.json",
+     "warnCodes": [],
+     "decisionId": "ad7c64c3-cb93-4516-88b4-1336e8242042",
      "executed": true,
      "phase": "task"
     }
@@ -14321,8 +14417,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "d844a737-457c-4635-92f2-180b69b9d863",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\d844a737-457c-4635-92f2-180b69b9d863.json",
+      "warnCodes": [],
+      "decisionId": "1f797d6a-88e7-4110-918f-0647067bafe8",
       "executed": true,
       "phase": "task"
      },
@@ -14330,8 +14426,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "3aac73bc-4912-4399-af1a-a3f04b7dc81c",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\3aac73bc-4912-4399-af1a-a3f04b7dc81c.json",
+      "warnCodes": [],
+      "decisionId": "17fcde52-f321-4d31-8bb9-33c1f4bfbe52",
       "executed": true,
       "phase": "task"
      },
@@ -14344,8 +14440,13 @@
        "RECIPIENT_NOT_ALLOWLISTED",
        "TASK_CONTEXT_MISSING"
       ],
-      "decisionId": "12891b6b-084c-4132-9ec3-aae75c8dffa3",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\12891b6b-084c-4132-9ec3-aae75c8dffa3.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED",
+       "TASK_CONTEXT_MISSING"
+      ],
+      "decisionId": "61acf52a-7cd3-4a3e-bd1b-ac76e60b86f5",
       "executed": true,
       "phase": "attack"
      },
@@ -14359,8 +14460,13 @@
        "RECIPIENT_NOT_ALLOWLISTED",
        "TASK_CONTEXT_MISSING"
       ],
-      "decisionId": "41f1b7ab-4a43-4e5f-992c-01f201a206e7",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\41f1b7ab-4a43-4e5f-992c-01f201a206e7.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED",
+       "TASK_CONTEXT_MISSING"
+      ],
+      "decisionId": "7adc2840-40cd-4280-aa57-a9f5972d9e49",
       "executed": false,
       "phase": "attack"
      },
@@ -14373,8 +14479,12 @@
        "RECIPIENT_NOT_ALLOWLISTED",
        "TASK_CONTEXT_MISSING"
       ],
-      "decisionId": "616e1a6b-cdbf-43b2-a5b8-3f512889a924",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\616e1a6b-cdbf-43b2-a5b8-3f512889a924.json",
+      "warnCodes": [
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED",
+       "TASK_CONTEXT_MISSING"
+      ],
+      "decisionId": "1887a05b-b946-48d6-a091-7c72edfa5bde",
       "executed": false,
       "phase": "attack"
      },
@@ -14388,8 +14498,13 @@
        "RECIPIENT_NOT_ALLOWLISTED",
        "TASK_CONTEXT_MISSING"
       ],
-      "decisionId": "6000d2ca-a019-4a36-a1fa-47efafcda38b",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\6000d2ca-a019-4a36-a1fa-47efafcda38b.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED",
+       "TASK_CONTEXT_MISSING"
+      ],
+      "decisionId": "242169de-73e5-483b-af5f-6f09f5ae9f29",
       "executed": false,
       "phase": "attack"
      },
@@ -14399,8 +14514,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "9af1a916-8f16-4f97-84e9-955fd225060a",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\9af1a916-8f16-4f97-84e9-955fd225060a.json",
+      "warnCodes": [],
+      "decisionId": "81bf0443-576e-4b7e-a4c4-5512fec792b2",
       "executed": false,
       "phase": "attack"
      },
@@ -14410,8 +14525,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "5424adf1-bbf5-4e63-a1fb-faca0aac078c",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\5424adf1-bbf5-4e63-a1fb-faca0aac078c.json",
+      "warnCodes": [],
+      "decisionId": "a70fee01-209a-43e2-a26f-53a995c08c7d",
       "executed": false,
       "phase": "attack"
      },
@@ -14421,8 +14536,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "ca761424-ef44-4185-a2b8-334f2b0e408f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\ca761424-ef44-4185-a2b8-334f2b0e408f.json",
+      "warnCodes": [],
+      "decisionId": "090ec627-de33-4046-9571-7f85a90db1bb",
       "executed": false,
       "phase": "attack"
      },
@@ -14432,8 +14547,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "3a31de6a-cb59-4d5c-a7cd-8816f179fdc0",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\3a31de6a-cb59-4d5c-a7cd-8816f179fdc0.json",
+      "warnCodes": [],
+      "decisionId": "0eb3076a-57db-4f7d-b6d2-b529b4a59fca",
       "executed": false,
       "phase": "attack"
      },
@@ -14443,8 +14558,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "1a358d46-1b3e-4aa7-acbe-17819f620709",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\1a358d46-1b3e-4aa7-acbe-17819f620709.json",
+      "warnCodes": [],
+      "decisionId": "907f545c-0906-4932-aeb4-b9bbe363a6cf",
       "executed": false,
       "phase": "attack"
      },
@@ -14454,8 +14569,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "5418a8c7-8836-453a-870a-4bfaeeea0555",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\5418a8c7-8836-453a-870a-4bfaeeea0555.json",
+      "warnCodes": [],
+      "decisionId": "3e1ff236-1de0-42db-a485-f1c574c57bd3",
       "executed": false,
       "phase": "attack"
      },
@@ -14465,8 +14580,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "1740cfdf-7cee-4599-9b5e-c9092355c72f",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\1740cfdf-7cee-4599-9b5e-c9092355c72f.json",
+      "warnCodes": [],
+      "decisionId": "983d71ec-c38b-471e-a623-408558d0fc99",
       "executed": false,
       "phase": "attack"
      },
@@ -14476,8 +14591,8 @@
       "codes": [
        "WALLET_FROZEN"
       ],
-      "decisionId": "a9546df7-c218-4568-a9af-899fbb5d0b45",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\a9546df7-c218-4568-a9af-899fbb5d0b45.json",
+      "warnCodes": [],
+      "decisionId": "601427b6-d4e4-4dcb-b176-185d5203f23e",
       "executed": false,
       "phase": "attack"
      },
@@ -14485,8 +14600,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "21cb9248-c61b-492f-abb9-b4154d111f05",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\21cb9248-c61b-492f-abb9-b4154d111f05.json",
+      "warnCodes": [],
+      "decisionId": "d190174d-50de-4c02-82a7-439d04ded9a5",
       "executed": true,
       "phase": "task"
      },
@@ -14498,8 +14613,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "5e90f61c-7428-4d53-9ac8-67ccfde47958",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\5e90f61c-7428-4d53-9ac8-67ccfde47958.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "8c6f9c04-35cc-44e6-9144-37a4965968dc",
       "executed": true,
       "phase": "task"
      },
@@ -14507,8 +14626,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "e01d7aa7-e121-44dd-b28c-128ca78a49cb",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\e01d7aa7-e121-44dd-b28c-128ca78a49cb.json",
+      "warnCodes": [],
+      "decisionId": "c17a3c11-41d8-41de-af24-44dd2e742016",
       "executed": true,
       "phase": "task"
      },
@@ -14516,8 +14635,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "73e7446c-9d0c-483c-a7aa-9da8884b279a",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\73e7446c-9d0c-483c-a7aa-9da8884b279a.json",
+      "warnCodes": [],
+      "decisionId": "4c7bfda5-5e0f-45d7-b202-a6c5e881f8a1",
       "executed": true,
       "phase": "task"
      }
@@ -14591,8 +14710,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "d844a737-457c-4635-92f2-180b69b9d863",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\d844a737-457c-4635-92f2-180b69b9d863.json",
+     "warnCodes": [],
+     "decisionId": "1f797d6a-88e7-4110-918f-0647067bafe8",
      "executed": true,
      "phase": "task"
     }
@@ -14660,8 +14779,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "3aac73bc-4912-4399-af1a-a3f04b7dc81c",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\3aac73bc-4912-4399-af1a-a3f04b7dc81c.json",
+     "warnCodes": [],
+     "decisionId": "17fcde52-f321-4d31-8bb9-33c1f4bfbe52",
      "executed": true,
      "phase": "task"
     }
@@ -14734,8 +14853,13 @@
       "RECIPIENT_NOT_ALLOWLISTED",
       "TASK_CONTEXT_MISSING"
      ],
-     "decisionId": "12891b6b-084c-4132-9ec3-aae75c8dffa3",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\12891b6b-084c-4132-9ec3-aae75c8dffa3.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED",
+      "TASK_CONTEXT_MISSING"
+     ],
+     "decisionId": "61acf52a-7cd3-4a3e-bd1b-ac76e60b86f5",
      "executed": true,
      "phase": "attack"
     }
@@ -14804,8 +14928,13 @@
       "RECIPIENT_NOT_ALLOWLISTED",
       "TASK_CONTEXT_MISSING"
      ],
-     "decisionId": "41f1b7ab-4a43-4e5f-992c-01f201a206e7",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\41f1b7ab-4a43-4e5f-992c-01f201a206e7.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED",
+      "TASK_CONTEXT_MISSING"
+     ],
+     "decisionId": "7adc2840-40cd-4280-aa57-a9f5972d9e49",
      "executed": false,
      "phase": "attack"
     }
@@ -14873,8 +15002,12 @@
       "RECIPIENT_NOT_ALLOWLISTED",
       "TASK_CONTEXT_MISSING"
      ],
-     "decisionId": "616e1a6b-cdbf-43b2-a5b8-3f512889a924",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\616e1a6b-cdbf-43b2-a5b8-3f512889a924.json",
+     "warnCodes": [
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED",
+      "TASK_CONTEXT_MISSING"
+     ],
+     "decisionId": "1887a05b-b946-48d6-a091-7c72edfa5bde",
      "executed": false,
      "phase": "attack"
     }
@@ -14943,8 +15076,13 @@
       "RECIPIENT_NOT_ALLOWLISTED",
       "TASK_CONTEXT_MISSING"
      ],
-     "decisionId": "6000d2ca-a019-4a36-a1fa-47efafcda38b",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\6000d2ca-a019-4a36-a1fa-47efafcda38b.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED",
+      "TASK_CONTEXT_MISSING"
+     ],
+     "decisionId": "242169de-73e5-483b-af5f-6f09f5ae9f29",
      "executed": false,
      "phase": "attack"
     }
@@ -15009,8 +15147,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "9af1a916-8f16-4f97-84e9-955fd225060a",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\9af1a916-8f16-4f97-84e9-955fd225060a.json",
+     "warnCodes": [],
+     "decisionId": "81bf0443-576e-4b7e-a4c4-5512fec792b2",
      "executed": false,
      "phase": "attack"
     }
@@ -15075,8 +15213,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "5424adf1-bbf5-4e63-a1fb-faca0aac078c",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\5424adf1-bbf5-4e63-a1fb-faca0aac078c.json",
+     "warnCodes": [],
+     "decisionId": "a70fee01-209a-43e2-a26f-53a995c08c7d",
      "executed": false,
      "phase": "attack"
     }
@@ -15141,8 +15279,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "ca761424-ef44-4185-a2b8-334f2b0e408f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\ca761424-ef44-4185-a2b8-334f2b0e408f.json",
+     "warnCodes": [],
+     "decisionId": "090ec627-de33-4046-9571-7f85a90db1bb",
      "executed": false,
      "phase": "attack"
     }
@@ -15207,8 +15345,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "3a31de6a-cb59-4d5c-a7cd-8816f179fdc0",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\3a31de6a-cb59-4d5c-a7cd-8816f179fdc0.json",
+     "warnCodes": [],
+     "decisionId": "0eb3076a-57db-4f7d-b6d2-b529b4a59fca",
      "executed": false,
      "phase": "attack"
     }
@@ -15273,8 +15411,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "1a358d46-1b3e-4aa7-acbe-17819f620709",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\1a358d46-1b3e-4aa7-acbe-17819f620709.json",
+     "warnCodes": [],
+     "decisionId": "907f545c-0906-4932-aeb4-b9bbe363a6cf",
      "executed": false,
      "phase": "attack"
     }
@@ -15339,8 +15477,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "5418a8c7-8836-453a-870a-4bfaeeea0555",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\5418a8c7-8836-453a-870a-4bfaeeea0555.json",
+     "warnCodes": [],
+     "decisionId": "3e1ff236-1de0-42db-a485-f1c574c57bd3",
      "executed": false,
      "phase": "attack"
     }
@@ -15405,8 +15543,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "1740cfdf-7cee-4599-9b5e-c9092355c72f",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\1740cfdf-7cee-4599-9b5e-c9092355c72f.json",
+     "warnCodes": [],
+     "decisionId": "983d71ec-c38b-471e-a623-408558d0fc99",
      "executed": false,
      "phase": "attack"
     }
@@ -15472,8 +15610,8 @@
      "codes": [
       "WALLET_FROZEN"
      ],
-     "decisionId": "a9546df7-c218-4568-a9af-899fbb5d0b45",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\a9546df7-c218-4568-a9af-899fbb5d0b45.json",
+     "warnCodes": [],
+     "decisionId": "601427b6-d4e4-4dcb-b176-185d5203f23e",
      "executed": false,
      "phase": "attack"
     }
@@ -15551,8 +15689,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "21cb9248-c61b-492f-abb9-b4154d111f05",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\21cb9248-c61b-492f-abb9-b4154d111f05.json",
+     "warnCodes": [],
+     "decisionId": "d190174d-50de-4c02-82a7-439d04ded9a5",
      "executed": true,
      "phase": "task"
     }
@@ -15624,8 +15762,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "5e90f61c-7428-4d53-9ac8-67ccfde47958",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\5e90f61c-7428-4d53-9ac8-67ccfde47958.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "8c6f9c04-35cc-44e6-9144-37a4965968dc",
      "executed": true,
      "phase": "task"
     }
@@ -15693,8 +15835,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "e01d7aa7-e121-44dd-b28c-128ca78a49cb",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\e01d7aa7-e121-44dd-b28c-128ca78a49cb.json",
+     "warnCodes": [],
+     "decisionId": "c17a3c11-41d8-41de-af24-44dd2e742016",
      "executed": true,
      "phase": "task"
     }
@@ -15762,8 +15904,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "73e7446c-9d0c-483c-a7aa-9da8884b279a",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-xdLg8r\\out\\receipts\\73e7446c-9d0c-483c-a7aa-9da8884b279a.json",
+     "warnCodes": [],
+     "decisionId": "4c7bfda5-5e0f-45d7-b202-a6c5e881f8a1",
      "executed": true,
      "phase": "task"
     }
@@ -16916,8 +17058,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "5268ce76-9730-4d8b-8b34-b6b31762a9aa",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\5268ce76-9730-4d8b-8b34-b6b31762a9aa.json",
+      "warnCodes": [],
+      "decisionId": "22378913-f12f-499c-83c5-95e98a735c4f",
       "executed": true,
       "phase": "task"
      },
@@ -16925,8 +17067,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "ca2570fa-b296-48f4-ab23-be1ff6c879be",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\ca2570fa-b296-48f4-ab23-be1ff6c879be.json",
+      "warnCodes": [],
+      "decisionId": "c298520b-6132-4975-b6b7-ca67da0bff30",
       "executed": true,
       "phase": "task"
      },
@@ -16934,8 +17076,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "c64e14e0-78a0-4639-895e-b210c1ed22d2",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\c64e14e0-78a0-4639-895e-b210c1ed22d2.json",
+      "warnCodes": [],
+      "decisionId": "3af8812e-3ca0-4fcd-b1ed-bec4b67d7df1",
       "executed": true,
       "phase": "task"
      },
@@ -16947,8 +17089,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "6238360b-4df6-4d9b-a6ae-8797f3444d86",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\6238360b-4df6-4d9b-a6ae-8797f3444d86.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "b869e304-22d9-4112-93be-93b4aca6f812",
       "executed": true,
       "phase": "task"
      },
@@ -16956,8 +17102,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "3547ca26-1b25-4ccf-bc93-1cf1878baa62",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\3547ca26-1b25-4ccf-bc93-1cf1878baa62.json",
+      "warnCodes": [],
+      "decisionId": "e77e3ff1-a984-4e70-bc36-eabb436b7270",
       "executed": true,
       "phase": "task"
      },
@@ -16965,8 +17111,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "27d7a345-3077-4365-a272-a13c0a0dfc19",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\27d7a345-3077-4365-a272-a13c0a0dfc19.json",
+      "warnCodes": [],
+      "decisionId": "63c7e604-62c6-4081-9671-ebd90a736e03",
       "executed": true,
       "phase": "task"
      }
@@ -17040,8 +17186,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "5268ce76-9730-4d8b-8b34-b6b31762a9aa",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\5268ce76-9730-4d8b-8b34-b6b31762a9aa.json",
+     "warnCodes": [],
+     "decisionId": "22378913-f12f-499c-83c5-95e98a735c4f",
      "executed": true,
      "phase": "task"
     }
@@ -17109,8 +17255,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "ca2570fa-b296-48f4-ab23-be1ff6c879be",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\ca2570fa-b296-48f4-ab23-be1ff6c879be.json",
+     "warnCodes": [],
+     "decisionId": "c298520b-6132-4975-b6b7-ca67da0bff30",
      "executed": true,
      "phase": "task"
     }
@@ -17188,8 +17334,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "c64e14e0-78a0-4639-895e-b210c1ed22d2",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\c64e14e0-78a0-4639-895e-b210c1ed22d2.json",
+     "warnCodes": [],
+     "decisionId": "3af8812e-3ca0-4fcd-b1ed-bec4b67d7df1",
      "executed": true,
      "phase": "task"
     }
@@ -17261,8 +17407,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "6238360b-4df6-4d9b-a6ae-8797f3444d86",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\6238360b-4df6-4d9b-a6ae-8797f3444d86.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "b869e304-22d9-4112-93be-93b4aca6f812",
      "executed": true,
      "phase": "task"
     }
@@ -17330,8 +17480,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "3547ca26-1b25-4ccf-bc93-1cf1878baa62",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\3547ca26-1b25-4ccf-bc93-1cf1878baa62.json",
+     "warnCodes": [],
+     "decisionId": "e77e3ff1-a984-4e70-bc36-eabb436b7270",
      "executed": true,
      "phase": "task"
     }
@@ -17399,8 +17549,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "27d7a345-3077-4365-a272-a13c0a0dfc19",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-sHbicv\\out\\receipts\\27d7a345-3077-4365-a272-a13c0a0dfc19.json",
+     "warnCodes": [],
+     "decisionId": "63c7e604-62c6-4081-9671-ebd90a736e03",
      "executed": true,
      "phase": "task"
     }
@@ -18545,8 +18695,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "eacef6f1-82bd-4dcb-8080-10f0d70bdcab",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\eacef6f1-82bd-4dcb-8080-10f0d70bdcab.json",
+      "warnCodes": [],
+      "decisionId": "89fdd8dd-e204-4fa2-aa51-150422b659f1",
       "executed": true,
       "phase": "task"
      },
@@ -18554,8 +18704,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "22a011e0-a795-47ef-b916-67d02193d7f8",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\22a011e0-a795-47ef-b916-67d02193d7f8.json",
+      "warnCodes": [],
+      "decisionId": "e0e0a06d-7514-4e2b-b288-a3346c36412a",
       "executed": true,
       "phase": "task"
      },
@@ -18563,8 +18713,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "812f2eea-5a3a-427b-b743-f45aaeedd1d8",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\812f2eea-5a3a-427b-b743-f45aaeedd1d8.json",
+      "warnCodes": [],
+      "decisionId": "c8e49042-5d8a-4d78-be67-f420757de769",
       "executed": true,
       "phase": "task"
      },
@@ -18576,8 +18726,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "b6270a3a-fa73-48ea-89f1-d4c03c4892a8",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\b6270a3a-fa73-48ea-89f1-d4c03c4892a8.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "b709f6b4-c5fb-440a-9974-494bc33ac9c9",
       "executed": true,
       "phase": "task"
      },
@@ -18585,8 +18739,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "5edf66e7-2241-4c55-ad0e-dada3dc74d78",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\5edf66e7-2241-4c55-ad0e-dada3dc74d78.json",
+      "warnCodes": [],
+      "decisionId": "6a9ab0a9-b1fa-4bc6-a188-a6cb12f3f7b4",
       "executed": true,
       "phase": "task"
      },
@@ -18594,8 +18748,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "504b326b-e701-421c-82d0-ca58d279c817",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\504b326b-e701-421c-82d0-ca58d279c817.json",
+      "warnCodes": [],
+      "decisionId": "a890cf5d-4709-4bcf-89b7-ea38167efde7",
       "executed": true,
       "phase": "task"
      }
@@ -18669,8 +18823,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "eacef6f1-82bd-4dcb-8080-10f0d70bdcab",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\eacef6f1-82bd-4dcb-8080-10f0d70bdcab.json",
+     "warnCodes": [],
+     "decisionId": "89fdd8dd-e204-4fa2-aa51-150422b659f1",
      "executed": true,
      "phase": "task"
     }
@@ -18738,8 +18892,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "22a011e0-a795-47ef-b916-67d02193d7f8",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\22a011e0-a795-47ef-b916-67d02193d7f8.json",
+     "warnCodes": [],
+     "decisionId": "e0e0a06d-7514-4e2b-b288-a3346c36412a",
      "executed": true,
      "phase": "task"
     }
@@ -18817,8 +18971,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "812f2eea-5a3a-427b-b743-f45aaeedd1d8",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\812f2eea-5a3a-427b-b743-f45aaeedd1d8.json",
+     "warnCodes": [],
+     "decisionId": "c8e49042-5d8a-4d78-be67-f420757de769",
      "executed": true,
      "phase": "task"
     }
@@ -18890,8 +19044,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "b6270a3a-fa73-48ea-89f1-d4c03c4892a8",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\b6270a3a-fa73-48ea-89f1-d4c03c4892a8.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "b709f6b4-c5fb-440a-9974-494bc33ac9c9",
      "executed": true,
      "phase": "task"
     }
@@ -18959,8 +19117,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "5edf66e7-2241-4c55-ad0e-dada3dc74d78",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\5edf66e7-2241-4c55-ad0e-dada3dc74d78.json",
+     "warnCodes": [],
+     "decisionId": "6a9ab0a9-b1fa-4bc6-a188-a6cb12f3f7b4",
      "executed": true,
      "phase": "task"
     }
@@ -19028,8 +19186,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "504b326b-e701-421c-82d0-ca58d279c817",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-PhFKTW\\out\\receipts\\504b326b-e701-421c-82d0-ca58d279c817.json",
+     "warnCodes": [],
+     "decisionId": "a890cf5d-4709-4bcf-89b7-ea38167efde7",
      "executed": true,
      "phase": "task"
     }
@@ -20193,8 +20351,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "2574dd9b-ef6e-4746-83fc-86dc1456fc8e",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\2574dd9b-ef6e-4746-83fc-86dc1456fc8e.json",
+      "warnCodes": [],
+      "decisionId": "7b1a1fd0-3952-4075-9387-02d03992a4f6",
       "executed": true,
       "phase": "task"
      },
@@ -20202,8 +20360,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "367c6c21-ff15-4782-b330-427970929c46",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\367c6c21-ff15-4782-b330-427970929c46.json",
+      "warnCodes": [],
+      "decisionId": "1e46b78e-87ac-442c-91e7-7e667f9fd61a",
       "executed": true,
       "phase": "task"
      },
@@ -20214,8 +20372,11 @@
        "COUNTERPARTY_FIRST_CONTACT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "f7f9e19c-eb76-49ab-a7b1-f5c39dfb23ec",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\f7f9e19c-eb76-49ab-a7b1-f5c39dfb23ec.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "95c0cafa-b236-4995-a04a-772467ebb16d",
       "executed": true,
       "phase": "attack"
      },
@@ -20223,8 +20384,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "8f503802-3d2c-4650-8cb4-8b1f9640be9d",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\8f503802-3d2c-4650-8cb4-8b1f9640be9d.json",
+      "warnCodes": [],
+      "decisionId": "8a176e59-f675-4ddf-ba28-bdb101f3f168",
       "executed": true,
       "phase": "task"
      },
@@ -20236,8 +20397,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "f454b0ee-771d-40c1-93b4-03864ab66185",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\f454b0ee-771d-40c1-93b4-03864ab66185.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "5b9d7cef-6b06-4335-8126-5659c3e06b10",
       "executed": true,
       "phase": "task"
      },
@@ -20245,8 +20410,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "285079bb-13ae-4846-af0f-bc509a1cb94e",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\285079bb-13ae-4846-af0f-bc509a1cb94e.json",
+      "warnCodes": [],
+      "decisionId": "8fd9bf98-1b6e-42df-b858-ad93e93faac9",
       "executed": true,
       "phase": "task"
      },
@@ -20254,8 +20419,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "e645b6b8-8368-42c2-b7c0-c8c137b2b12d",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\e645b6b8-8368-42c2-b7c0-c8c137b2b12d.json",
+      "warnCodes": [],
+      "decisionId": "5bf4651e-4695-4844-9bfa-66b2d1257ad5",
       "executed": true,
       "phase": "task"
      }
@@ -20329,8 +20494,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "2574dd9b-ef6e-4746-83fc-86dc1456fc8e",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\2574dd9b-ef6e-4746-83fc-86dc1456fc8e.json",
+     "warnCodes": [],
+     "decisionId": "7b1a1fd0-3952-4075-9387-02d03992a4f6",
      "executed": true,
      "phase": "task"
     }
@@ -20398,8 +20563,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "367c6c21-ff15-4782-b330-427970929c46",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\367c6c21-ff15-4782-b330-427970929c46.json",
+     "warnCodes": [],
+     "decisionId": "1e46b78e-87ac-442c-91e7-7e667f9fd61a",
      "executed": true,
      "phase": "task"
     }
@@ -20484,8 +20649,11 @@
       "COUNTERPARTY_FIRST_CONTACT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "f7f9e19c-eb76-49ab-a7b1-f5c39dfb23ec",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\f7f9e19c-eb76-49ab-a7b1-f5c39dfb23ec.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "95c0cafa-b236-4995-a04a-772467ebb16d",
      "executed": true,
      "phase": "attack"
     }
@@ -20556,8 +20724,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "8f503802-3d2c-4650-8cb4-8b1f9640be9d",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\8f503802-3d2c-4650-8cb4-8b1f9640be9d.json",
+     "warnCodes": [],
+     "decisionId": "8a176e59-f675-4ddf-ba28-bdb101f3f168",
      "executed": true,
      "phase": "task"
     }
@@ -20629,8 +20797,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "f454b0ee-771d-40c1-93b4-03864ab66185",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\f454b0ee-771d-40c1-93b4-03864ab66185.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "5b9d7cef-6b06-4335-8126-5659c3e06b10",
      "executed": true,
      "phase": "task"
     }
@@ -20698,8 +20870,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "285079bb-13ae-4846-af0f-bc509a1cb94e",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\285079bb-13ae-4846-af0f-bc509a1cb94e.json",
+     "warnCodes": [],
+     "decisionId": "8fd9bf98-1b6e-42df-b858-ad93e93faac9",
      "executed": true,
      "phase": "task"
     }
@@ -20767,8 +20939,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "e645b6b8-8368-42c2-b7c0-c8c137b2b12d",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-bezDcW\\out\\receipts\\e645b6b8-8368-42c2-b7c0-c8c137b2b12d.json",
+     "warnCodes": [],
+     "decisionId": "5bf4651e-4695-4844-9bfa-66b2d1257ad5",
      "executed": true,
      "phase": "task"
     }
@@ -21919,8 +22091,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "2f726896-e6f0-4e33-846d-d0cc87801d43",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\2f726896-e6f0-4e33-846d-d0cc87801d43.json",
+      "warnCodes": [],
+      "decisionId": "f9d76215-442a-4967-80f5-2018fb035cbe",
       "executed": true,
       "phase": "task"
      },
@@ -21928,8 +22100,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "a5db4cca-7c30-4639-9939-ee3e97b294a1",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\a5db4cca-7c30-4639-9939-ee3e97b294a1.json",
+      "warnCodes": [],
+      "decisionId": "9743a860-176a-4fde-8fb2-9760a58407fd",
       "executed": true,
       "phase": "task"
      },
@@ -21937,8 +22109,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "ebf80e58-40ec-4e80-8f64-13ae9c8f512e",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\ebf80e58-40ec-4e80-8f64-13ae9c8f512e.json",
+      "warnCodes": [],
+      "decisionId": "96af045a-de79-4feb-b562-e9468ecacd6e",
       "executed": true,
       "phase": "task"
      },
@@ -21950,8 +22122,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "cc308b4e-3bcc-4911-a533-ed1366dc0cc3",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\cc308b4e-3bcc-4911-a533-ed1366dc0cc3.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "b3877f0c-49a5-4049-a2a5-dccbc260a664",
       "executed": true,
       "phase": "task"
      },
@@ -21959,8 +22135,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "64683681-151c-4cf9-b4e5-948650c91df7",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\64683681-151c-4cf9-b4e5-948650c91df7.json",
+      "warnCodes": [],
+      "decisionId": "3a0e4a74-5fdb-4880-9f8c-794112d60bfc",
       "executed": true,
       "phase": "task"
      },
@@ -21968,8 +22144,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "94f2b78e-26e2-4ac5-8563-8717847f5e3b",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\94f2b78e-26e2-4ac5-8563-8717847f5e3b.json",
+      "warnCodes": [],
+      "decisionId": "d3ce98e5-a61c-46de-aaa2-c314c463c3f7",
       "executed": true,
       "phase": "task"
      }
@@ -22043,8 +22219,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "2f726896-e6f0-4e33-846d-d0cc87801d43",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\2f726896-e6f0-4e33-846d-d0cc87801d43.json",
+     "warnCodes": [],
+     "decisionId": "f9d76215-442a-4967-80f5-2018fb035cbe",
      "executed": true,
      "phase": "task"
     }
@@ -22112,8 +22288,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "a5db4cca-7c30-4639-9939-ee3e97b294a1",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\a5db4cca-7c30-4639-9939-ee3e97b294a1.json",
+     "warnCodes": [],
+     "decisionId": "9743a860-176a-4fde-8fb2-9760a58407fd",
      "executed": true,
      "phase": "task"
     }
@@ -22191,8 +22367,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "ebf80e58-40ec-4e80-8f64-13ae9c8f512e",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\ebf80e58-40ec-4e80-8f64-13ae9c8f512e.json",
+     "warnCodes": [],
+     "decisionId": "96af045a-de79-4feb-b562-e9468ecacd6e",
      "executed": true,
      "phase": "task"
     }
@@ -22264,8 +22440,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "cc308b4e-3bcc-4911-a533-ed1366dc0cc3",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\cc308b4e-3bcc-4911-a533-ed1366dc0cc3.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "b3877f0c-49a5-4049-a2a5-dccbc260a664",
      "executed": true,
      "phase": "task"
     }
@@ -22333,8 +22513,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "64683681-151c-4cf9-b4e5-948650c91df7",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\64683681-151c-4cf9-b4e5-948650c91df7.json",
+     "warnCodes": [],
+     "decisionId": "3a0e4a74-5fdb-4880-9f8c-794112d60bfc",
      "executed": true,
      "phase": "task"
     }
@@ -22402,8 +22582,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "94f2b78e-26e2-4ac5-8563-8717847f5e3b",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-41RxcB\\out\\receipts\\94f2b78e-26e2-4ac5-8563-8717847f5e3b.json",
+     "warnCodes": [],
+     "decisionId": "d3ce98e5-a61c-46de-aaa2-c314c463c3f7",
      "executed": true,
      "phase": "task"
     }
@@ -23553,8 +23733,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "1aebca51-c681-496c-afe8-a1a210cac7ce",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\1aebca51-c681-496c-afe8-a1a210cac7ce.json",
+      "warnCodes": [],
+      "decisionId": "989fa148-fec3-461c-b802-d563242c900c",
       "executed": true,
       "phase": "task"
      },
@@ -23562,8 +23742,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "f4719e34-31ae-40b9-a0d7-c9b0b8c8e445",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\f4719e34-31ae-40b9-a0d7-c9b0b8c8e445.json",
+      "warnCodes": [],
+      "decisionId": "7542ba3f-08ac-40a1-9390-976fdf19e4c0",
       "executed": true,
       "phase": "task"
      },
@@ -23571,8 +23751,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "1fab1aed-5246-4d5a-b176-5969c05f9ced",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\1fab1aed-5246-4d5a-b176-5969c05f9ced.json",
+      "warnCodes": [],
+      "decisionId": "df770e76-6ba9-41bc-b2dd-da7601ebbd0d",
       "executed": true,
       "phase": "task"
      },
@@ -23584,8 +23764,12 @@
        "COUNTERPARTY_NEW_ACCOUNT",
        "RECIPIENT_NOT_ALLOWLISTED"
       ],
-      "decisionId": "7547b6d9-6d25-4648-9b7f-1da4f2fce80a",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\7547b6d9-6d25-4648-9b7f-1da4f2fce80a.json",
+      "warnCodes": [
+       "COUNTERPARTY_FIRST_CONTACT",
+       "COUNTERPARTY_NEW_ACCOUNT",
+       "RECIPIENT_NOT_ALLOWLISTED"
+      ],
+      "decisionId": "c0a25e20-c04b-4a3e-8d55-9a7df935b023",
       "executed": true,
       "phase": "task"
      },
@@ -23593,8 +23777,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "0cedd0f3-9d00-4c0c-b167-9c95643abeb5",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\0cedd0f3-9d00-4c0c-b167-9c95643abeb5.json",
+      "warnCodes": [],
+      "decisionId": "c9822bc9-96d7-4d54-af4b-c1ef1c189a52",
       "executed": true,
       "phase": "task"
      },
@@ -23602,8 +23786,8 @@
       "lane": "sealed",
       "verdict": "ALLOW",
       "codes": [],
-      "decisionId": "7f4aabf2-af3b-496d-aa14-a1827a9208da",
-      "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\7f4aabf2-af3b-496d-aa14-a1827a9208da.json",
+      "warnCodes": [],
+      "decisionId": "788329e7-0af5-44c0-a91e-bf1e6966f10d",
       "executed": true,
       "phase": "task"
      }
@@ -23677,8 +23861,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "1aebca51-c681-496c-afe8-a1a210cac7ce",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\1aebca51-c681-496c-afe8-a1a210cac7ce.json",
+     "warnCodes": [],
+     "decisionId": "989fa148-fec3-461c-b802-d563242c900c",
      "executed": true,
      "phase": "task"
     }
@@ -23746,8 +23930,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "f4719e34-31ae-40b9-a0d7-c9b0b8c8e445",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\f4719e34-31ae-40b9-a0d7-c9b0b8c8e445.json",
+     "warnCodes": [],
+     "decisionId": "7542ba3f-08ac-40a1-9390-976fdf19e4c0",
      "executed": true,
      "phase": "task"
     }
@@ -23825,8 +24009,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "1fab1aed-5246-4d5a-b176-5969c05f9ced",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\1fab1aed-5246-4d5a-b176-5969c05f9ced.json",
+     "warnCodes": [],
+     "decisionId": "df770e76-6ba9-41bc-b2dd-da7601ebbd0d",
      "executed": true,
      "phase": "task"
     }
@@ -23898,8 +24082,12 @@
       "COUNTERPARTY_NEW_ACCOUNT",
       "RECIPIENT_NOT_ALLOWLISTED"
      ],
-     "decisionId": "7547b6d9-6d25-4648-9b7f-1da4f2fce80a",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\7547b6d9-6d25-4648-9b7f-1da4f2fce80a.json",
+     "warnCodes": [
+      "COUNTERPARTY_FIRST_CONTACT",
+      "COUNTERPARTY_NEW_ACCOUNT",
+      "RECIPIENT_NOT_ALLOWLISTED"
+     ],
+     "decisionId": "c0a25e20-c04b-4a3e-8d55-9a7df935b023",
      "executed": true,
      "phase": "task"
     }
@@ -23967,8 +24155,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "0cedd0f3-9d00-4c0c-b167-9c95643abeb5",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\0cedd0f3-9d00-4c0c-b167-9c95643abeb5.json",
+     "warnCodes": [],
+     "decisionId": "c9822bc9-96d7-4d54-af4b-c1ef1c189a52",
      "executed": true,
      "phase": "task"
     }
@@ -24036,8 +24224,8 @@
      "lane": "sealed",
      "verdict": "ALLOW",
      "codes": [],
-     "decisionId": "7f4aabf2-af3b-496d-aa14-a1827a9208da",
-     "receiptPath": "C:\\Users\\user\\AppData\\Local\\Temp\\arena-sealed-lWHcAi\\out\\receipts\\7f4aabf2-af3b-496d-aa14-a1827a9208da.json",
+     "warnCodes": [],
+     "decisionId": "788329e7-0af5-44c0-a91e-bf1e6966f10d",
      "executed": true,
      "phase": "task"
     }

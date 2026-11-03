@@ -1,0 +1,25 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "9e805455-5109-4cd9-92c3-a4f614d5d306",
+  "issuedAt": "2026-11-03T15:57:07.860Z",
+  "verdict": "BLOCK",
+  "reasonCodes": [
+    "ACTION_CLASS_FORBIDDEN"
+  ],
+  "public": {
+    "intentKind": "add_key",
+    "route": "public",
+    "mode": "offline"
+  },
+  "commitments": {
+    "agentId": "71bf9665fc5caaae57e03dd627ab7f73318800cd93572bfd38c6d31b6c9f9f5b",
+    "details": "055b55f22027a6b9be75a46070837eff0f15bdfccf956e15e8ee314791bd9add",
+    "intent": "b8a1ddbc32f87a82b6c28f21b8ce6261420d71247454870439b4c376d8d3edf1"
+  },
+  "policyCommitment": "d2d57338ce98d378053571aaca11d8a75ecd3cafa05408a243c675b1caae0b0d",
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "f4153d279a63dee8e4260acc4c8b1d02ae3cc6d7ed3e8fa2ab75f203958847ca"
+  },
+  "signature": "2965df4e7189aaa070282772986ee452ce0e9dbe5a9d122aabd5a94696d11e7d8f97d04c482f990af222bd9848667493fba3dd2d357caf1bd9074f868baae603"
+}

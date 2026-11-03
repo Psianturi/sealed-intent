@@ -1,0 +1,55 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "90423c8e-1700-4883-a002-153badf0701a",
+  "issuedAt": "2026-11-03T16:01:14.163Z",
+  "verdict": "BLOCK",
+  "reasonCodes": [
+    "PROMPT_INJECTION_SUSPECTED",
+    "TEE_SIGNAL_BLOCK"
+  ],
+  "warnCodes": [
+    "COUNTERPARTY_FIRST_CONTACT",
+    "COUNTERPARTY_NEW_ACCOUNT",
+    "RECIPIENT_NOT_ALLOWLISTED"
+  ],
+  "public": {
+    "intentKind": "transfer",
+    "route": "public",
+    "mode": "offline"
+  },
+  "commitments": {
+    "agentId": "b5133624d051444490e7d175bb62bf94dd8f1b296cc83f37fdcb69d19aae1984",
+    "tokenIn": "470a00daddef71b1e4403d1f4c2486912958be09a6787a9218004d2565d33951",
+    "amountIn": "f92268374efc99baeaa3cc8d9a2fa6cfdb43714d30fa2e7ea791fb8cee758eca",
+    "recipient": "e59ebd797d81660fadbf6020b1dbd12d197fb4d20679c66813307bb048867d15",
+    "taskText": "8f98cca28449ab7b1a74dca8d1d39495d14a1328e8442f8057138973dc3cca7b",
+    "intent": "70544c7d761daa33b9f06531b7e7b56eb9c3f1ea731e64dbbf1c7444d16626f9"
+  },
+  "policyCommitment": "f2db40677a833dc77c4a9cdec5fec160455f22f578a1642dca56768d134c6784",
+  "tee": {
+    "kind": "offline-simulated",
+    "signatureKind": "provider_tee",
+    "model": "offline/rule-based-simulator",
+    "requestHash": "87fa68176fd5e5b5c33af5215610b5f34736f7d05b39a0c2c25e0546f36eb395",
+    "responseHash": "91575f6cfec4017df4b75fcb49b62c811ad7e7265292ee7b1be3d83fe8b97c53",
+    "text": "offline/rule-based-simulator:87fa68176fd5e5b5c33af5215610b5f34736f7d05b39a0c2c25e0546f36eb395:91575f6cfec4017df4b75fcb49b62c811ad7e7265292ee7b1be3d83fe8b97c53",
+    "signature": "0x00d6c7f8ca8eff89597731b1e49d01c3f6b1cf2ad187849189c0d3d25713034437fbe50bbd1b7b5d2ecdb8fe8ef942c6097143550d570737c2c67a87334fb1661c",
+    "signingAddress": "0x2f016c9dc2581b9aca197bc7bffef30aedf05b01",
+    "signingAlgo": "ecdsa",
+    "attestation": {
+      "nonce": "e5d18b91fa2bd25cbc8a50b84f1301944e2725b79dd16b81e282e1c1f564b9a1",
+      "signingAddressMatched": false,
+      "quoteVerifiedLocally": false,
+      "note": "offline demo: no attestation"
+    },
+    "signal": "block",
+    "signalCodes": [
+      "SUSPICIOUS_TASK_TEXT"
+    ]
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "c4e899c5b745b5ae900d1dcd095c701105b9fdcc550f757a3c500c2146a5cf6d"
+  },
+  "signature": "f54c7fcd41511cd23ec98b209af23150684f2f5d961ae401ed819415098feae76be0906ad31b12e093976cb74ba0d463b6c52a97cd1a88b6928f08ce14d9e90e"
+}

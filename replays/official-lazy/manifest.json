@@ -1,6 +1,6 @@
 {
   "runId": "ledger-lazy-2026-11-03-23d4e2f6",
-  "createdAt": "2026-11-03T15:52:47.900Z",
+  "createdAt": "2026-11-03T15:59:15.706Z",
   "chain": "ledger",
   "victim": "scripted",
   "approver": "lazy",
@@ -39,5 +39,5 @@
     "rules": "REAL (the same code that runs live)"
   },
   "issuer": "70e6e99d689b00104ad1086419fe58ba9c6caa7904bb0adfd858e9b239b6908a",
-  "signature": "0451b1e1fdbcf93591a26c93c5ce1ca701c8d076748ee9313978b0fa5326a6715dcfd948b6d82f0ed9d09e5f92fe8ec1477e09acb80524d3a73f80118353f80a"
+  "signature": "6653664ccc61314dc755651193bd4fc495851b1791119c578ec70b8a3b12144abbb0ca5fc4da80bb91fdfe15af2ab34c86d67d00bdacd5e6f6f961efd7545f0d"
 }

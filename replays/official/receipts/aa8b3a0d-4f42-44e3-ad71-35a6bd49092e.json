@@ -1,0 +1,51 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "aa8b3a0d-4f42-44e3-ad71-35a6bd49092e",
+  "issuedAt": "2026-11-03T15:57:08.249Z",
+  "verdict": "WARN",
+  "reasonCodes": [],
+  "warnCodes": [
+    "COUNTERPARTY_FIRST_CONTACT",
+    "COUNTERPARTY_NEW_ACCOUNT",
+    "RECIPIENT_NOT_ALLOWLISTED",
+    "TASK_CONTEXT_MISSING"
+  ],
+  "public": {
+    "intentKind": "transfer",
+    "route": "public",
+    "mode": "offline",
+    "budgetReservationId": "d2576e1f-a945-45c0-bfbe-9facd9f8e18b"
+  },
+  "commitments": {
+    "agentId": "a1bb43ca7e5377e0e6786b8a846a190428b9a40612de44b6a9274af37124899c",
+    "tokenIn": "ff6040b0b10f1a887c31626ef0067ba867f46cecfb09b4b8065574d4b32f5b83",
+    "amountIn": "6f51649cbddb3c21a214ff2b4f826fee7120c1a13cd1a61a2d11b94dcb865bf3",
+    "recipient": "f6dd70534e3a111968f721b0ccb7a0a893e77417accac2a3bd46f0b8f3814205",
+    "intent": "1a0a284fa261b5add2712fad8329268366617fcecf262280f0261f86ba0905b7"
+  },
+  "policyCommitment": "6f91182efed33d66c8edc6f3cd511348cbf5609af03de9f08d7ba9b755a69240",
+  "tee": {
+    "kind": "offline-simulated",
+    "signatureKind": "provider_tee",
+    "model": "offline/rule-based-simulator",
+    "requestHash": "39b6614a88c080dfba421839f7a0c0815d231fc2e01357163a242e7c88bed5fb",
+    "responseHash": "dc275bee3cc910ef46e17da60fb9f6d10448fb3892e35d66391b3dfa1b072121",
+    "text": "offline/rule-based-simulator:39b6614a88c080dfba421839f7a0c0815d231fc2e01357163a242e7c88bed5fb:dc275bee3cc910ef46e17da60fb9f6d10448fb3892e35d66391b3dfa1b072121",
+    "signature": "0x9523f5e2a7ab7891a158347cee4861f85418f75957a4f66924ed9037777ee91d21072b4f6b6314f36720fa2a00e6d64b1b60627f66e33e014d2e28ef02e0d8b41b",
+    "signingAddress": "0x9c0d5629a102e5b96d11a79ab49e09aaae8c9a5f",
+    "signingAlgo": "ecdsa",
+    "attestation": {
+      "nonce": "773d709c809dc48182887d837aa0398204741ec6cfb8980c9e5d0e80415bb58b",
+      "signingAddressMatched": false,
+      "quoteVerifiedLocally": false,
+      "note": "offline demo: no attestation"
+    },
+    "signal": "allow",
+    "signalCodes": []
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "25245ec2db264c7af7f4a971bbd7ff2be0919e95e296fc7a738763eef68dc7a7"
+  },
+  "signature": "800be44a7a49629b51676e12c01a22f3398449884875a774918d5ed53714d47e130f3d3b6289a50ffb9427b7605c4aee4087961a307f281936bccfc868000d0d"
+}

@@ -1,0 +1,46 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "fce34e79-6181-47c4-9443-b31b7d44032d",
+  "issuedAt": "2026-11-03T16:03:26.136Z",
+  "verdict": "ALLOW",
+  "reasonCodes": [],
+  "public": {
+    "intentKind": "transfer",
+    "route": "public",
+    "mode": "offline",
+    "budgetReservationId": "71940d48-05af-4770-b0ad-5e1f1d856b46"
+  },
+  "commitments": {
+    "agentId": "56f10bbece330651a6497748d35492d7e0d1947af8fd22cb7c83bb7049c1400c",
+    "tokenIn": "07299f858549fdbe2878d487283c2f65c74116839b5cd23ba25511ce210e8fc3",
+    "amountIn": "e1cdd5c7048f262e17e6bf54172a1a372499b16a68a216e9a9f8e0d30ef6549e",
+    "recipient": "1cec3a98aad8cdf58c0f57bfa19cd1ab510ac9d0845598c09b57d22cb73e2c2e",
+    "taskText": "285d2619c5388135a2517991554d647845922a58f92591122141cd221a14a550",
+    "intent": "ef1c368d2a5823a9b205aa4970eafab8a2e99bf38d3e3d4da002c87d5c35d436"
+  },
+  "policyCommitment": "476437071337fd241332c91ca912a452d8e64c502a717f2e570fc00612b5640b",
+  "tee": {
+    "kind": "offline-simulated",
+    "signatureKind": "provider_tee",
+    "model": "offline/rule-based-simulator",
+    "requestHash": "ec6a088dc4bb76f5c65130cd0df1896503082793dd3f013aa6356f4934645a4c",
+    "responseHash": "ad0ed6c46155cb084dee90b78f5e97874e5958e16b8db1fce496c7c94ffae0eb",
+    "text": "offline/rule-based-simulator:ec6a088dc4bb76f5c65130cd0df1896503082793dd3f013aa6356f4934645a4c:ad0ed6c46155cb084dee90b78f5e97874e5958e16b8db1fce496c7c94ffae0eb",
+    "signature": "0x535c18c29cdcb340285ac271b5f5b2b7e79a099ffa9df8f5a8c3aeb8c0b32d046ea3d2981ff296dd7a9251c19d6a7713a9ee7b2e8fc30391c359707a6114c2c81c",
+    "signingAddress": "0xa8a04a00b155426b780dda47d509424764e1d313",
+    "signingAlgo": "ecdsa",
+    "attestation": {
+      "nonce": "ace4a83e9ba416fcdb99fc8cb7215106ee2a546329f145726b65b0969d82900b",
+      "signingAddressMatched": false,
+      "quoteVerifiedLocally": false,
+      "note": "offline demo: no attestation"
+    },
+    "signal": "allow",
+    "signalCodes": []
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "f92c4c02584cda05ae6f30f0a2f8eb19326fe065d0f7d3f81b42b02d3cf1b347"
+  },
+  "signature": "1635c9a98abc8bfddef01fad0f01b578932f437642065289839fffdb6bad42a43e10a00a56f93d935767f35dfc9c9ef1cccc611d2900d44f352b29e135c29a09"
+}

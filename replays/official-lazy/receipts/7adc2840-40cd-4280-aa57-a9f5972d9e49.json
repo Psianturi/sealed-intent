@@ -1,0 +1,53 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "7adc2840-40cd-4280-aa57-a9f5972d9e49",
+  "issuedAt": "2026-11-03T15:59:15.042Z",
+  "verdict": "BLOCK",
+  "reasonCodes": [
+    "LIMIT_EXCEEDED"
+  ],
+  "warnCodes": [
+    "COUNTERPARTY_FIRST_CONTACT",
+    "COUNTERPARTY_NEW_ACCOUNT",
+    "RECIPIENT_NOT_ALLOWLISTED",
+    "TASK_CONTEXT_MISSING"
+  ],
+  "public": {
+    "intentKind": "transfer",
+    "route": "public",
+    "mode": "offline"
+  },
+  "commitments": {
+    "agentId": "1212d29dbaa4cbc782caef73ef638f4d4eb87e02ae70eec9819c840a51b0713d",
+    "tokenIn": "911f627ca899b17703d46f91e46d6e88945684adb39696d765e6ca4b1a3d1f10",
+    "amountIn": "73b8281d981847b6d58260b88cf365b6210c42dbd72b34aabe300af7eda58f93",
+    "recipient": "4f170c2b3f5cf2f2f7d936cc8a652e6d1167d8e78a9b18d312773e3114221bd4",
+    "limitDetail": "f27323665cf73157026b66ba74e82226c3ece453e66972550382703e96eacf3d",
+    "intent": "97b7fdca52db4363bd5ac7588e75e4e9cb19dae0efb16147fe73ee750bd5b2f8"
+  },
+  "policyCommitment": "6e8795773728a384d577eddc9cc5ced0a4b00964b6b15f3c9f4fde05a48a074d",
+  "tee": {
+    "kind": "offline-simulated",
+    "signatureKind": "provider_tee",
+    "model": "offline/rule-based-simulator",
+    "requestHash": "2b17a9f1a6d6e66ea0c55d25d2924c6b4873cf6072e104cf70999fe4788a6f36",
+    "responseHash": "03f66afb790ee5c80c5a7b4ab8f0a77d92260a6ff1654802b6605684fcca3a2d",
+    "text": "offline/rule-based-simulator:2b17a9f1a6d6e66ea0c55d25d2924c6b4873cf6072e104cf70999fe4788a6f36:03f66afb790ee5c80c5a7b4ab8f0a77d92260a6ff1654802b6605684fcca3a2d",
+    "signature": "0x67e7fe55a29ad7eedb4ff4ba57fb1dd4a32a1fe90edea3869c7469885bc2de5639658ef845cec0e59c2b20b660d34304403885e9006aa272aaf5e7a090bba6171c",
+    "signingAddress": "0xc95fda657a80eb84e470b61fe0dd4098e5f22e65",
+    "signingAlgo": "ecdsa",
+    "attestation": {
+      "nonce": "d5e5c522f7e58d80ab37cdf5830bd8c9bd12a7f419a0a2bad119c81e19247ffb",
+      "signingAddressMatched": false,
+      "quoteVerifiedLocally": false,
+      "note": "offline demo: no attestation"
+    },
+    "signal": "allow",
+    "signalCodes": []
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "fe60a3f1c92e908515a56f46a7f6fadc7f9592f79c845a3ace553f1bd59c9e82"
+  },
+  "signature": "6cee26badcf0d818a85b9dfb6d60c316de5f91231bd17e2026396377841efbdc15f384890f31b032a727d3813c3fa7c0119de945f3d9348615aa77bc2780f70c"
+}

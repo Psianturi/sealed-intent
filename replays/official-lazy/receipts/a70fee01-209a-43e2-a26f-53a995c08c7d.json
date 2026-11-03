@@ -1,0 +1,27 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "a70fee01-209a-43e2-a26f-53a995c08c7d",
+  "issuedAt": "2026-11-03T15:59:15.055Z",
+  "verdict": "BLOCK",
+  "reasonCodes": [
+    "WALLET_FROZEN"
+  ],
+  "public": {
+    "intentKind": "transfer",
+    "route": "public",
+    "mode": "offline"
+  },
+  "commitments": {
+    "agentId": "3405c8f4c63c5d699b2367d1d1a3d8b6b7c1ec64772c92b821c9614736dc1cf3",
+    "tokenIn": "1c32a577291e7eb29a0c9d822c06df2c9f2bec806003cf8e733b17f682b4a02c",
+    "amountIn": "7aa88fba5dcd074bcc2fa5e2fe5b5747d1bc72aebaeefe148e9f6266058ba555",
+    "recipient": "546c1bf13763e3b708897e19f7b3d754e096a1c47b23ea91430a913bd1e56461",
+    "intent": "22562da6cf00e469b9682498e850217e9ade0178febcad9ef688df286f8aa08d"
+  },
+  "policyCommitment": "2862cbde96daf6db6fddd4def1f7c9dbdfa5226361dfa635af9e623bb288e04b",
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "fe60a3f1c92e908515a56f46a7f6fadc7f9592f79c845a3ace553f1bd59c9e82"
+  },
+  "signature": "4634d3f525dc7d1fd06ad50b93f954a05767e33cc515d8e83f7c011e105923ddd32070f1a36fae072b6ec0523656f914c495c467706ca4cd5571cc6ec69b940c"
+}

@@ -1,0 +1,55 @@
+{
+  "version": "sealed-intent/receipt@1",
+  "receiptId": "158623f2-0f6b-4920-b897-c2a5cf0aef4c",
+  "issuedAt": "2026-11-03T15:59:14.606Z",
+  "verdict": "BLOCK",
+  "reasonCodes": [
+    "EXCESSIVE_VALUE_LOSS"
+  ],
+  "public": {
+    "intentKind": "swap",
+    "route": "public",
+    "mode": "offline",
+    "quote": {
+      "correlationId": "01d6830b43742bb56ec34b9a02d05e09",
+      "signatureVerified": true,
+      "dry": true
+    }
+  },
+  "commitments": {
+    "agentId": "d1960f04f594c44c496fedbcc969c3eae56156f28b47b4e681c5b53b2d8c66ca",
+    "tokenIn": "0ccbf801568ae20680631eef6a426c6559c69838ba91ba5d4a51f75eb052e460",
+    "tokenOut": "15123f67d4750ecd698e960d832204bfecaa166d752303f8e2ed261fa973d605",
+    "amountIn": "77b66b158664c6c58c77280388dddad6287e83bc06f3b0887784b73863b2f6c8",
+    "minAmountOut": "e1f38762aad0d18bc4d8729af8b8a61adc67a40404627be3851d41b957fe683a",
+    "recipient": "7507eda5298575cb42ee85de4b325672155a0e0921a0516b7fd92bb51847135a",
+    "refundTo": "9dbffd0e7b3d0a731eeca92851dd16ed6ad93c83d26f821998f29faf4a66b255",
+    "taskText": "d125a7280c878cdc158e5f9164117598a6b2ce9a5f393357d74a0ba3ee58b929",
+    "intent": "fae765629fe804566eb0f2449f8cca79929a4a99141206d1fd2603a1faee57e3"
+  },
+  "policyCommitment": "ee26093552b87c6cbc3ea9c40eca30ba89476028cdb9d09fd96a078c8aa4195e",
+  "tee": {
+    "kind": "offline-simulated",
+    "signatureKind": "provider_tee",
+    "model": "offline/rule-based-simulator",
+    "requestHash": "d0fee043ace2ea675a110d7868f3d208a1c52e995442b986dce546b3a4b84a61",
+    "responseHash": "2d0d9f0f005320f8de6a7b90cd125c6c3cf3af5e15277b7861e99cd1ac836be7",
+    "text": "offline/rule-based-simulator:d0fee043ace2ea675a110d7868f3d208a1c52e995442b986dce546b3a4b84a61:2d0d9f0f005320f8de6a7b90cd125c6c3cf3af5e15277b7861e99cd1ac836be7",
+    "signature": "0x136e1a6a192a28b171cd1e259dab5ce2c6fce190840164bbf5dd87e99da8f49b19e001daf4904341d05c80c839d786db93d88801dd32cd7e4982b62c8766230f1b",
+    "signingAddress": "0xd57bcc35008c564c73ee3617e956537c8c9cb370",
+    "signingAlgo": "ecdsa",
+    "attestation": {
+      "nonce": "7546a6dc4fe2aadae3d672871cd96446030696d032e9a2a4c52604f50a61fad9",
+      "signingAddressMatched": false,
+      "quoteVerifiedLocally": false,
+      "note": "offline demo: no attestation"
+    },
+    "signal": "allow",
+    "signalCodes": []
+  },
+  "issuer": {
+    "alg": "ed25519",
+    "publicKey": "ee9e2643c473ab49d86b60b36de9cd75b710c4bc13f4242b5f4b16383663ac1f"
+  },
+  "signature": "d174731d36ea6819264dd9068c34c84e827239ecbe631e10c50805a733815b74ed5b60aa8309c3638760914a703955f2f89dccb386670ffa3a46a09ac0999909"
+}

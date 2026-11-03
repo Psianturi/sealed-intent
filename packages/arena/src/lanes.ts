@@ -18,10 +18,13 @@ export interface LaneResult {
   lane: LaneId;
   phase?: "task" | "attack";
   verdict: "ALLOW" | "WARN" | "BLOCK";
+  /** every code; the ones that only asked the owner are also in warnCodes */
   codes: string[];
+  warnCodes?: string[];
   executed: boolean;
   error?: string;
   decisionId?: string;
+  /** where the run wrote the receipt; the recorder copies it and drops the path */
   receiptPath?: string;
 }
 
@@ -149,7 +152,7 @@ export class SealedLane implements Lane {
     this.oneclick.behavior = { minOutHaircutBps: this.haircutBps ?? 0 };
     const intent = toIntent(action, taskText);
     const d = await this.env.preflight.evaluate({ agentId: "agent", intent });
-    const base = { lane: this.id, verdict: d.verdict, codes: [...d.reasonCodes, ...d.warnCodes], decisionId: d.decisionId, receiptPath: d.receiptPath };
+    const base = { lane: this.id, verdict: d.verdict, codes: [...d.reasonCodes, ...d.warnCodes], warnCodes: d.warnCodes, decisionId: d.decisionId, receiptPath: d.receiptPath };
     if (d.verdict === "BLOCK") return { ...base, executed: false };
     if (d.verdict === "WARN") {
       const who = this.approver(action, d.warnCodes);
