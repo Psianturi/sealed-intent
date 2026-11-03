@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proof | SeIn</title>
+  <meta name="description" content="Every claim SeIn makes, checked live by your browser against NEAR, NEAR AI Cloud and NEAR Intents. Contract, transactions, enclave, quotes and wallet signatures." />
+  <meta property="og:title" content="SeIn proof: checked by your browser, not by us" />
+  <meta property="og:description" content="The contract on NEAR, the custody payments, the NEAR AI enclave, NEAR Intents quotes and NEP-413 owner signatures, each checked live." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="theme-color" content="#2747c4" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!--header:proof-->
+  <main>
+    <h1 class="page-title">Proof</h1>
+    <p class="lead">Every claim on this site, checked right now by your browser against NEAR, NEAR AI Cloud and NEAR Intents. Nothing passes through a SeIn server, so there is nothing of ours to trust.</p>
+
+    <ol class="board" id="board" aria-live="polite">
+      <li data-part="contract"><a href="#contract"><span class="board-dot" aria-hidden="true"></span><b>Contract on NEAR</b><span class="board-state">Checking…</span></a></li>
+      <li data-part="custody"><a href="#custody"><span class="board-dot" aria-hidden="true"></span><b>OutLayer custody</b><span class="board-state">Checking…</span></a></li>
+      <li data-part="enclave"><a href="#enclave"><span class="board-dot" aria-hidden="true"></span><b>NEAR AI Cloud</b><span class="board-state">Checking…</span></a></li>
+      <li data-part="intents"><a href="#intents"><span class="board-dot" aria-hidden="true"></span><b>NEAR Intents</b><span class="board-state">Checking…</span></a></li>
+      <li data-part="approval"><a href="#approval"><span class="board-dot" aria-hidden="true"></span><b>NEP-413 signature</b><span class="board-state">Checking…</span></a></li>
+    </ol>
+    <p class="board-foot"><span class="note" id="checked-at">Starting the checks…</span> <button type="button" class="btn small" id="rerun">Check again</button></p>
+
+    <section id="contract">
+      <h2>A contract on NEAR</h2>
+      <p class="lead small">SeIn's registry is a smart contract on NEAR testnet. It lists the keys that sign receipts and the agents, and it holds a fingerprint of every batch of receipts, so a receipt cannot be changed or made up later.</p>
+      <div class="stats" id="contract-stats"></div>
+      <ul class="check-list chain staged" id="contract-checks"></ul>
+    </section>
+
+    <section id="custody">
+      <h2>Payments through OutLayer custody</h2>
+      <p class="lead small">The agent never holds a key. Money moves only through an OutLayer custody wallet, which signs the transaction. Each payment below is read from the chain, with who signed it and who was paid.</p>
+      <ul class="check-list chain staged" id="custody-checks"></ul>
+    </section>
+
+    <section id="enclave">
+      <h2>An opinion from a NEAR AI Cloud enclave</h2>
+      <p class="lead small">For every payment SeIn asks a model running inside a hardware enclave on NEAR AI Cloud whether the request looks like a trick. The enclave signs its answer. Your browser checks that signature, then asks NEAR AI which key its enclave uses today.</p>
+      <ul class="check-list chain staged" id="enclave-checks"></ul>
+    </section>
+
+    <section id="intents">
+      <h2>Prices from NEAR Intents</h2>
+      <p class="lead small">Before a swap SeIn asks NEAR Intents (1Click) for its own quote and checks the solver network's signature, so a made-up price cannot pass. Ask for a fresh quote and watch your browser check it.</p>
+      <div class="btns"><button type="button" class="btn primary" id="fresh-quote">Ask NEAR Intents for a fresh quote</button><button type="button" class="btn" id="tamper-quote">Change one digit</button></div>
+      <ul class="check-list chain staged" id="intents-checks"></ul>
+    </section>
+
+    <section id="approval">
+      <h2>Owner approval with a NEP-413 wallet signature</h2>
+      <p class="lead small">When SeIn is unsure, only the owner can let a payment through, by signing a message with their NEAR wallet. The message names the decision and a fingerprint of exactly what the owner was shown, so a signature cannot be moved to another payment.</p>
+      <pre class="signed-msg" id="approval-msg"></pre>
+      <div class="btns"><button type="button" class="btn" id="tamper-approval">Show the owner 10 NEAR instead</button></div>
+      <ul class="check-list chain staged" id="approval-checks"></ul>
+    </section>
+
+    <section id="limits">
+      <h2>What this page does not prove</h2>
+      <ul class="limits-list no">
+        <li>Everything here runs on NEAR testnet with test tokens. A mainnet payment and a mainnet swap are not done yet.</li>
+        <li>NEAR Intents has no testnet, so SeIn reads real mainnet quotes but makes no swaps.</li>
+        <li>The enclave's hardware evidence was checked by SeIn when it asked. Your browser checks the enclave's signature and today's published key, not the hardware report itself.</li>
+        <li>The Arena's chain is simulated or a set of local NEAR nodes. Its results are recordings, not testnet transactions.</li>
+        <li>Nobody has audited this code.</li>
+      </ul>
+    </section>
+    <!--footer:proof-->
+  </main>
+  <script type="module" src="/src/proof.ts"></script>
+</body>
+</html>

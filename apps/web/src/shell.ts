@@ -8,6 +8,7 @@ export const WORDMARK = `<span class="word">Se<b>I</b><span class="n">n</span></
 const NAV: [string, string, string][] = [
   ["home", "/", "Overview"],
   ["arena", "/arena.html", "Arena"],
+  ["proof", "/proof", "Proof"],
   ["verify", "/verify.html", "Verify"],
   ["agent", "/a/agent-1", "Agent"],
   ["limits", "/limits.html", "Limits"],

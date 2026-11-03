@@ -9,6 +9,8 @@ Every decision produces a signed receipt that anyone can verify, without reveali
 
 Live site: https://sein-near.vercel.app (overview, Arena replay, receipt verifier). Built at NEAR HACKATHON (Nov 2026). Tracks: `security` (main), `privacy`, `agents`, `defi`.
 
+**Proof, checked by your browser:** https://sein-near.vercel.app/proof reads the registry contract, the custody payments, the NEAR AI enclave key, a fresh NEAR Intents quote and a NEP-413 owner signature straight from NEAR, NEAR AI Cloud and 1Click. Nothing passes through a SeIn server.
+
 > **Status:** the checker, the receipts and the Arena run offline with no keys and no funds. On NEAR testnet, payments ran through
 > real OutLayer custody with the real NEAR AI Cloud check, and each has a transaction anyone can look up; see [`evidence/custody-testnet`](evidence/custody-testnet).
 > A public registry holds the signing keys, agents and receipt batches. A mainnet payment, a swap and a live confidential route have not run yet, and the service is not hosted. See [Limits](#limits-read-this) and [SECURITY.md](SECURITY.md).

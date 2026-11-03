@@ -6,6 +6,7 @@ apps/web/public/samples/
 apps/web/public/receipts/
 apps/web/public/storyboard/
 apps/web/public/proofs/
+apps/web/public/proof/
 *.tsbuildinfo
 
 # runtime state (receipts, openings, ledgers, keys)

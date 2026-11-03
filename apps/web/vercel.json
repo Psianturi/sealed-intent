@@ -12,6 +12,10 @@
       "destination": "/agent.html"
     },
     {
+      "source": "/proof",
+      "destination": "/proof.html"
+    },
+    {
       "source": "/approve/:id",
       "destination": "/approve.html"
     }
