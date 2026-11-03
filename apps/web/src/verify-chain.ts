@@ -4,13 +4,17 @@ import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils";
 import { canonical, type Check } from "./verify-core";
 
 const RPC: Record<string, string> = { testnet: "https://test.rpc.fastnear.com", mainnet: "https://free.rpc.fastnear.com" };
+// regular nodes forget transactions after about two and a half days
+const ARCHIVE: Record<string, string> = { testnet: "https://archival-rpc.testnet.fastnear.com", mainnet: "https://archival-rpc.mainnet.fastnear.com" };
+const HISTORY = new Set(["tx", "block"]);
 const sha = (s: string) => bytesToHex(sha256(utf8ToBytes(s)));
 const node = (l: string, r: string) => sha(`sein-node:${l}${r}`);
 export const receiptLeaf = (record: unknown) => sha(`sein-leaf:${canonical(record)}`);
 export const explorerTx = (network: string, hash: string) => `https://${network === "testnet" ? "testnet." : ""}nearblocks.io/txns/${hash}`;
 
-async function rpc<T>(network: string, method: string, params: unknown): Promise<T | undefined> {
-  const res = await fetch(RPC[network] ?? RPC.mainnet!, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "verify", method, params }) });
+export async function rpc<T>(network: string, method: string, params: unknown): Promise<T | undefined> {
+  const urls = HISTORY.has(method) ? ARCHIVE : RPC;
+  const res = await fetch(urls[network] ?? urls.mainnet!, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "verify", method, params }) });
   const j = (await res.json()) as { result?: T };
   return j.result;
 }
