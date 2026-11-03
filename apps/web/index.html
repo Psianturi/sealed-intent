@@ -44,8 +44,8 @@
       <div class="stat"><p class="stat-num"><!--stat:stopped--></p><p class="stat-label">attacks in scope stopped</p><p class="stat-sub"><!--stat:how--></p></div>
       <div class="stat"><p class="stat-num"><!--stat:lost--></p><p class="stat-label">lost to those attacks</p><p class="stat-sub"><!--stat:lost-others--></p></div>
       <div class="stat"><p class="stat-num"><!--stat:tasks--></p><p class="stat-label">everyday tasks finished</p><p class="stat-sub"><!--stat:blocked--></p></div>
-      <div class="stat"><p class="stat-num"><!--stat:out--></p><p class="stat-label">out of reach by design</p><p class="stat-sub">Shown on purpose. No checker in front of a wallet stops a stolen key.</p></div>
-      <p class="proof-note">From a recorded Arena run with test tokens on a simulated chain. <!--stat:lazy--> <a href="/arena.html">See every attack</a>.</p>
+      <div class="stat"><p class="stat-num"><!--stat:out--></p><p class="stat-label">out of reach by design</p><p class="stat-sub">Shown on purpose. No checker in front of a wallet stops a stolen custody or owner key.</p></div>
+      <p class="proof-note">From a recorded Arena run with test tokens, on a simulated chain and again on three real local NEAR nodes, with identical results. <!--stat:lazy--> <a href="/arena.html">See every attack</a>.</p>
     </section>
 
     <section>
@@ -157,7 +157,7 @@
       <div class="honest">
         <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li><li>Payments through OutLayer custody on NEAR testnet, each with a transaction anyone can look up.</li><li>A public registry on NEAR testnet: signing keys, agents and receipt batches.</li></ul></div>
         <div class="col"><span class="status sim">Simulated in the Arena</span><ul><li>The chain is a ledger, or local NEAR nodes with real token contracts. Both recordings match.</li><li>Quotes, the enclave opinion and custody are stand-ins there.</li><li>The agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled.</li></ul></div>
-        <div class="col"><span class="status todo">Not yet</span><ul><li>A mainnet payment and swap.</li><li>A live confidential route.</li><li>A hosted service. Today the owner runs SeIn on their own machine.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen key, a bug inside a token, a compromised SeIn host.</p></div>
+        <div class="col"><span class="status todo">Not yet</span><ul><li>A mainnet payment and swap.</li><li>A live confidential route.</li><li>A hosted service. Today the owner runs SeIn on their own machine.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen custody or owner key, a bug inside a token, a compromised SeIn host. <a href="/limits.html">All the limits</a>.</p></div>
       </div>
     </section>
 

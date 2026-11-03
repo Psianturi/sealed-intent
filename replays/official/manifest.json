@@ -1,10 +1,10 @@
 {
-  "runId": "ledger-2026-11-01-23d4e2f6",
-  "createdAt": "2026-11-01T17:36:04.952Z",
+  "runId": "ledger-2026-11-03-23d4e2f6",
+  "createdAt": "2026-11-03T15:52:44.639Z",
   "chain": "ledger",
   "victim": "scripted",
   "approver": "strict",
-  "policyHash": "4097017596e576aaed4dd147fa994c90270ecf7513674c822693b0889c8b789d",
+  "policyHash": "79090d0061f45d94e769f37e4be3c29784f21add79dc026f9eb9a6a7fc7aeaf1",
   "catalogHash": "2dee8e7b66ff8232d9afddc8651a6bb4c10283d8ec00181439645bbb0917ffad",
   "seed": "default",
   "prices": {
@@ -39,5 +39,5 @@
     "rules": "REAL (the same code that runs live)"
   },
   "issuer": "70e6e99d689b00104ad1086419fe58ba9c6caa7904bb0adfd858e9b239b6908a",
-  "signature": "bab30ee429f7a59cfbea3d570c43704464cc634a775bf7f3ccc9d27843d1b282041cb36dddfab6d80ca9be7d0653174b5c902ef42383c6ea5b1637606a24c20b"
+  "signature": "e8efbed6aefc2a5da1f725a277ff8532d4e15c9ebf1f1607f8b193b58fee3087396d4824b5c75fc05f9fe040dfadeb3ff940378ab1be174d7740db6d0b95ae02"
 }

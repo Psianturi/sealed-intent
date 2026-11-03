@@ -50,13 +50,13 @@ export class FreezeStore {
     return Number(this.db.prepare("DELETE FROM freeze WHERE scope='wallet'").run().changes) === 1;
   }
 
-  /** Records a BLOCK and returns this agent's counts for the last hour. "limit" marks a block caused only by a cap. */
+  /** Records a BLOCK. Returns this agent's blocks in the last hour, and its limit probes in the last day. "limit" marks a block caused only by a cap. */
   recordBlock(agent: string, kind: "block" | "limit" = "block", now = Date.now()): { blocks: number; limitProbes: number } {
     const agentId = this.vault ? this.vault.blind(agent) : agent;
     this.db.prepare("INSERT INTO block_log (agent_id, at, kind) VALUES (?, ?, ?)").run(agentId, now, kind);
     this.db.prepare("DELETE FROM block_log WHERE at < ?").run(now - 24 * HOUR);
     const all = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ?").get(agentId, now - HOUR) as { n: number };
-    const limit = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ? AND kind='limit'").get(agentId, now - HOUR) as { n: number };
+    const limit = this.db.prepare("SELECT COUNT(*) AS n FROM block_log WHERE agent_id=? AND at >= ? AND kind='limit'").get(agentId, now - 24 * HOUR) as { n: number };
     return { blocks: Number(all.n), limitProbes: Number(limit.n) };
   }
 

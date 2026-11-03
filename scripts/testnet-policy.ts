@@ -14,5 +14,5 @@ export const testnetPolicy = (wallet: string, vendor: string) =>
     dailyUsd: 20,
     contracts: {},
     tee: { ...DEMO_POLICY.tee, required: true, obeyBlockSignal: false },
-    freeze: { onForbiddenAction: true, maxBlocksPerHour: 50, maxLimitProbesPerHour: 3 },
+    freeze: { onForbiddenAction: true, maxBlocksPerHour: 50, maxLimitProbesPerDay: 3 },
   });

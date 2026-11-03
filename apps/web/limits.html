@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Limits and threat model | SeIn</title>
+  <meta name="description" content="What SeIn stops, what it cannot stop, what stays private and what does not, and what to do if something goes wrong. In plain words." />
+  <meta property="og:title" content="What SeIn can and cannot stop" />
+  <meta property="og:description" content="The limits of a checker between an AI agent and its money, stated plainly." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://sein-near.vercel.app/limits.html" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="theme-color" content="#2747c4" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!--header:limits-->
+  <main>
+    <h1 class="page-title">What SeIn can and cannot stop</h1>
+    <p class="lead">SeIn is a guard at the vault door. The owner sets how strict it is. Some doors stay locked whatever anyone asks. And some dangers are outside the door, where no guard can help. This page says which is which.</p>
+
+    <section>
+      <h2>The owner's rules, and the rules nobody can switch off</h2>
+      <div class="cards two">
+        <article class="card"><h3>Set by the owner</h3><p>How much per payment, per hour and per day. Who may be paid. When to ask before paying. Which payments must take a private route.</p></article>
+        <article class="card"><h3>Always on</h3><p>The agent can never add a key to the wallet, install code or sign a message. A quote must carry a real signature. The AI opinion can only make a decision stricter, never looser.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <h2>What SeIn stops</h2>
+      <p class="lead small">The agent was tricked or made a mistake, and asks for something the owner would not want.</p>
+      <ul class="limits-list ok">
+        <li><strong>A hidden instruction in a message.</strong> The receiver, the wording and an AI in a verified enclave are all checked.</li>
+        <li><strong>A look-alike address, a brand new account, a reported account.</strong> Blocked, or the owner decides.</li>
+        <li><strong>A bad swap or a forged quote.</strong> Refused before anything is signed.</li>
+        <li><strong>Spending too much.</strong> Limits per payment, per hour, per day, and on how many payments.</li>
+        <li><strong>A dangerous action hidden in a normal request.</strong> Adding a key, installing code or signing a message is always refused, and the wallet freezes.</li>
+        <li><strong>An agent hunting for its limit.</strong> It only ever hears "limit exceeded". Three such refusals in a day freeze the wallet.</li>
+        <li><strong>Money sent around SeIn.</strong> Every transaction must match a decision. On testnet one sent straight to custody was noticed in <!--custody:found--> seconds, and the wallet was frozen on chain in <!--custody:frozen-->.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>What SeIn cannot stop</h2>
+      <p class="lead small">Shown on purpose in the Arena, where they get through in every lane.</p>
+      <ul class="limits-list no">
+        <li><strong>A stolen custody or owner key.</strong> SeIn guards the door, not the vault. Custody refuses native NEAR to strangers. It does not check who receives a token or how much, so keep token balances small. SeIn notices any payment without a decision within a minute and freezes the wallet.</li>
+        <li><strong>A taken-over SeIn server.</strong> Then only the custody policy and the alarm still hold, so run the alarm somewhere else.</li>
+        <li><strong>A bug inside a token.</strong> Money can move without anyone signing.</li>
+        <li><strong>A lying data source.</strong> SeIn asks two and sends any disagreement to the owner. That narrows the risk, it does not end it.</li>
+        <li><strong>An owner who approves without reading.</strong> In the Arena, 2 of the 9 attacks then got through.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Privacy, honestly</h2>
+      <ul class="limits-list">
+        <li><strong>Who was paid becomes public once the payment is made.</strong> A receipt keeps the amount and receiver sealed, but its transaction can be looked up by anyone. A private route hides where the money came from and how it travelled, not where it went.</li>
+        <li><strong>The SeIn operator can see how many dollars each agent spent.</strong> The budget has to add them up. Everything else on its disk is encrypted and deleted after 30 days.</li>
+        <li><strong>The question to the AI is protected up to the verified enclave gateway,</strong> not yet all the way to the model.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Today's product</h2>
+      <ul class="limits-list">
+        <li>Not hosted yet. The owner runs SeIn on their own machine.</li>
+        <li>Tested with real transactions on NEAR testnet. No mainnet payment and no live private route yet.</li>
+        <li>NEAR only, a few tokens, and only swaps, transfers and approved contract calls.</li>
+        <li>The enclave check takes 20 to 60 seconds. Fine for payments, not for fast trading.</li>
+        <li>Not audited. Use only money you can afford to lose.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>If something goes wrong</h2>
+      <ol class="limits-list steps">
+        <li><strong>Stop the money.</strong> Press "Stop all payments" on an approval page, or use the owner tool. With a freeze key set up, custody freezes on chain too.</li>
+        <li><strong>Cut off the agent.</strong> Revoke its access. It takes effect on its next request.</li>
+        <li><strong>Look at what happened.</strong> SeIn lists every transaction that had no decision behind it.</li>
+        <li><strong>Move the funds.</strong> From the custody dashboard, with the account that controls the policy.</li>
+        <li><strong>Replace what leaked,</strong> then read the history and lift the freeze yourself.</li>
+      </ol>
+    </section>
+    <!--footer:limits-->
+  </main>
+</body>
+</html>

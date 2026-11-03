@@ -47,7 +47,7 @@ describe("forbidden action classes freeze the wallet", () => {
   });
 
   it("a burst of blocks freezes the wallet", async () => {
-    const env = build({ ...DEMO_POLICY, freeze: { onForbiddenAction: true, maxBlocksPerHour: 3, maxLimitProbesPerHour: 6 } });
+    const env = build({ ...DEMO_POLICY, freeze: { onForbiddenAction: true, maxBlocksPerHour: 3, maxLimitProbesPerDay: 6 } });
     for (let i = 0; i < 3; i++) await ev(env, { ...swap, recipient: DEMO_ACCOUNTS.attacker });
     expect(env.preflight.status().frozen).toBe(true);
     expect(env.preflight.status().reason).toContain("3 blocks");

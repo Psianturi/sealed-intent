@@ -98,7 +98,7 @@ export function renderScore(run: Run): string {
   }).join("");
 }
 
-export const PIP_LEGEND = `<p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design: a stolen key, a forged verdict, a compromised checker, a lying data source, a bug inside a token.</p>`;
+export const PIP_LEGEND = `<p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design: a stolen custody key, a forged verdict, a compromised checker, a lying data source, a bug inside a token.</p>`;
 
 export function scopeSentence(run: Run): string {
   const s = scopeOf(run);
@@ -153,7 +153,7 @@ export function renderHonesty(run: Run): string {
 
 export function renderMeta(run: Run): string {
   const m = run.manifest;
-  return `Recorded ${esc(m.createdAt.slice(0, 10))} on ${m.chain === "sandbox" ? "three real local NEAR nodes" : "a simulated chain"}. ${m.approver === "lazy" ? "The owner approves every WARN without reading." : "The owner reads each WARN before answering."} The rules and the attack list were locked before the run.`;
+  return `Recorded ${esc(m.createdAt.slice(0, 10))} on ${m.chain === "sandbox" ? "three real local NEAR nodes, with the same result as the simulated chain" : "a simulated chain, and reproduced with the same result on three real local NEAR nodes"}. ${m.approver === "lazy" ? "The owner approves every WARN without reading." : "The owner reads each WARN before answering."} The rules and the attack list were locked before the run.`;
 }
 
 export function renderFingerprints(run: Run): string {

@@ -45,7 +45,7 @@ describe("limits", () => {
   });
 
   it("an agent that probes for the exact cap is frozen before it learns it", async () => {
-    const env = build({ ...DEMO_POLICY, freeze: { ...DEMO_POLICY.freeze, maxLimitProbesPerHour: 3 } });
+    const env = build({ ...DEMO_POLICY, freeze: { ...DEMO_POLICY.freeze, maxLimitProbesPerDay: 3 } });
     for (const amount of [80, 60, 55]) {
       const d = await env.preflight.evaluate({ agentId: "a", intent: pay({ amount: usdc(amount) }) });
       expect(d.reasonCodes).toEqual(["LIMIT_EXCEEDED"]);

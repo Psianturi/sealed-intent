@@ -110,7 +110,7 @@ against a $50 cap (`packages/core/test/privacy.test.ts`):
 | $200 | 4 | between $50.00 and $62.50 |
 | $60 | 5 | between $45.00 and $46.88 |
 
-Only refusals count toward the freeze. So with no idea of the cap the prober learns very little, and with a good first guess
+Only refusals count toward the freeze, and they are counted over a day. So with no idea of the cap the prober learns very little, and with a good first guess
 it still gets within about 10%, once, at the price of a frozen wallet and an owner who now knows. The price of this rule: an
 honest agent that hits a limit three times in an hour also freezes the wallet until the owner looks. `secrecy.perTxJitterPct` redraws the effective cap every hour: at 50 the prober finds the draw,
 which leaves the real cap uncertain by about a third. It can also refuse honest payments near the cap, so it is off by default.
@@ -119,7 +119,7 @@ which leaves the real cap uncertain by about a third. It can also refuse honest 
 
 - The agent's identity is assigned by the server: a bearer token maps to an agent name (`SEALED_AGENT_TOKENS`), and the budget is counted per that name. Whatever the agent writes in the request body is ignored.
 - Approving or rejecting a WARN, freezing and unfreezing need the **owner token** (`SEALED_OWNER_TOKEN`), which the agent never holds. Pending decisions live in SQLite, so a WARN raised through MCP can be approved through REST.
-- A forbidden action class, 20 BLOCKs within an hour, or 3 BLOCKs caused only by a spending cap (an agent probing for the exact limit) freezes the wallet until the owner lifts it. The freeze survives restarts.
+- A forbidden action class, 20 BLOCKs within an hour, or 3 BLOCKs within 24 hours caused only by a spending cap (an agent probing for the exact limit) freezes the wallet until the owner lifts it. The freeze survives restarts.
 - The budget is only given back when the executor reports that nothing left the wallet; an unclear outcome counts as spent. Spends are also counted: `velocity.maxTxPerHour` caps how many payments an agent may start per hour regardless of size.
 - A request that arrives without the task text that led to it cannot be screened for injection, so it is a WARN (`TASK_CONTEXT_MISSING`) until a human reads it. The screen covers English and Indonesian phrasings; the enclave opinion is the second filter.
 - A contract whose code changed since it was last seen stays flagged on every request, allow-listed or not, until the owner accepts the new code. Another agent's blocklist report only warns until the owner confirms it.
@@ -295,6 +295,28 @@ fixtures            example policy (offline fixtures live in packages/core/src/f
 - Live execution currently supports NEP-141 origin assets on NEAR.
 - **Blocklist reports are self-asserted.** An agent's report with "evidence" only warns until the owner confirms it; the shared list is a signal, not a verdict.
 - Not audited. Do not use with funds you cannot lose.
+
+## Integrating
+
+How an agent connects, through MCP or plain HTTP, and how the owner answers: [INTEGRATING.md](INTEGRATING.md).
+
+## Built with
+
+| Part | Libraries |
+|---|---|
+| Checker and gateway | TypeScript on Node 22 with its built-in SQLite, zod, `@modelcontextprotocol/sdk` |
+| NEAR | near-kit for transactions, message signatures and the local test node; `near-sdk` 5 for the registry contract in Rust |
+| Enclave evidence | `@phala/dcap-qvl` for Intel TDX quotes, NVIDIA's attestation service for the GPUs |
+| Quotes | NEAR Intents 1Click API, `@defuse-protocol/one-click-sdk-typescript` for quote signatures |
+| Receipts | `@noble/curves` and `@noble/hashes`, the same code in Node and in the browser |
+| Website | Vite, no framework; `@hot-labs/near-connect` for the owner's wallet on the approve page |
+| Tests | vitest, near-sandbox through near-kit |
+
+## Next
+
+- Registering an agent from the web. Today it is the command line.
+- A hosted testnet instance with a "Try it" page, so visitors can send a request and see the verdict and its receipt.
+- A registry on mainnet for mainnet receipts.
 
 ## Roadmap
 

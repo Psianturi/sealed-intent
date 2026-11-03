@@ -212,7 +212,7 @@ export class Preflight {
       const probe = [...g.block].every((c) => LIMIT_CODES.has(c));
       const n = this.deps.freeze.recordBlock(agentId, probe ? "limit" : "block");
       if (n.blocks >= policy.freeze.maxBlocksPerHour) this.deps.freeze.freeze(`agent ${agentId} hit ${policy.freeze.maxBlocksPerHour} blocks in an hour`, "auto");
-      else if (n.limitProbes >= policy.freeze.maxLimitProbesPerHour) this.deps.freeze.freeze(`agent ${agentId} probed the spending limits ${n.limitProbes} times in an hour`, "auto");
+      else if (n.limitProbes >= policy.freeze.maxLimitProbesPerDay) this.deps.freeze.freeze(`agent ${agentId} probed the spending limits ${n.limitProbes} times in a day`, "auto");
     }
     const decision = await this.finish({ ...base, verdict, block: [...g.block], review: [...g.review], kind: intent.kind, quote: g.quote ?? g.dryQuote, live: g.quote, tee, reservationId });
     if (verdict !== "BLOCK" && g.action && reservationId) {

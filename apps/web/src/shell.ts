@@ -10,7 +10,7 @@ const NAV: [string, string, string][] = [
   ["arena", "/arena.html", "Arena"],
   ["verify", "/verify.html", "Verify"],
   ["agent", "/a/agent-1", "Agent"],
-  ["builders", "https://github.com/Psianturi/sealed-intent", "Builders"],
+  ["limits", "/limits.html", "Limits"],
 ];
 
 export function siteHeader(current: string): string {
@@ -18,6 +18,8 @@ export function siteHeader(current: string): string {
   return `<header class="top"><a class="brand" href="/" aria-label="SeIn, short for Sealed Intent, home">${mark(30)}${WORDMARK}</a><nav aria-label="Main">${links}</nav></header>`;
 }
 
+const FOOT_LINKS = `<nav class="foot-links" aria-label="More"><a href="/limits.html">Limits and threat model</a><a href="https://github.com/Psianturi/sealed-intent">Source code</a><a href="https://github.com/Psianturi/sealed-intent/blob/main/INTEGRATING.md">Integrate your agent</a></nav>`;
+
 export function siteFooter(note: string): string {
-  return `<footer><div class="foot-brand">${mark(22)}${WORDMARK}<span class="foot-full">Sealed Intent</span></div><p>Built at NEAR HACKATHON, November 2026. ${note}</p></footer>`;
+  return `<footer><div class="foot-brand">${mark(22)}${WORDMARK}<span class="foot-full">Sealed Intent</span></div><p>Built at NEAR HACKATHON, November 2026. ${note}</p>${FOOT_LINKS}</footer>`;
 }
