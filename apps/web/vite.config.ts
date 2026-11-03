@@ -35,8 +35,10 @@ function staticContent(): Plugin {
       const lazy = readRun("official-lazy");
       const flowPath = resolve(__dirname, "..", "..", "evidence", "custody-testnet", "s4-flow.json");
       const flow = existsSync(flowPath) ? JSON.parse(readFileSync(flowPath, "utf8")) : undefined;
+      // the flow's payments, the payment around SeIn, and the signed owner approval
+      const paid = flow ? flow.steps.filter((s: { txHash?: string }) => s.txHash).length + 1 + (existsSync(resolve(flowPath, "..", "approval", "approval.json")) ? 1 : 0) : 0;
       const parts: Record<string, string> = {
-        ...(flow ? { "custody:found": String(flow.bypass.detectedSeconds), "custody:frozen": String(flow.bypass.frozenSeconds) } : {}),
+        ...(flow ? { "custody:found": String(flow.bypass.detectedSeconds), "custody:frozen": String(flow.bypass.frozenSeconds), "live:payments": String(paid) } : {}),
         "mark:18": mark(18),
         "header:home": siteHeader("home"),
         "header:arena": siteHeader("arena"),

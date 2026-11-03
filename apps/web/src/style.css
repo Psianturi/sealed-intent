@@ -349,6 +349,17 @@ label.btn { position: relative; }
 .btn[disabled] { opacity: 0.5; pointer-events: none; }
 .bad-text { color: var(--block); }
 
+/* live bar on the overview */
+.livebar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; margin-top: 36px; padding: 12px 18px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--allow) 40%, var(--line)); background: var(--surface); color: var(--ink); text-decoration: none; font-size: 14.5px; transition: border-color 0.2s, transform 0.15s; }
+.livebar:hover { border-color: var(--allow); transform: translateY(-1px); }
+.livebar-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--allow); box-shadow: 0 0 0 0 color-mix(in srgb, var(--allow) 50%, transparent); animation: live-ping 2s ease-out infinite; }
+@keyframes live-ping { 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.livebar-label { font-weight: 700; color: var(--allow); }
+.livebar-item { color: var(--muted); }
+.livebar-item b { color: var(--ink); font-size: 16px; margin-right: 2px; }
+.livebar-go { margin-left: auto; font-weight: 600; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) { .livebar-go { margin-left: 0; } }
+
 /* proof page */
 .board { list-style: none; padding: 0; margin: 28px 0 10px; display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .board a { position: relative; display: grid; gap: 4px; padding: 14px 14px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; overflow: hidden; height: 100%; transition: border-color 0.3s, transform 0.15s; }

@@ -39,6 +39,15 @@
       <div id="stage" class="stage" role="img" aria-label="Animation: messages reach an AI agent, its payments stop at the SeIn gate, five checks light up, and each one ends as ALLOW, WARN or BLOCK with a sealed receipt."></div>
     </section>
 
+    <a class="livebar" href="/proof" aria-label="Live on NEAR testnet. Open the proof page to check it yourself.">
+      <span class="livebar-dot" aria-hidden="true"></span>
+      <span class="livebar-label">Live on NEAR testnet</span>
+      <span class="livebar-item" data-live="anchored" hidden><b class="mono">0</b> receipts anchored on chain</span>
+      <span class="livebar-item"><b class="mono"><!--live:payments--></b> payments through OutLayer custody</span>
+      <span class="livebar-item">NEAR AI enclave, NEAR Intents quotes, NEP-413 approvals</span>
+      <span class="livebar-go">Check it yourself</span>
+    </a>
+
     <section class="proof" aria-labelledby="proof-title">
       <h2 id="proof-title" class="sr-only">The result in numbers</h2>
       <div class="stat"><p class="stat-num"><!--stat:stopped--></p><p class="stat-label">attacks in scope stopped</p><p class="stat-sub"><!--stat:how--></p></div>
@@ -155,7 +164,7 @@
     <section>
       <h2>What is real, what is simulated, what is not done</h2>
       <div class="honest">
-        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li><li>Payments through OutLayer custody on NEAR testnet, each with a transaction anyone can look up.</li><li>A public registry on NEAR testnet: signing keys, agents and receipt batches.</li></ul></div>
+        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li><li>Payments through OutLayer custody on NEAR testnet, each with a transaction anyone can look up.</li><li>A public registry on NEAR testnet: signing keys, agents and receipt batches.</li></ul><p class="note"><a href="/proof">Check each of these from your browser</a>.</p></div>
         <div class="col"><span class="status sim">Simulated in the Arena</span><ul><li>The chain is a ledger, or local NEAR nodes with real token contracts. Both recordings match.</li><li>Quotes, the enclave opinion and custody are stand-ins there.</li><li>The agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled.</li></ul></div>
         <div class="col"><span class="status todo">Not yet</span><ul><li>A mainnet payment and swap.</li><li>A live confidential route.</li><li>A hosted service. Today the owner runs SeIn on their own machine.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen custody or owner key, a bug inside a token, a compromised SeIn host. <a href="/limits.html">All the limits</a>.</p></div>
       </div>
