@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Approve a payment | SeIn</title>
+  <meta name="description" content="Approve or reject a payment your AI agent asked for, with your own NEAR wallet." />
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#2747c4" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!--header:approve-->
+  <main>
+    <h1 class="page-title">Your agent is asking</h1>
+    <p class="lead">SeIn stopped this payment and is waiting for you. Read it, then answer with your NEAR wallet. Your signature covers exactly what you see here.</p>
+    <div id="ask" aria-live="polite"><p class="note">Reading the request from your SeIn…</p></div>
+    <details class="dev">
+      <summary>How this page works</summary>
+      <ul>
+        <li>This page talks only to your own SeIn. Its address and a one-time key are in the part of the link after <code>#</code>, which browsers never send to this website.</li>
+        <li>Approving signs a message with your wallet. SeIn checks the signature against your account on NEAR, and that it covers this exact request. It does not move money and costs no gas.</li>
+        <li>After you approve, custody still applies its own policy.</li>
+      </ul>
+    </details>
+    <!--footer:approve-->
+  </main>
+  <script type="module" src="/src/approve.ts"></script>
+</body>
+</html>

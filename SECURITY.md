@@ -17,6 +17,7 @@ An agent that was tricked, by a poisoned message, a bad tool or a fake contact, 
 | An old receipt rewritten, or one made up later | Issuer signature, Merkle root on the registry, period checks | Contract tests, `apps/web` verify page |
 | A stolen agent token | Agent signing key, one use per signed request, revocation | `apps/server/test/gateway.test.ts` |
 | A forged approval | Wallet signature over what the owner was shown, checked against the chain | `apps/server/test/gateway.test.ts`, `pnpm custody:flow` |
+| Another website calling the owner's gateway | Browser calls only from `SEALED_WEB_ORIGINS`, only on the review, approve, reject and freeze routes, and a one-time key per review | `apps/server/test/approve-page.test.ts` |
 
 ## What it does not defend against
 

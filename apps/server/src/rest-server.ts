@@ -1,4 +1,4 @@
-import { agentView, checkApproval, RateLimiter, type AccessStore, type ApprovalVerifier, type SignedApproval } from "@sealed-intent/core";
+import { agentView, checkApproval, checkFreeze, RateLimiter, type AccessStore, type ApprovalVerifier, type SignedApproval } from "@sealed-intent/core";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import type { AccountWatcher, CustodyFreezer, Preflight, ReceiptStore, Reconciler, SharedBlocklist } from "@sealed-intent/core";
@@ -16,6 +16,12 @@ import { bearer, type Auth } from "./auth";
  *   POST /v1/agents/issue       owner token   { agentId, agentKey? }  -> token, shown once
  *   POST /v1/agents/revoke      owner token   { agentId }
  *   GET  /v1/proofs/:id                       -> where the receipt sits in an anchored batch
+ *   POST /v1/review/links       owner token   -> a link per waiting decision, for approving with a wallet in the browser
+ *   GET  /v1/review/:id         "Review <key>" from that link, or owner token -> what the owner is asked
+ *   POST /v1/freeze             also accepts { signed } from the owner's wallet
+ *
+ * The approve page on the public site calls the review, approve, reject and freeze routes from the owner's
+ * browser, so those answer CORS requests from SEALED_WEB_ORIGINS. Nothing else does.
  *   GET  /v1/pending            owner token   -> WARN decisions waiting for a human, decrypted
  *   POST /v1/freeze             owner token   { reason }
  *   POST /v1/unfreeze           owner token
@@ -44,7 +50,15 @@ export interface RestDeps {
   ownerAccount?: string;
   approvals?: ApprovalVerifier;
   agentRequestsPerMinute?: number;
+  /** origins of the site whose approve page may call this gateway from a browser */
+  webOrigins?: string[];
+  /** where the approve page lives, and where the owner's browser reaches this gateway */
+  webUrl?: string;
+  publicUrl?: string;
+  network?: string;
 }
+
+const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze)|GET \/health)$/;
 
 async function readBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
@@ -55,6 +69,20 @@ async function readBody(req: IncomingMessage): Promise<string> {
     chunks.push(c as Buffer);
   }
   return Buffer.concat(chunks).toString("utf8");
+}
+
+function corsFor(req: IncomingMessage, res: ServerResponse, origins: string[] | undefined, route: string): boolean {
+  const origin = req.headers.origin;
+  if (!origin || !origins?.includes(origin)) return false;
+  const preflightRoute = req.method === "OPTIONS" ? `${req.headers["access-control-request-method"] ?? ""} ${route.slice(route.indexOf(" ") + 1)}` : route;
+  if (!BROWSER_ROUTES.test(preflightRoute)) return false;
+  res.setHeader("Access-Control-Allow-Origin", origin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // the page is public and the gateway is on the owner's own machine
+  if (req.headers["access-control-request-private-network"]) res.setHeader("Access-Control-Allow-Private-Network", "true");
+  return true;
 }
 
 function send(res: ServerResponse, status: number, data: unknown) {
@@ -68,12 +96,17 @@ function sameToken(a: string | undefined, b: string): boolean {
 }
 
 export function createRestServer(deps: RestDeps): Server {
-  const { preflight, blocklist, receipts, offline, auth, watcher, reconciler, custody, access, ownerAccount, approvals } = deps;
+  const { preflight, blocklist, receipts, offline, auth, watcher, reconciler, custody, access, ownerAccount, approvals, webOrigins } = deps;
   const limiter = new RateLimiter(deps.agentRequestsPerMinute ?? 120);
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
       const route = `${req.method} ${url.pathname}`;
+      const browser = corsFor(req, res, webOrigins, route);
+      if (req.method === "OPTIONS") {
+        res.writeHead(browser ? 204 : 403);
+        return res.end();
+      }
       const token = bearer(req);
       const agentId = access?.agentForToken(token) ?? auth.agentForToken(token);
       const isOwner = sameToken(token, auth.ownerToken);
@@ -121,10 +154,15 @@ export function createRestServer(deps: RestDeps): Server {
         return send(res, 200, preflight.reviewQueue());
       }
       if (route === "POST /v1/freeze" || route === "POST /v1/unfreeze") {
-        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        const { reason, signed } = (await body(req)) as { reason?: string; signed?: SignedApproval };
+        let by = "owner";
+        if (route.endsWith("freeze") && !route.endsWith("unfreeze") && signed && ownerAccount && approvals) {
+          const check = await checkFreeze(signed, ownerAccount, approvals);
+          if (!check.ok) return send(res, 401, { error: check.reason });
+          by = ownerAccount;
+        } else if (!isOwner) return send(res, 401, { error: "owner token required" });
         if (route.endsWith("unfreeze")) return send(res, 200, { ok: preflight.unfreeze("owner"), ...preflight.status() });
-        const { reason } = (await body(req)) as { reason?: string };
-        preflight.freeze(reason || "owner request", "owner");
+        preflight.freeze(reason || (by === "owner" ? "owner request" : "owner stopped all payments from the web"), by);
         const onChain = await custody?.freeze().catch((err: Error) => ({ error: err.message }));
         return send(res, 200, { ...preflight.status(), custodyFreeze: onChain ?? "not configured" });
       }
@@ -153,6 +191,25 @@ export function createRestServer(deps: RestDeps): Server {
         if (!isOwner) return send(res, 401, { error: "owner token required" });
         if (!decisionId || !approver) return send(res, 400, { error: "decisionId and approver required" });
         return send(res, 200, action === "approve" ? preflight.approve(decisionId, approver) : preflight.reject(decisionId, approver));
+      }
+      if (route === "POST /v1/review/links") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        if (!access) return send(res, 400, { error: "agent access is not configured" });
+        const web = deps.webUrl ?? "https://sein-near.vercel.app";
+        const gateway = deps.publicUrl ?? "http://127.0.0.1:8787";
+        // the part after # stays in the browser: the site never sees the gateway address or the key
+        const links = preflight.reviewQueue().filter((r) => !r.approvedBy).map((r) => ({ decisionId: r.decisionId, link: `${web}/approve/${r.decisionId}#g=${encodeURIComponent(gateway)}&k=${access.issueReviewKey(r.decisionId)}` }));
+        return send(res, 200, { links });
+      }
+      const reviewPath = url.pathname.match(/^\/v1\/review\/([0-9a-f-]{36})$/);
+      if (req.method === "GET" && reviewPath) {
+        const id = reviewPath[1]!;
+        const header = req.headers.authorization;
+        const key = header?.startsWith("Review ") ? header.slice(7).trim() : undefined;
+        if (!isOwner && !access?.reviewKeyValid(id, key)) return send(res, 401, { error: "this link is not valid or has expired" });
+        const review = preflight.review(id);
+        if (!review) return send(res, 404, { error: "nothing is waiting under this id: it was decided already, or never needed you" });
+        return send(res, 200, { review, owner: ownerAccount, network: deps.network ?? "mainnet", signRequired: !!ownerAccount });
       }
       if (route === "POST /v1/agents/issue" || route === "POST /v1/agents/revoke") {
         if (!isOwner) return send(res, 401, { error: "owner token required" });

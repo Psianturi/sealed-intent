@@ -339,3 +339,12 @@ label.btn { position: relative; }
   header.top nav a:first-child { display: none; }
   header.top nav { gap: 12px; }
 }
+
+/* approve page */
+.ask-amount { font-size: 15px; margin: 0 0 8px; }
+.ask-amount b { font-size: 34px; letter-spacing: -0.01em; margin-right: 8px; }
+.why { margin: 6px 0 14px; padding-left: 20px; }
+.btn.danger { color: var(--block); border-color: var(--block-soft); }
+.btn.danger:hover { border-color: var(--block); }
+.btn[disabled] { opacity: 0.5; pointer-events: none; }
+.bad-text { color: var(--block); }

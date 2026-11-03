@@ -34,6 +34,7 @@ export class AccessStore {
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS agent_access (agent_id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE, agent_key TEXT, created_at INTEGER NOT NULL, revoked_at INTEGER);
       CREATE TABLE IF NOT EXISTS idempotency (agent_id TEXT, key TEXT, route TEXT, status INTEGER, answer TEXT, at INTEGER NOT NULL, PRIMARY KEY (agent_id, key, route));
+      CREATE TABLE IF NOT EXISTS review_keys (decision_id TEXT PRIMARY KEY, key_hash TEXT NOT NULL, expires_at INTEGER NOT NULL);
     `);
   }
 
@@ -57,6 +58,19 @@ export class AccessStore {
   keyOf(agentId: string): string | undefined {
     const row = this.db.prepare("SELECT agent_key FROM agent_access WHERE agent_id=? AND revoked_at IS NULL").get(agentId) as { agent_key: string | null } | undefined;
     return row?.agent_key ?? undefined;
+  }
+
+  /** A key that lets a browser read one waiting decision, so the owner can review it from a link. Shown once. */
+  issueReviewKey(decisionId: string, ttlMs = 24 * 3_600_000, now = Date.now()): string {
+    const key = randomBytes(24).toString("hex");
+    this.db.prepare("INSERT OR REPLACE INTO review_keys VALUES (?,?,?)").run(decisionId, sha(key), now + ttlMs);
+    return key;
+  }
+
+  reviewKeyValid(decisionId: string, key: string | undefined, now = Date.now()): boolean {
+    if (!key) return false;
+    const row = this.db.prepare("SELECT key_hash, expires_at FROM review_keys WHERE decision_id=?").get(decisionId) as { key_hash: string; expires_at: number } | undefined;
+    return !!row && Number(row.expires_at) > now && row.key_hash === sha(key);
   }
 
   /** Checks the signature and refuses a repeat of the same signed request. */

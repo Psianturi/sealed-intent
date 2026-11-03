@@ -24,7 +24,8 @@ export function createApp() {
   const offline = (process.env.SEALED_MODE ?? "offline") !== "live";
   checkSecretFile(".env", offline);
   // the wallet is frozen here first, then on chain, so a dead chain call never leaves it open
-  const custody = freezerFromEnv();
+  // an offline instance never touches the real custody wallet
+  const custody = offline ? undefined : freezerFromEnv();
   const freezeBoth = async (reason: string, by: string, freezeHere: (reason: string, by: string) => void) => {
     freezeHere(reason, by);
     if (custody) await custody.freeze().catch((err: Error) => console.error(`on-chain freeze failed: ${err.message}`));
@@ -70,5 +71,9 @@ export function createApp() {
     ownerAccount,
     approvals: ownerAccount ? new ChainApprovalVerifier(testnet ? "testnet" : "mainnet", process.env.NEAR_RPC_URL ?? (testnet ? "https://test.rpc.fastnear.com" : "https://free.rpc.fastnear.com")) : undefined,
     anchorer: registry ? new Anchorer(registry) : undefined,
+    webOrigins: (process.env.SEALED_WEB_ORIGINS ?? "https://sein-near.vercel.app").split(",").map((s) => s.trim()).filter(Boolean),
+    webUrl: process.env.SEALED_WEB_URL ?? "https://sein-near.vercel.app",
+    publicUrl: process.env.SEALED_PUBLIC_URL ?? `http://127.0.0.1:${process.env.PORT ?? 8787}`,
+    network: testnet ? "testnet" : "mainnet",
   };
 }

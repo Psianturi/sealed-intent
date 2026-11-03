@@ -128,6 +128,7 @@ which leaves the real cap uncertain by about a third. It can also refuse honest 
 - The owner's tool: `pnpm owner status|pending|freeze|unfreeze|approve <id>|reject <id>|accept-code <account>|confirm-blocklist <account>|watch-accept <account>` against the running REST server, with `SEALED_OWNER_TOKEN` from `.env`. `pending` shows the amount, the receiver, why it was flagged, and what a private route hides.
 
 - With `SEALED_OWNER_ACCOUNT` set, approving needs a wallet signature (NEP-413) over the decision and a hash of what the owner was shown, checked against the chain. A token is no longer enough, and the signature cannot be moved to another payment.
+- The owner can answer from the browser. `pnpm owner pending` prints a link per waiting payment to `/approve/<id>` on the site. The page shows the request in plain words and signs with the owner's NEAR wallet through near-connect. The address of the owner's SeIn and a one-time read key sit after `#`, so the website never receives them: the page talks only to the owner's own SeIn, which answers browser calls from `SEALED_WEB_ORIGINS` on the review, approve, reject and freeze routes and nowhere else. The same page can stop every payment with one signature. Lifting a freeze still needs the owner tool.
 - Agent tokens are stored as hashes and can be revoked at once (`pnpm owner agent-issue`, `agent-revoke`). An agent with a signing key must sign every request, so a stolen token alone is useless. Repeating an `Idempotency-Key` returns the first answer and acts once.
 
 ### Every transaction must trace back to a decision
@@ -279,7 +280,7 @@ fixtures            example policy (offline fixtures live in packages/core/src/f
 ## Limits (read this)
 
 - **Custody does not check tokens in plain contract calls.** OutLayer refuses native NEAR to a stranger, but once a token contract is on its list it signs any `ft_transfer` to anyone, for any amount. Tested live, see [`evidence/custody-testnet`](evidence/custody-testnet). SeIn reads the transfer and refuses it, and reconciliation catches one sent around SeIn, but a stolen custody key could move the token balance within one cycle. Hold native NEAR under the hardened policy, or keep token balances small.
-- **Not hosted yet.** The owner runs the gateway on their own machine. Registering an agent and approving from a web page need a hosted gateway and are command-line only today.
+- **Not hosted yet.** The owner runs the gateway on their own machine. Approving from the web works against that local gateway; registering an agent is command-line only.
 - **Receipts seal, the chain does not.** A receipt hides the amount and receiver, but its transaction hash points to public data. Keep the link private if that matters, or use the confidential route.
 - **Reconciliation is after the fact.** It limits a bypass to one cycle, it does not prevent it. Its nonce check freezes the wallet on any transaction SeIn did not record, including one whose result it lost.
 - **Offline mode is a simulation.** Fixture quotes are signed with a local "manager" key and checked by the *same* SDK function used in live mode. The enclave is simulated and every receipt says `offline-simulated`.

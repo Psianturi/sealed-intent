@@ -10,8 +10,9 @@ import type { OwnerReview } from "./preflight";
 export const APPROVAL_RECIPIENT = "sein-approval";
 
 export interface SignedApproval {
-  action: "approve" | "reject";
-  decisionId: string;
+  action: "approve" | "reject" | "freeze";
+  /** absent for a freeze, which concerns every payment */
+  decisionId?: string;
   accountId: string;
   publicKey: string;
   signature: string;
@@ -24,7 +25,9 @@ export const reviewHash = (review: OwnerReview): string => {
   return createHash("sha256").update(canonicalJson(shown), "utf8").digest("hex");
 };
 
-export const approvalMessage = (action: SignedApproval["action"], decisionId: string, hash: string) => `SeIn ${action} ${decisionId} ${hash}`;
+export const approvalMessage = (action: "approve" | "reject", decisionId: string, hash: string) => `SeIn ${action} ${decisionId} ${hash}`;
+/** Stopping every payment needs no decision; the wallet signature is what counts. */
+export const FREEZE_MESSAGE = "SeIn freeze all payments";
 
 /** Confirms the key is a full-access key of the account on chain. */
 export interface ApprovalVerifier {
@@ -44,9 +47,20 @@ export class ChainApprovalVerifier implements ApprovalVerifier {
 export async function checkApproval(a: SignedApproval, expected: { owner: string; review: OwnerReview | undefined }, verifier: ApprovalVerifier): Promise<{ ok: boolean; reason?: string }> {
   if (!expected.review) return { ok: false, reason: "unknown, blocked or already executed decision" };
   if (a.accountId !== expected.owner) return { ok: false, reason: "not the owner of this wallet" };
+  if (a.action === "freeze" || !a.decisionId) return { ok: false, reason: "not an approval" };
   const message = approvalMessage(a.action, a.decisionId, reviewHash(expected.review));
   try {
     return (await verifier.verify(a, message)) ? { ok: true } : { ok: false, reason: "signature does not match this decision" };
+  } catch {
+    return { ok: false, reason: "signature could not be checked" };
+  }
+}
+
+export async function checkFreeze(a: SignedApproval, owner: string, verifier: ApprovalVerifier): Promise<{ ok: boolean; reason?: string }> {
+  if (a.action !== "freeze") return { ok: false, reason: "not a freeze" };
+  if (a.accountId !== owner) return { ok: false, reason: "not the owner of this wallet" };
+  try {
+    return (await verifier.verify(a, FREEZE_MESSAGE)) ? { ok: true } : { ok: false, reason: "signature does not match" };
   } catch {
     return { ok: false, reason: "signature could not be checked" };
   }

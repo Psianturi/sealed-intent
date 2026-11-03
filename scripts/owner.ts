@@ -5,7 +5,7 @@
  *   pnpm owner status
  *   pnpm owner freeze [reason]            stop every payment until unfreeze
  *   pnpm owner unfreeze
- *   pnpm owner pending                    what is waiting for you: amount, receiver, why, and what a private route hides
+ *   pnpm owner pending                    what is waiting for you, with a link to approve each one with your wallet in the browser
  *   pnpm owner approve <decisionId> [name]
  *   pnpm owner reject <decisionId> [name]
  *   pnpm owner accept-code <account>      accept a contract's current code after COUNTERPARTY_CODE_CHANGED
@@ -59,9 +59,13 @@ try {
     case "unfreeze":
       console.log(JSON.stringify(await call("POST", "/v1/unfreeze"), null, 2));
       break;
-    case "pending":
-      console.log(JSON.stringify(await call("GET", "/v1/pending"), null, 2));
+    case "pending": {
+      const pending = (await call("GET", "/v1/pending")) as { decisionId: string; approvedBy?: string }[];
+      console.log(JSON.stringify(pending, null, 2));
+      const { links } = (await call("POST", "/v1/review/links")) as { links: { decisionId: string; link: string }[] };
+      for (const l of links) console.log(`\nApprove or reject ${l.decisionId} with your wallet, on this machine:\n${l.link}`);
       break;
+    }
     case "watch-accept":
       console.log(JSON.stringify(await call("POST", "/v1/watch/accept", { account: need("account", args[0]) }), null, 2));
       break;
