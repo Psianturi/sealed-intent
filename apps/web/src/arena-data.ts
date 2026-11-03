@@ -10,12 +10,14 @@ export interface LaneResult {
   phase?: "task" | "attack";
   verdict: "ALLOW" | "WARN" | "BLOCK";
   codes: string[];
+  warnCodes?: string[];
   executed: boolean;
   error?: string;
   decisionId?: string;
 }
 export interface Verdict {
   stolenCents: number;
+  stolenByAttacker?: Record<string, number>;
   legitDone: number;
   legitTotal: number;
   falseBlocks: string[];
@@ -41,7 +43,7 @@ export interface Outcome {
 }
 export type Snapshot = Record<string, { balances: Record<string, string>; keys: { publicKey: string }[]; codeHash: string | null }>;
 export interface Run {
-  manifest: { runId: string; createdAt: string; chain: string; victim: string; approver: string; policyHash: string; catalogHash: string; realVsSimulated: Record<string, string>; prices: Record<string, { decimals: number; priceUsd: number }>; issuer?: string; signature?: string };
+  manifest: { runId: string; createdAt: string; chain: string; victim: string; approver: string; policyHash: string; catalogHash: string; realVsSimulated: Record<string, string>; prices: Record<string, { decimals: number; priceUsd: number }>; accounts?: Record<string, string>; issuer?: string; signature?: string };
   outcomes: Outcome[];
   totals: Record<LaneId, { stolenCents: number; escaped: string[]; compromised?: string[]; legitDone: number; legitTotal: number; falseBlocks: string[]; foreignKeys: number }>;
 }

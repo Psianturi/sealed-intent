@@ -159,9 +159,12 @@ drop.addEventListener("drop", async (e) => {
 });
 
 // a link to one receipt: /r/<id>
-const linked = location.pathname.match(/\/r\/([0-9a-f-]{36})/)?.[1] ?? new URLSearchParams(location.search).get("r");
-if (linked) {
-  void fetch(`/receipts/${linked}.json`).then(async (res) => {
+const query = new URLSearchParams(location.search);
+const linked = location.pathname.match(/\/r\/([0-9a-f-]{36})/)?.[1] ?? query.get("r");
+const replay = query.get("replay");
+if (linked && /^[0-9a-f-]{36}$/.test(linked)) {
+  const path = replay && /^[a-z0-9-]+$/.test(replay) ? `/replays/${replay}/receipts/${linked}.json` : `/receipts/${linked}.json`;
+  void fetch(path).then(async (res) => {
     if (res.ok && res.headers.get("content-type")?.includes("json")) load(await res.text());
     else $("out").innerHTML = `<article class="result bad"><p class="result-head"><span class="result-icon" aria-hidden="true">✕</span>Receipt not found</p><p>This site has no receipt with that id.</p></article>`;
   });

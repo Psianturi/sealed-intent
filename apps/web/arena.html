@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Arena: three agents, the same attacks | SeIn</title>
-  <meta name="description" content="Three identical AI agents, the same tasks and attacks, and a referee that reads only on-chain state. See which attacks got through." />
+  <meta name="description" content="Three identical AI agents, the same tasks and attacks, and a referee that reads only on-chain state. Watch which money gets out, and where SeIn stops it." />
   <meta property="og:title" content="The Arena: three agents, the same attacks" />
   <meta property="og:description" content="No guard, spending limits only, or SeIn. A referee that reads only on-chain state keeps score." />
   <meta property="og:type" content="website" />
@@ -14,50 +14,63 @@
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
-  <meta name="theme-color" content="#2747c4" />
+  <meta name="theme-color" content="#05070C" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/stage/stage.css" />
 </head>
-<body>
+<body class="arena-page">
   <!--header:arena-->
-  <main>
+  <main class="arena-intro">
     <h1 class="page-title">The Arena</h1>
-    <p class="lead">Three identical AI agents get the same everyday tasks and the same attacks. One has no guard. One has spending limits only. One goes through SeIn. A referee that reads only on-chain state keeps score, so we cannot grade ourselves.</p>
+    <p class="lead">Three identical AI agents get the same message. One has no guard, one has a spending limit, one goes through SeIn. Watch where the money ends up. A referee that reads only the chain keeps score.</p>
+  </main>
+
+  <section class="vr" id="stage" tabindex="0" aria-label="Arena stage. Space plays or pauses. Left and right change the case.">
+    <div class="vr-head">
+      <div class="vr-title" id="vr-title"></div>
+      <div class="vr-side">
+        <ol class="vr-chapters" id="vr-chapters" aria-label="Chapters"></ol>
+        <label class="vr-switch"><input type="checkbox" id="owner-reads" checked /><span class="vr-switch-ui" aria-hidden="true"></span><span>Owner reads before approving</span></label>
+      </div>
+    </div>
+    <div class="vr-screen" id="vr-screen"><!--stage-fallback--></div>
+    <p class="vr-caption" id="vr-caption" aria-live="polite"></p>
+    <div class="vr-controls">
+      <button type="button" class="vr-ctl" id="vr-prev" aria-label="Previous case"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button type="button" class="vr-ctl wide" id="vr-play" aria-label="Play">Play</button>
+      <input type="range" id="vr-scrub" min="0" max="1000" value="0" aria-label="Timeline" />
+      <span class="vr-time" id="vr-time">0:00 / 0:00</span>
+      <button type="button" class="vr-ctl wide" id="vr-skip">Skip to result</button>
+      <label class="vr-speed"><span class="sr-only">Speed</span><select id="vr-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></label>
+      <button type="button" class="vr-ctl" id="vr-next" aria-label="Next case"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </section>
+
+  <main>
+    <h2 id="cases">Case files</h2>
+    <p class="note">Each attack follows the pattern of a real incident, replayed against an agent on NEAR with test tokens. Select one to play it on the stage.</p>
+    <div id="case-files"><!--case-files--></div>
+
+    <h2>Final tally</h2>
     <div class="controls">
       <label for="chainpick">Recording</label>
       <select id="chainpick">
-        <option value="official">Simulated chain, the owner reads each WARN</option>
-        <option value="official-sandbox">Real local NEAR nodes, the owner reads each WARN</option>
-        <option value="official-lazy">Simulated chain, the owner approves everything</option>
+        <option value="official">Simulated chain</option>
+        <option value="official-sandbox">Three real local NEAR nodes</option>
       </select>
     </div>
     <p class="note" id="run-meta"><!--meta--></p>
-
-    <h2>Scoreboard</h2>
+    <div id="tally"><!--tally--></div>
     <div id="score" class="score"><!--score--></div>
     <p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design: a stolen custody key, a forged verdict, a compromised checker, a lying data source, a bug inside a token.</p>
     <p class="lead small" id="summary"><!--score-sentence--></p>
 
-    <h2>Watch one attack</h2>
-    <div class="controls">
-      <label for="pick">Attack</label>
-      <select id="pick"></select>
-      <button class="btn primary" id="play">Play</button>
-      <button class="btn" id="skip">Show the result</button>
-    </div>
-    <p class="note" id="scenario-summary"></p>
-    <div id="corridor"></div>
-    <ol class="narration" id="narration"></ol>
-
-    <h2>All attacks</h2>
-    <p class="note">Each follows the pattern of a real incident, replayed against an agent on NEAR. Select a row for the story and the evidence. "We predicted" was written before the run, so you can judge us; the referee never reads it.</p>
-    <table id="scenarios" class="stack"><thead><tr><th>Attack</th><th>Pattern from</th><th>No guard</th><th>Limits only</th><th>SeIn</th><th>We predicted</th></tr></thead><tbody><!--rows--></tbody></table>
-
     <h2>What got past SeIn</h2>
-    <p class="note">Shown on purpose. These are attacks a checker in front of the wallet cannot stop by itself.</p>
+    <p class="note">Shown on purpose. A checker in front of the wallet cannot stop these by itself; a custody policy or an on-chain guard is the layer that can.</p>
     <ul id="escaped"><!--escaped--></ul>
 
     <h2>What is real and what is simulated</h2>
@@ -67,7 +80,6 @@
     <details class="dev"><summary>For builders: fingerprints of this run</summary><p id="repro"><!--fingerprints--></p></details>
     <!--footer:arena-->
   </main>
-  <aside class="drawer" id="drawer" aria-hidden="true"></aside>
   <script type="module" src="/src/arena.ts"></script>
 </body>
 </html>

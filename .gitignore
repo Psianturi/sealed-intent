@@ -4,6 +4,7 @@ dist/
 apps/web/public/replays/
 apps/web/public/samples/
 apps/web/public/receipts/
+apps/web/public/storyboard/
 apps/web/public/proofs/
 *.tsbuildinfo
 

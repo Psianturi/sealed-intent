@@ -1,8 +1,20 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import { renderEscaped, renderFingerprints, renderHonesty, renderMeta, renderRows, renderScore, scopeOf, scopeSentence, usd, type Run } from "./src/arena-data";
 import { mark, siteFooter, siteHeader } from "./src/shell";
+import { renderCaseFiles, renderStageFallback, renderTally } from "./src/stage/static";
+import { buildStoryboard } from "./src/storyboard";
+
+/** The stage reads only these files, made from the official recordings. */
+function writeStoryboards(): void {
+  const out = resolve(__dirname, "public", "storyboard");
+  mkdirSync(out, { recursive: true });
+  for (const dir of ["official", "official-lazy", "official-sandbox"]) {
+    const run = readRun(dir);
+    if (run) writeFileSync(resolve(out, `${dir}.json`), JSON.stringify(buildStoryboard(run, dir)));
+  }
+}
 
 function readRun(name: string): Run | undefined {
   const dir = resolve(__dirname, "public", "replays", name);
@@ -15,6 +27,9 @@ function readRun(name: string): Run | undefined {
 function staticContent(): Plugin {
   return {
     name: "sein-static-content",
+    buildStart() {
+      writeStoryboards();
+    },
     transformIndexHtml(html) {
       const run = readRun("official");
       const lazy = readRun("official-lazy");
@@ -38,7 +53,11 @@ function staticContent(): Plugin {
       if (run) {
         const s = scopeOf(run);
         const t = run.totals.sealed;
+        const sb = buildStoryboard(run, "official");
         Object.assign(parts, {
+          "case-files": renderCaseFiles(sb),
+          tally: renderTally(sb),
+          "stage-fallback": renderStageFallback(sb),
           score: renderScore(run),
           "score-sentence": scopeSentence(run),
           rows: renderRows(run),
