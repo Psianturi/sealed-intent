@@ -6,6 +6,7 @@
  *   pnpm registry anchor [outDir]           anchor receipts not yet anchored, write proofs
  *   pnpm registry set-policy                record a salted commitment to SeIn's policy for agent-1
  *   pnpm registry status                    what the contract holds
+ *   pnpm registry upgrade                   deploy the committed wasm over the live one; the state stays
  */
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -52,6 +53,13 @@ async function deploy() {
   console.log("deployed", registry.account, "tx", tx.transaction.hash, "wasm sha256", createHash("sha256").update(wasm).digest("hex"));
 }
 
+async function upgrade() {
+  const account = env("SEIN_REGISTRY_ACCOUNT");
+  const wasm = new Uint8Array(readFileSync(join("contracts", "sein-registry", "sein_registry.wasm")));
+  const tx = await near(account, env("SEIN_REGISTRY_KEY")).transaction(account).deployContract(account, wasm).send();
+  console.log("upgraded", account, "tx", tx.transaction.hash, "wasm sha256", createHash("sha256").update(wasm).digest("hex"));
+}
+
 async function register() {
   const owner = env("SEIN_TESTNET_OWNER_ACCOUNT");
   const contract = env("SEIN_REGISTRY_ACCOUNT");
@@ -85,6 +93,7 @@ async function setPolicy() {
 
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === "deploy") await deploy();
+else if (cmd === "upgrade") await upgrade();
 else if (cmd === "register") await register();
 else if (cmd === "set-policy") await setPolicy();
 else if (cmd === "status") await status();
