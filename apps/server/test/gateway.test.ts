@@ -126,6 +126,21 @@ describe("the owner approves with a wallet signature", () => {
   const accepts: ApprovalVerifier = { verify: async () => true };
   const signedFor = (decisionId: string, action: SignedApproval["action"] = "approve", accountId = "owner.near"): SignedApproval => ({ action, decisionId, accountId, publicKey: "ed25519:x", signature: "ed25519:y", nonce: "AA==" });
 
+  it("an execute before the approval is not remembered, so the same key pays once the owner approves", async () => {
+    const s = await start({ ownerAccount: "owner.near", approvals: accepts });
+    close = s.close;
+    const t = s.access.issue("agent-1");
+    const d = (await (await post(s.base, "/v1/preflight", { intent: warn() }, bearer(t))).json()) as Json;
+    const h = { ...bearer(t), "Idempotency-Key": `pay-${d.decisionId}` };
+    const early = (await (await post(s.base, "/v1/execute", { decisionId: d.decisionId }, h)).json()) as Json;
+    expect(early.status).toBe("not_sent");
+    expect((await post(s.base, "/v1/approve", { decisionId: d.decisionId, signed: signedFor(String(d.decisionId)) }, bearer("owner-secret"))).status).toBe(200);
+    const paid = (await (await post(s.base, "/v1/execute", { decisionId: d.decisionId }, h)).json()) as Json;
+    expect(paid.status).toBe("simulated");
+    const again = await post(s.base, "/v1/execute", { decisionId: d.decisionId }, h);
+    expect(again.headers.get("Idempotent-Replay")).toBe("true");
+  });
+
   it("the old owner token is no longer enough", async () => {
     const s = await start({ ownerAccount: "owner.near", approvals: accepts });
     close = s.close;

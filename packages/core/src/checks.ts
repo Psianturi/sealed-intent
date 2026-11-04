@@ -34,7 +34,11 @@ export function units(amount: string, decimals: number): number {
 }
 
 export function findToken(tokens: TokenResponse[], assetId: string): TokenResponse | undefined {
-  return tokens.find((t) => t.assetId === assetId);
+  const found = tokens.find((t) => t.assetId === assetId);
+  if (found || assetId !== "native") return found;
+  // 1Click lists wNEAR, not native NEAR; one NEAR is worth one wNEAR and both have 24 decimals
+  const wnear = tokens.find((t) => t.assetId === "nep141:wrap.near");
+  return wnear && { ...wnear, assetId: "native", symbol: "NEAR" };
 }
 
 export function checkQuote(input: QuoteCheckInput): QuoteCheckResult {

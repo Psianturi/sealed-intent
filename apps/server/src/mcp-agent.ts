@@ -52,5 +52,5 @@ registerTools(server, {
   execute: (decisionId) => call("POST", "/v1/execute", { decisionId }),
   report: (args) => call("POST", "/v1/blocklist/report", args),
   receipt: (decisionId) => call("GET", `/v1/receipts/${encodeURIComponent(decisionId)}`),
-});
+}, process.env.SEALED_NETWORK === "testnet" ? "testnet" : "mainnet");
 await server.connect(new StdioServerTransport());

@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { tokenOf, toSmallest, type Network } from "./setup";
 
 /** Where the tools send their work: in this process (offline demo) or a separate REST service (real use). */
 export interface McpBackend {
@@ -11,8 +12,58 @@ export interface McpBackend {
 
 const text = (data: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] });
 
+const explorer = (network: Network, hash: string) => `https://${network === "testnet" ? "testnet." : ""}nearblocks.io/txns/${hash}`;
+
+/** What happened to a payment, in words an agent can pass on to its user. */
+function outcome(network: Network, decisionId: string, x: Record<string, any>) {
+  if (x.status === "submitted" || x.status === "simulated") return { result: x.status === "simulated" ? "paid (simulated, offline mode)" : "paid", decisionId, txHash: x.txHash, explorer: x.txHash ? explorer(network, x.txHash) : undefined };
+  if (x.status === "pending_approval" || /approval/.test(String(x.details ?? ""))) return { result: "still waiting for the owner", decisionId, next: "The owner has not approved it yet. Ask the user to approve it, then call finish_payment again." };
+  if (x.status === "not_sent") return { result: "not sent", decisionId, reason: x.refusedByCustody ? "the custody wallet refused it" : "it was not sent", details: x.details };
+  return { result: x.status ?? "error", decisionId, details: x.error ?? x.details };
+}
+
 /** There is deliberately no approve tool: approving a WARN is a human action with the owner token. */
-export function registerTools(server: McpServer, backend: McpBackend): void {
+export function registerTools(server: McpServer, backend: McpBackend, network: Network = "mainnet"): void {
+  server.registerTool(
+    "pay",
+    {
+      title: "Pay someone, checked by SeIn first",
+      description:
+        "The simple way to send money. Give the receiver, the amount in normal units (0.5 means half a token) and the token (NEAR, USDC or wNEAR). SeIn checks it against the owner's secret rules before anything moves. If the result is paid, tell the user. If it is waiting for the owner, tell the user the owner must approve it with their wallet, and call finish_payment with the decisionId once they say it is approved. If it is refused, nothing was sent: tell the user and do not retry it another way.",
+      inputSchema: {
+        to: z.string().describe("the NEAR account that receives the money, e.g. bob.near"),
+        amount: z.string().describe("normal units, e.g. 0.5"),
+        token: z.string().default("NEAR").describe("NEAR, USDC or wNEAR"),
+        taskText: z.string().describe("the user's instruction that led to this payment, word for word"),
+      },
+    },
+    async ({ to, amount, token, taskText }) => {
+      const t = tokenOf(network, token);
+      if (!t) return text({ result: "refused", reason: `unknown token ${token}; use NEAR, USDC or wNEAR` });
+      let units: string;
+      try {
+        units = toSmallest(amount, t.decimals);
+      } catch (err) {
+        return text({ result: "refused", reason: (err as Error).message });
+      }
+      const d = (await backend.preflight({ kind: "transfer", token: t.assetId, amount: units, recipient: to, taskText })) as Record<string, any>;
+      if (d.verdict === "ALLOW") return text(outcome(network, d.decisionId, (await backend.execute(d.decisionId)) as Record<string, any>));
+      if (d.verdict === "WARN") return text({ result: "waiting for the owner", decisionId: d.decisionId, next: "The owner has to approve this payment with their NEAR wallet. Tell the user. When they say it is approved, call finish_payment with this decisionId." });
+      if (d.verdict === "BLOCK") return text({ result: "refused", decisionId: d.decisionId, reasons: d.reasonCodes, next: "Nothing was sent. Tell the user; do not try again in another form." });
+      return text({ result: "error", details: d });
+    },
+  );
+
+  server.registerTool(
+    "finish_payment",
+    {
+      title: "Send a payment the owner approved",
+      description: "Call this with the decisionId from pay after the user says the owner approved it. It sends the payment, or says it is still waiting.",
+      inputSchema: { decisionId: z.string() },
+    },
+    async ({ decisionId }) => text(outcome(network, decisionId, (await backend.execute(decisionId)) as Record<string, any>)),
+  );
+
   server.registerTool(
     "preflight_swap",
     {

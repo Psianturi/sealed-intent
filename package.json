@@ -25,6 +25,7 @@
     "arena:storyboard": "tsx apps/web/scripts/storyboard.ts",
     "web:dev": "pnpm --filter @sealed-intent/web dev",
     "web:build": "pnpm --filter @sealed-intent/web build",
+    "sein": "tsx scripts/sein.ts",
     "owner": "tsx scripts/owner.ts",
     "secret:scan": "node scripts/secret-scan.mjs",
     "custody": "tsx scripts/custody.ts",

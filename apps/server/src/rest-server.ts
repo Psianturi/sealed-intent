@@ -135,7 +135,10 @@ export function createRestServer(deps: RestDeps): Server {
         }
         try {
           const answer = await run();
-          access.settle(agentId, key, route, 200, JSON.stringify(answer, null, 2));
+          // "not yet" (waiting for the owner, frozen) changes nothing, so the same key may try again later
+          const nothingHappened = (answer as { status?: string; refusedByCustody?: boolean })?.status === "not_sent" && !(answer as { refusedByCustody?: boolean }).refusedByCustody;
+          if (nothingHappened) access.release(agentId, key, route);
+          else access.settle(agentId, key, route, 200, JSON.stringify(answer, null, 2));
           return send(res, 200, answer);
         } catch (err) {
           access.release(agentId, key, route);

@@ -1,5 +1,7 @@
 # Putting SeIn between your agent and its money
 
+Most people only need [GETTING-STARTED.md](GETTING-STARTED.md): `pnpm sein setup`, `pnpm sein start` and `pnpm sein connect` do everything on this page for you. This page shows what happens underneath.
+
 Your agent keeps deciding what to do. It just no longer holds the wallet. It asks SeIn, and only SeIn can make custody sign.
 
 The SeIn gateway runs as its own OS user with the custody key, the policy and the owner token. The agent runs as another user with one agent token, and optionally a signing key.
@@ -34,7 +36,7 @@ The bridge holds only the agent's token and refuses to start if a secret reached
 }
 ```
 
-Tools: `preflight_swap`, `preflight_transfer`, `preflight_call`, `execute_swap`, `report_counterparty`, `get_receipt`. None of them can approve, freeze or unfreeze.
+Tools: `pay` and `finish_payment` for plain payments in normal units (0.5 NEAR), and `preflight_swap`, `preflight_transfer`, `preflight_call`, `execute_swap`, `report_counterparty`, `get_receipt` for full control. None of them can approve, freeze or unfreeze.
 
 ## 2b. Plain HTTP, in a few lines
 
