@@ -239,3 +239,9 @@ body.present header.top, body.present .arena-intro, body.present main:not(.arena
 body.present { background: #05070c; }
 body.present .vr { margin: 0 auto; min-height: 100vh; border-radius: 0; max-width: none; }
 body.present .vr-caption { font-size: 28px; }
+
+/* a short intro, so the stage itself is on the first screen */
+.arena-intro .page-title { margin: 18px 0 4px; font-size: clamp(28px, 3.2vw, 38px); }
+.arena-intro .lead { font-size: 16.5px; max-width: 980px; margin-bottom: 0; }
+.arena-page .vr { margin-top: 12px; }
+.arena-intro { padding-bottom: 0; }

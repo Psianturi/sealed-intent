@@ -122,7 +122,7 @@ Every decision leaves a signed receipt that anyone can check at https://sein-nea
 4. **Tricked?** The task text is screened, and a model inside a NEAR AI Cloud enclave gives its opinion.
 5. **In budget?** Per payment, per hour and per day, in dollars.
 
-Then SeIn answers ALLOW (custody pays), WARN (you decide) or BLOCK (nothing moves). If a transaction ever leaves the wallet without a SeIn receipt, SeIn notices within about a minute and freezes the wallet.
+Then SeIn answers ALLOW (custody pays), WARN (you decide) or BLOCK (nothing moves). If a transaction ever leaves the wallet without a SeIn receipt, SeIn notices within about a minute and stops every payment. To have it also freeze the custody wallet on chain, give it a key that can only freeze (see INTEGRATING.md).
 
 ## Mainnet checklist
 

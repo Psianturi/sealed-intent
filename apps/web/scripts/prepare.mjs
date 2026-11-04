@@ -28,7 +28,7 @@ if (existsSync(join(evidence, "receipts"))) {
   const receipts = all
     .filter((r) => r.version !== "sealed-intent/execution@1")
     .sort((a, b) => a.issuedAt.localeCompare(b.issuedAt))
-    .map((r) => ({ decisionId: r.receiptId, verdict: r.verdict, agent: r.public?.registeredAgent, issuedAt: r.issuedAt, status: executions.get(r.receiptId)?.status, executionReceiptId: executions.get(r.receiptId)?.receiptId }));
+    .map((r) => ({ decisionId: r.receiptId, verdict: r.verdict, reasonCodes: r.reasonCodes ?? [], agent: r.public?.registeredAgent, issuedAt: r.issuedAt, status: executions.get(r.receiptId)?.status, executionReceiptId: executions.get(r.receiptId)?.receiptId }));
   const chain = JSON.parse(readFileSync(join(evidence, "chain.json"), "utf8"));
   writeFileSync(join(pub, "receipts", "index.json"), JSON.stringify({ ...chain, receipts }, null, 2));
   const flow = JSON.parse(readFileSync(join(evidence, "s4-flow.json"), "utf8"));

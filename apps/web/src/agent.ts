@@ -1,7 +1,15 @@
 import { esc } from "./arena-data";
+import { reason } from "./copy";
 import { view, type Agent } from "./verify-chain";
 
-interface IndexRow { decisionId: string; verdict: string; agent?: string; issuedAt: string; status?: string }
+interface IndexRow { decisionId: string; verdict: string; reasonCodes?: string[]; agent?: string; issuedAt: string; status?: string }
+
+/** What happened, in words: receipts publish the verdict and block reasons, never amounts or receivers. */
+function happened(r: IndexRow): string {
+  if (r.verdict === "ALLOW") return r.status === "submitted" ? "Allowed and paid on chain" : "Allowed";
+  if (r.verdict === "WARN") return r.status === "submitted" ? "Asked the owner, who approved; paid on chain" : r.status === "not_sent" ? "The owner approved, the custody wallet still refused" : "Asked the owner; not paid";
+  return `${r.reasonCodes?.length ? reason(r.reasonCodes[0]!) : "Refused"}; nothing sent`;
+}
 interface PublicIndex { network: string; registry: string; receipts: IndexRow[] }
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -17,6 +25,7 @@ async function main() {
     return;
   }
   $("title").textContent = id;
+  $("eyebrow").textContent = `AI agent on NEAR ${index.network}`;
   document.title = `${id} | SeIn`;
   const mine = index.receipts.filter((r) => r.agent === id);
   const count = (v: string) => mine.filter((r) => r.verdict === v).length;
@@ -26,7 +35,7 @@ async function main() {
   $("profile").innerHTML = `
     <article class="result ok">
       <p><span class="chip ${statusClass}">${esc(agent.status)}</span> <span class="status sim">${esc(index.network)}, test tokens</span></p>
-      <dl class="sealed-list">
+      <dl class="facts">
         <div><dt>Owner</dt><dd class="mono">${esc(agent.owner)}</dd></div>
         <div><dt>Custody account</dt><dd class="mono breaks">${esc(agent.custody_account)}</dd></div>
         <div><dt>Registered</dt><dd>${when(agent.created_at_ms)}</dd></div>
@@ -45,7 +54,7 @@ async function main() {
     <ul class="receipt-list">${mine
       .slice()
       .reverse()
-      .map((r) => `<li><a href="/r/${esc(r.decisionId)}"><span class="chip ${r.verdict === "ALLOW" ? "allow" : r.verdict === "WARN" ? "warn" : "block"}">${esc(r.verdict)}</span> <span class="note">${esc(r.issuedAt.slice(0, 16).replace("T", " "))} UTC</span>${r.status ? ` <span class="note">${esc(r.status === "submitted" ? "sent on chain" : r.status === "not_sent" ? "not sent" : r.status)}</span>` : ""}</a></li>`)
+      .map((r) => `<li><a href="/r/${esc(r.decisionId)}"><span class="chip ${r.verdict === "ALLOW" ? "allow" : r.verdict === "WARN" ? "warn" : "block"}">${esc(r.verdict)}</span><span class="what">${esc(happened(r))}</span><span class="note">${esc(r.issuedAt.slice(0, 16).replace("T", " "))} UTC</span><span class="go">Check</span></a></li>`)
       .join("")}</ul>`;
 }
 void main();

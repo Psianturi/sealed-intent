@@ -12,6 +12,10 @@
       "destination": "/agent.html"
     },
     {
+      "source": "/start",
+      "destination": "/start.html"
+    },
+    {
       "source": "/proof",
       "destination": "/proof.html"
     },
