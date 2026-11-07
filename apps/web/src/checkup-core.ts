@@ -48,6 +48,7 @@ export const KNOWN: Record<Network, Record<string, string>> = {
     "usdt.tether-token.near": "Tether USDt",
     "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": "Circle USDC",
     "v2.ref-finance.near": "Ref Finance",
+    "ref-labs.near": "Ref Finance",
     "social.near": "NEAR Social",
     "intents.near": "NEAR Intents",
     "meta-pool.near": "Meta Pool",
@@ -65,6 +66,7 @@ export const KNOWN: Record<Network, Record<string, string>> = {
   },
 };
 
+const BAIT = /(reward|claim|airdrop|gift|bonus|free|prize|voucher|winner|giveaway|redeem)/i;
 const NO_CODE = "11111111111111111111111111111111";
 // characters that look alike once printed
 const SKELETON: [RegExp, string][] = [[/0/g, "o"], [/[1il|]/g, "l"], [/3/g, "e"], [/5/g, "s"], [/rn/g, "m"], [/vv/g, "w"], [/[-_.]/g, ""]];
@@ -99,7 +101,8 @@ export function scan(input: ScanInput): ScanResult {
   const f: Finding[] = [];
   const conn: Connection[] = [];
   const flagged = new Map(input.flagged.filter((x) => x.network === input.network).map((x) => [x.account, x]));
-  const known = KNOWN[input.network];
+  // a copy: sub-accounts of known apps are added for this scan only
+  const known: Record<string, string> = { ...KNOWN[input.network] };
 
   if (!input.exists) return { findings: [{ id: "missing", severity: "danger", kind: "account", title: "This account does not exist", detail: `Nothing called ${input.account} on NEAR ${input.network}.` }], connections: [], score: 0, grade: "At risk" };
 
@@ -118,10 +121,13 @@ export function scan(input: ScanInput): ScanResult {
     const p = (k.access_key.permission as { FunctionCall: { allowance: string | null; receiver_id: string; method_names: string[] } }).FunctionCall;
     const to = p.receiver_id;
     const id = `key:${k.public_key}`;
+    const parent = Object.keys(known).find((k) => to.endsWith(`.${k}`));
+    if (parent && !known[to]) known[to] = known[parent]!;
     const what = known[to] ? `${known[to]} (${to})` : to;
     let severity: Severity = known[to] ? "ok" : "caution";
     let title = known[to] ? `Connected to ${known[to]}` : `Connected to an app SeIn does not know: ${to}`;
-    let detail = `A login key for ${what}. It can call ${p.method_names.length ? p.method_names.join(", ") : "any method"} for you, but cannot attach deposits, so it cannot move tokens. Gas allowance left: ${near(p.allowance ?? undefined)}.`;
+    const spent = p.allowance !== null && BigInt(p.allowance) < 10n ** 21n;
+    let detail = `A login key for ${what}. It can call ${p.method_names.length ? p.method_names.join(", ") : "any method"} for you, but cannot attach deposits, so it cannot move tokens. Gas allowance left: ${near(p.allowance ?? undefined)}.${spent ? " With no gas left it can no longer do anything; cutting it is just tidying." : ""}${known[to] ? "" : " Unknown is not the same as bad: SeIn's list of known apps is short. Keep it if you use this app."}`;
     const imitates = lookalikeOf(to, input.network);
     if (flagged.has(to)) [severity, title, detail] = ["danger", `Connected to a reported account: ${to}`, `${flagged.get(to)!.reason}. Cut this connection.`];
     else if (imitates) [severity, title, detail] = ["danger", `Connected to a look-alike of ${known[imitates]}: ${to}`, `The name imitates ${imitates}. Look-alike apps are how people get phished. Cut this connection.`];
@@ -139,9 +145,14 @@ export function scan(input: ScanInput): ScanResult {
     conn.push({ id: `token:${t}`, label: known[t] ?? t, kind: "token", severity });
   }
 
-  const strangeNfts = input.nfts.filter((n) => !known[n]);
-  for (const n of input.nfts) conn.push({ id: `nft:${n}`, label: n, kind: "nft", severity: flagged.has(n) || lookalikeOf(n, input.network) ? "danger" : "info" });
-  if (strangeNfts.length) f.push({ id: "nfts", severity: "caution", kind: "nft", title: `${plural(strangeNfts.length, "NFT collection")} you may not have asked for`, detail: `${strangeNfts.slice(0, 4).join(", ")}${strangeNfts.length > 4 ? "…" : ""}. Unsolicited NFTs are a common bait: their text tells a person or an agent to visit a site or pay. Ignore what they say.` });
+  // an NFT from an app the account uses is expected; a name that promises a reward or a claim is the classic bait
+  const apps = [...fc.map((k) => (k.access_key.permission as { FunctionCall: { receiver_id: string } }).FunctionCall.receiver_id), ...input.tokens].map((a) => a.replace(/.(near|testnet|tg)$/, ""));
+  const related = (n: string) => !!known[n] || apps.some((a) => a.length >= 4 && n.startsWith(a));
+  const bait = input.nfts.filter((n) => !related(n) && BAIT.test(n));
+  const other = input.nfts.filter((n) => !related(n) && !BAIT.test(n));
+  for (const n of input.nfts) conn.push({ id: `nft:${n}`, label: n, kind: "nft", severity: flagged.has(n) || lookalikeOf(n, input.network) ? "danger" : bait.includes(n) ? "caution" : "info" });
+  if (bait.length) f.push({ id: "nfts", severity: "caution", kind: "nft", title: `${plural(bait.length, "NFT collection")} named like bait`, detail: `${bait.slice(0, 4).join(", ")}${bait.length > 4 ? "…" : ""}. Names that promise a reward, a claim or a free drop are how scammers reach wallets: their text tells a person or an agent to visit a site or pay. Do not follow it. Hiding them in your wallet is enough; they cannot take anything by themselves.` });
+  if (other.length) f.push({ id: "nfts-other", severity: "info", kind: "nft", title: `${plural(other.length, "other NFT collection")}`, detail: `${other.slice(0, 4).join(", ")}${other.length > 4 ? "…" : ""}. Nothing about their names stands out. Treat any text inside them as information, never as an instruction.` });
 
   const badContacts = [...new Set(input.contacts)].filter((c) => flagged.has(c) || lookalikeOf(c, input.network));
   for (const c of badContacts) f.push({ id: `contact:${c}`, severity: "danger", kind: "contact", title: `Recent contact with ${flagged.has(c) ? "a reported account" : "a look-alike account"}: ${c}`, detail: flagged.get(c)?.reason ?? `The name imitates ${lookalikeOf(c, input.network)}.`, target: c });
@@ -167,4 +178,20 @@ export function lessonFrom(input: Pick<ScanInput, "account" | "network">, result
   if (result.findings.some((x) => x.title.includes("look-alike"))) rules.push("Check every account name character by character. A name that only looks like a known app is a trap.");
   if (neverPay.length) rules.push(`Never pay or connect to: ${neverPay.map((n) => n.account).join(", ")}.`);
   return { version: 1, account: input.account, network: input.network, createdAt: now.toISOString(), neverPay, rules };
+}
+
+/**
+ * The last check before the wallet opens, against keys read from the chain just now: only login keys
+ * (function-call keys) that still exist may be deleted. A full-access key is never deleted, whatever the page says.
+ */
+export function safeToCut(selected: string[], fresh: AccessKey[]): { ok: true; keys: string[] } | { ok: false; reason: string } {
+  if (!selected.length) return { ok: false, reason: "Pick at least one connection." };
+  const byKey = new Map(fresh.map((k) => [k.public_key, k]));
+  for (const s of selected) {
+    const k = byKey.get(s);
+    if (!k) return { ok: false, reason: "The account's keys changed since the scan. Scan again first." };
+    if (k.access_key.permission === "FullAccess") return { ok: false, reason: "That is a full-access key. SeIn never deletes one." };
+  }
+  if (!fresh.some((k) => k.access_key.permission === "FullAccess")) return { ok: false, reason: "This account has no full-access key, so it cannot sign this itself." };
+  return { ok: true, keys: [...new Set(selected)] };
 }

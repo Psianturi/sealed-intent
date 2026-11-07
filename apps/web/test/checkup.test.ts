@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lessonFrom, lookalikeOf, scan, skeleton, type AccessKey, type ScanInput } from "../src/checkup-core";
+import { lessonFrom, lookalikeOf, safeToCut, scan, skeleton, type AccessKey, type ScanInput } from "../src/checkup-core";
 
 const fc = (receiver: string, key = `ed25519:${receiver}`): AccessKey => ({ public_key: key, access_key: { nonce: 1, permission: { FunctionCall: { allowance: "250000000000000000000000", receiver_id: receiver, method_names: [] } } } });
 const fullKey = (k: string): AccessKey => ({ public_key: k, access_key: { nonce: 1, permission: "FullAccess" } });
@@ -48,5 +48,32 @@ describe("the check-up", () => {
     expect(l.neverPay.map((n) => n.account)).toEqual(["wrap-near.near"]);
     expect(l.rules.join(" ")).toMatch(/NFT/);
     expect(l.rules.join(" ")).toMatch(/wrap-near\.near/);
+  });
+});
+
+describe("the last check before cutting", () => {
+  const keys = [fullKey("ed25519:full"), fc("app.near", "ed25519:app"), fc("other.near", "ed25519:other")];
+  it("lets through login keys that still exist", () => {
+    expect(safeToCut(["ed25519:app", "ed25519:app"], keys)).toEqual({ ok: true, keys: ["ed25519:app"] });
+  });
+  it("never deletes a full-access key, even if the page was tampered with", () => {
+    expect(safeToCut(["ed25519:app", "ed25519:full"], keys)).toMatchObject({ ok: false, reason: expect.stringMatching(/full-access/) });
+  });
+  it("stops when the keys changed since the scan, or nothing was picked", () => {
+    expect(safeToCut(["ed25519:gone"], keys).ok).toBe(false);
+    expect(safeToCut([], keys).ok).toBe(false);
+  });
+});
+
+describe("fair to ordinary wallets", () => {
+  it("knows the sub-accounts of a known app, without changing the list for the next scan", () => {
+    const r = scan({ ...base, keys: [fullKey("ed25519:a"), fc("boostfarm.ref-labs.near")] });
+    expect(r.findings.find((f) => f.target === "boostfarm.ref-labs.near")?.severity).toBe("ok");
+    expect(scan({ ...base, keys: [fullKey("ed25519:a"), fc("other.near")] }).findings.find((f) => f.target === "other.near")?.severity).toBe("caution");
+  });
+  it("treats NFTs from an app the wallet uses as expected, and reward-named ones as bait", () => {
+    const r = scan({ ...base, keys: [fullKey("ed25519:a"), fc("aa-harvest-moon.near")], nfts: ["aa-harvest-moon-relics.near", "claim-rewards.near", "art.near"] });
+    expect(r.findings.find((f) => f.id === "nfts")?.detail).toMatch(/^claim-rewards\.near\./);
+    expect(r.findings.find((f) => f.id === "nfts-other")?.severity).toBe("info");
   });
 });

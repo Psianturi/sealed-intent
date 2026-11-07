@@ -1,12 +1,14 @@
 // SeIn Checkpoint: scan any NEAR account from this browser, cut bad connections with the owner's wallet, keep the lesson.
 import { esc } from "./arena-data";
-import { lessonFrom, scan, type AccessKey, type Finding, type Flag, type Lesson, type Network, type ScanInput, type ScanResult } from "./checkup-core";
+import { lessonFrom, safeToCut, scan, type AccessKey, type Finding, type Flag, type Lesson, type Network, type ScanInput, type ScanResult } from "./checkup-core";
 import type { Scene } from "./checkup-scene";
 import { explorerTx } from "./verify-chain";
 
 const RPC: Record<Network, string> = { mainnet: "https://free.rpc.fastnear.com", testnet: "https://test.rpc.fastnear.com" };
 const FAST: Record<Network, string> = { mainnet: "https://api.fastnear.com", testnet: "https://test.api.fastnear.com" };
 const BLOCKS: Record<Network, string> = { mainnet: "https://api.nearblocks.io", testnet: "https://api-testnet.nearblocks.io" };
+const OUTLAYER: Record<Network, string> = { mainnet: "outlayer.near", testnet: "outlayer.testnet" };
+const REGISTRY: Partial<Record<Network, string>> = { testnet: "sein-registry-mvy2i59w.testnet" };
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -20,6 +22,27 @@ async function rpc<T>(network: Network, params: Record<string, unknown>): Promis
   return { result: j.result };
 }
 
+async function view<T>(network: Network, contract: string, method: string, args: Record<string, unknown>): Promise<T | undefined> {
+  const r = await rpc<{ result: number[] }>(network, { request_type: "call_function", account_id: contract, method_name: method, args_base64: btoa(JSON.stringify(args)) }).catch(() => ({ result: undefined }));
+  return r.result ? (JSON.parse(new TextDecoder().decode(new Uint8Array(r.result.result))) as T) : undefined;
+}
+
+/** Only what the chain proves: an OutLayer custody policy, or a SeIn registry entry. Anything else is "no sign of an agent", never "a person". */
+async function identify(account: string, network: Network): Promise<{ agent: boolean; notes: string[] }> {
+  const notes: string[] = [];
+  if (/^[0-9a-f]{64}$/.test(account)) {
+    const p = await view<{ owner: string; frozen?: boolean } | null>(network, OUTLAYER[network], "get_wallet_policy", { wallet_pubkey: `ed25519:${account}` });
+    if (p) notes.push(`An AI agent's custody wallet on OutLayer, controlled by ${p.owner}${p.frozen ? ", frozen right now" : ""}`);
+  }
+  const registry = REGISTRY[network];
+  if (registry) {
+    const n = Math.min(Number((await view<number>(network, registry, "agent_count", {})) ?? 0), 20);
+    const agents = await Promise.all(Array.from({ length: n }, (_, i) => view<{ agent_id: string; owner: string; custody_account: string }>(network, registry, "get_agent", { agent_id: `agent-${i + 1}` })));
+    for (const a of agents) if (a?.custody_account === account) notes.push(`Registered as ${a.agent_id} in SeIn's registry, owned by ${a.owner}`);
+  }
+  return { agent: notes.length > 0, notes };
+}
+
 const log = (line: string, state: "run" | "done" | "warn" = "run") => {
   const li = document.createElement("li");
   li.className = state;
@@ -30,6 +53,7 @@ const log = (line: string, state: "run" | "done" | "warn" = "run") => {
 
 async function gather(account: string, network: Network, flagged: Flag[]): Promise<ScanInput> {
   $("cp-log").innerHTML = "";
+  identity = { agent: false, notes: [] };
   const base: ScanInput = { network, account, exists: false, keys: [], missing: [], tokens: [], nfts: [], pools: [], contacts: [], flagged };
   let step = log(`Reading ${account} on NEAR ${network}`);
   const acct = await rpc<{ code_hash: string; amount: string }>(network, { request_type: "view_account", account_id: account });
@@ -55,6 +79,12 @@ async function gather(account: string, network: Network, flagged: Flag[]): Promi
   const full = await fetch(`${FAST[network]}/v1/account/${encodeURIComponent(account)}/full`).then((r) => r.json() as Promise<{ tokens?: { contract_id: string }[]; nfts?: { contract_id: string }[]; pools?: { pool_id: string }[] }>).catch(() => undefined);
   step.className = full ? "done" : "warn";
   await sleep(250);
+
+  step = log("Looking for signs of an AI agent");
+  const who = await identify(account, network).catch(() => ({ agent: false, notes: [] as string[] }));
+  identity = who;
+  step.className = "done";
+  step.textContent = who.agent ? "An AI agent's wallet" : "No sign of an AI agent";
 
   step = log("Checking who it recently dealt with");
   const txs = await fetch(`${BLOCKS[network]}/v3/accounts/${encodeURIComponent(account)}/txns?limit=25`).then((r) => (r.ok ? (r.json() as Promise<{ data?: { signer_account_id: string; receiver_account_id: string }[] }>) : undefined)).catch(() => undefined);
@@ -106,6 +136,10 @@ function renderScore(r: ScanResult) {
   const d = r.findings.filter((f) => f.severity === "danger").length;
   const c = r.findings.filter((f) => f.severity === "caution").length;
   $("cp-score-sub").textContent = `${d} urgent, ${c} to check, ${r.connections.filter((x) => x.kind === "key").length} app connections`;
+  const who = $("cp-who");
+  who.className = `cp-who ${identity.agent ? "agent" : "person"}`;
+  who.textContent = identity.agent ? identity.notes.join(". ") : "No sign of an AI agent: no custody policy, no registry entry. Probably a person's wallet.";
+  $("cp-lesson-how").textContent = identity.agent ? "This is an AI agent's wallet. Give the lesson to the SeIn that guards it: the accounts are blocked at once, and the agent can read the rules before it pays." : "For a person: keep these in mind. For an agent: give the lesson to the SeIn that guards it, and the accounts are blocked at once.";
 }
 
 function renderLesson(l: Lesson) {
@@ -117,6 +151,7 @@ function renderLesson(l: Lesson) {
   a.download = `sein-lesson-${l.account}.json`;
 }
 
+let identity: { agent: boolean; notes: string[] } = { agent: false, notes: [] };
 let current: { account: string; network: Network; input: ScanInput; result: ScanResult } | undefined;
 let scene: Scene | undefined;
 let flagged: Flag[] = [];
@@ -124,8 +159,9 @@ let flagged: Flag[] = [];
 function renderHeal(r: ScanResult) {
   const heal = r.findings.filter((f) => f.heal && f.key);
   $("cp-heal").hidden = heal.length === 0;
-  $("cp-heal-list").innerHTML = heal.map((f) => `<li><label><input type="checkbox" value="${esc(f.key!)}" data-id="key:${esc(f.key!)}" checked /> <span>${esc(f.target ?? "")}</span> <span class="cp-tag ${f.severity}">${f.severity === "danger" ? "urgent" : "check"}</span></label></li>`).join("");
+  $("cp-heal-list").innerHTML = heal.map((f) => `<li><label><input type="checkbox" value="${esc(f.key!)}" data-id="key:${esc(f.key!)}"${f.severity === "danger" ? " checked" : ""} /> <span>${esc(f.target ?? "")}</span> <span class="cp-tag ${f.severity}">${f.severity === "danger" ? "urgent" : "check"}</span></label></li>`).join("");
   $("cp-heal-status").textContent = "";
+  $("cp-confirm").hidden = true;
 }
 
 async function run(account: string, network: Network) {
@@ -165,16 +201,39 @@ async function heal(preview: boolean) {
     return;
   }
   const status = $("cp-heal-status");
-  status.textContent = "Opening your wallet…";
+  // first a plain statement of what will happen; the wallet opens only after the owner confirms it
+  const confirm = $("cp-confirm");
+  if (confirm.hidden) {
+    const apps = boxes.map((b) => b.closest("label")?.querySelector("span")?.textContent ?? "");
+    confirm.innerHTML = `<p><b>You are about to sign one transaction</b> from ${esc(current.account)} to itself. It deletes ${boxes.length === 1 ? "this login key" : `these ${boxes.length} login keys`}:</p>
+      <ul>${apps.map((a) => `<li class="mono">${esc(a)}</li>`).join("")}</ul>
+      <p>What happens: ${boxes.length === 1 ? "that app forgets" : "those apps forget"} your login; you can log in again any time. No NEAR, token or NFT moves. Your full-access keys are not touched. The network fee is a fraction of a cent.</p>
+      <div class="cp-actions"><button type="button" class="cp-go" id="cp-confirm-go">Confirm and open my wallet</button><button type="button" class="cp-ghost" id="cp-confirm-cancel">Cancel</button></div>`;
+    confirm.hidden = false;
+    $("cp-confirm-go").onclick = () => void heal(false);
+    $("cp-confirm-cancel").onclick = () => {
+      confirm.hidden = true;
+      status.textContent = "";
+    };
+    return;
+  }
+  confirm.hidden = true;
+  status.textContent = "Reading the account's keys again…";
   try {
-    const { NearConnector } = await import("@hot-labs/near-connect");
     const net = current.network;
+    // the page could be stale or tampered with: decide from the chain, right now
+    const fresh = await rpc<{ keys: AccessKey[] }>(net, { request_type: "view_access_key_list", account_id: current.account });
+    const check = safeToCut(cut, fresh.result?.keys ?? []);
+    if (!check.ok) throw new Error(check.reason);
+    status.textContent = "Opening your wallet…";
+    const { NearConnector } = await import("@hot-labs/near-connect");
+    // no addFunctionCallKey: connecting adds nothing to the account
     const connector = new NearConnector({ network: net, features: { signAndSendTransaction: true, ...(net === "testnet" ? { testnet: true } : {}) } });
     const w = await connector.connect();
     const accounts = await w.getAccounts();
-    if (!accounts.some((a) => a.accountId === current!.account)) throw new Error(`Connect ${current.account} itself. This wallet holds ${accounts.map((a) => a.accountId).join(", ") || "no account"}.`);
-    status.textContent = `Sign one transaction that deletes ${boxes.length} connection key${boxes.length === 1 ? "" : "s"}. Your full-access keys are not touched.`;
-    const out = (await w.signAndSendTransaction({ signerId: current.account, receiverId: current.account, actions: boxes.map((b) => ({ type: "DeleteKey" as const, params: { publicKey: b.value } })) })) as { transaction?: { hash?: string }; transaction_outcome?: { id?: string } };
+    if (!accounts.some((a) => a.accountId === current!.account)) throw new Error(`Connect ${current.account} itself, on ${net}. This wallet holds ${accounts.map((a) => a.accountId).join(", ") || "no account"}.`);
+    status.textContent = `Check the transaction in your wallet: ${check.keys.length} DeleteKey action${check.keys.length === 1 ? "" : "s"}, from ${current.account} to ${current.account}, nothing else.`;
+    const out = (await w.signAndSendTransaction({ network: net, signerId: current.account, receiverId: current.account, actions: check.keys.map((publicKey) => ({ type: "DeleteKey" as const, params: { publicKey } })) })) as { transaction?: { hash?: string }; transaction_outcome?: { id?: string } };
     const hash = out.transaction?.hash ?? out.transaction_outcome?.id;
     status.innerHTML = `Done. ${hash ? `<a href="${esc(explorerTx(net, hash))}" target="_blank" rel="noopener">See the transaction</a>.` : ""} Checking again…`;
     await scene?.heal(ids, after);

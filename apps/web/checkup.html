@@ -43,6 +43,7 @@
           <span class="cp-score-n mono" id="cp-score-n">--</span><span class="cp-score-of">/100</span>
           <p class="cp-grade" id="cp-grade">Waiting for a scan</p>
           <p class="cp-score-sub" id="cp-score-sub">Every dot will be a real key, token or contact.</p>
+          <p class="cp-who" id="cp-who"></p>
         </div>
         <p class="cp-legend"><span class="d danger"></span>urgent <span class="d caution"></span>check <span class="d ok"></span>known <span class="d info"></span>holding</p>
       </div>
@@ -56,14 +57,15 @@
       <div class="cp-col">
         <div class="cp-panel" id="cp-heal" hidden>
           <h2>Heal</h2>
-          <p>Cut these connections in one transaction, signed by the account's own wallet. SeIn never holds a key, and full-access keys are never touched.</p>
+          <p>Cut these connections in one transaction, signed by the account's own wallet. Only urgent ones are ticked; untick anything you still use. SeIn never holds a key, and full-access keys are never touched.</p>
           <ul class="cp-heal-list" id="cp-heal-list"></ul>
           <div class="cp-actions"><button type="button" class="cp-go" id="cp-heal-go">Cut with my wallet</button><button type="button" class="cp-ghost" id="cp-heal-preview">Preview the healing</button></div>
+          <div class="cp-confirm" id="cp-confirm" hidden></div>
           <p class="cp-status" id="cp-heal-status" aria-live="polite"></p>
         </div>
         <div class="cp-panel">
           <h2>Lessons for your agent</h2>
-          <p>What this check-up teaches. Give it to your agent, or to SeIn, so the same trap does not work twice.</p>
+          <p id="cp-lesson-how">What this check-up teaches. Give it to your agent, or to SeIn, so the same trap does not work twice.</p>
           <ol class="cp-lesson" id="cp-lesson-list"></ol>
           <div class="cp-actions"><button type="button" class="cp-ghost" id="cp-lesson-copy">Copy as JSON</button><a class="cp-ghost" id="cp-lesson-download" href="#">Download</a></div>
         </div>
