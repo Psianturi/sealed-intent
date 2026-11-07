@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkpoint | SeIn</title>
+  <meta name="description" content="Check up any NEAR wallet, an AI agent's or your own: risky app connections, look-alike accounts, bait NFTs and reported contacts. Cut what is wrong with your wallet, and keep the lesson for your agent." />
+  <meta property="og:title" content="SeIn Checkpoint: check up and heal a NEAR wallet" />
+  <meta property="og:description" content="Scan any NEAR account from your browser, cut risky connections with your own wallet, and turn what was found into lessons for your agent." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="theme-color" content="#05070c" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/checkup.css" />
+</head>
+<body class="room" data-state="idle">
+  <!--header:checkup-->
+  <main class="cp">
+    <section class="cp-hero">
+      <div class="cp-copy">
+        <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>SeIn Checkpoint</p>
+        <h1>Check up any NEAR wallet. Heal what is wrong.</h1>
+        <p class="cp-lead">An AI agent's wallet or your own. SeIn reads it straight from the chain: who can sign for it, which apps it is connected to, what it holds and who it dealt with. Then you cut what is risky with your own wallet, and the lesson stays with your agent.</p>
+        <form class="cp-form" id="cp-form" autocomplete="off">
+          <label class="sr-only" for="cp-account">NEAR account</label>
+          <input id="cp-account" name="account" placeholder="you.near or an agent's wallet" spellcheck="false" />
+          <label class="sr-only" for="cp-network">Network</label>
+          <select id="cp-network"><option value="mainnet">mainnet</option><option value="testnet">testnet</option></select>
+          <button class="cp-go" type="submit">Scan</button>
+        </form>
+        <p class="cp-try">Try: <button type="button" data-example="sein-patient-mw6h4gfp.testnet" data-network="testnet">a wallet with problems</button> <button type="button" data-example="f79de341d4627a69d31b850a515c1e9c282dbbdd2ac8933aca34129a8912fe21" data-network="testnet">an agent's custody wallet</button></p>
+        <ol class="cp-log" id="cp-log" aria-live="polite"></ol>
+      </div>
+      <div class="cp-stage">
+        <canvas id="cp-canvas" aria-hidden="true"></canvas>
+        <div class="cp-score" id="cp-score" aria-live="polite">
+          <span class="cp-score-n mono" id="cp-score-n">--</span><span class="cp-score-of">/100</span>
+          <p class="cp-grade" id="cp-grade">Waiting for a scan</p>
+          <p class="cp-score-sub" id="cp-score-sub">Every dot will be a real key, token or contact.</p>
+        </div>
+        <p class="cp-legend"><span class="d danger"></span>urgent <span class="d caution"></span>check <span class="d ok"></span>known <span class="d info"></span>holding</p>
+      </div>
+    </section>
+
+    <section class="cp-result" id="cp-result" hidden>
+      <div class="cp-col">
+        <h2>Diagnosis</h2>
+        <ul class="cp-findings" id="cp-findings"></ul>
+      </div>
+      <div class="cp-col">
+        <div class="cp-panel" id="cp-heal" hidden>
+          <h2>Heal</h2>
+          <p>Cut these connections in one transaction, signed by the account's own wallet. SeIn never holds a key, and full-access keys are never touched.</p>
+          <ul class="cp-heal-list" id="cp-heal-list"></ul>
+          <div class="cp-actions"><button type="button" class="cp-go" id="cp-heal-go">Cut with my wallet</button><button type="button" class="cp-ghost" id="cp-heal-preview">Preview the healing</button></div>
+          <p class="cp-status" id="cp-heal-status" aria-live="polite"></p>
+        </div>
+        <div class="cp-panel">
+          <h2>Lessons for your agent</h2>
+          <p>What this check-up teaches. Give it to your agent, or to SeIn, so the same trap does not work twice.</p>
+          <ol class="cp-lesson" id="cp-lesson-list"></ol>
+          <div class="cp-actions"><button type="button" class="cp-ghost" id="cp-lesson-copy">Copy as JSON</button><a class="cp-ghost" id="cp-lesson-download" href="#">Download</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cp-how">
+      <h2>What the check-up looks at</h2>
+      <div class="cp-grid">
+        <article><h3>Who can sign</h3><p>Every full-access key can move everything. More than one you do not recognise is the first sign of a takeover.</p></article>
+        <article><h3>App connections</h3><p>Each site you log in to leaves a key on your account. Keys to look-alike, reported or deleted apps are cut.</p></article>
+        <article><h3>Bait</h3><p>Look-alike tokens and unsolicited NFTs carry text meant to make a person, or an agent, pay. SeIn names them.</p></article>
+        <article><h3>Contacts</h3><p>Recent counterparties are checked against SeIn's list of reported accounts and the names of well-known contracts.</p></article>
+      </div>
+      <p class="cp-note">Read-only until you choose to heal. Data from NEAR RPC, FastNEAR and NearBlocks, read by your browser. SeIn's list of reported accounts starts small and grows from what its agents report; a clean result is not a guarantee.</p>
+    </section>
+    <!--footer:checkup-->
+  </main>
+  <script type="module" src="/src/checkup.ts"></script>
+</body>
+</html>

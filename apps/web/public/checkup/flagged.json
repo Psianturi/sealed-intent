@@ -1,0 +1,6 @@
+{
+  "note": "Accounts SeIn has reason to warn about. It starts small and grows from reports by SeIn agents; each entry says where it came from.",
+  "accounts": [
+    { "account": "sein-attacker-mvy1eh5f.testnet", "network": "testnet", "reason": "Plays the attacker in SeIn's own testnet runs and tried to take payments", "source": "SeIn testnet evidence, evidence/custody-testnet" }
+  ]
+}

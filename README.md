@@ -15,6 +15,8 @@ Live site: https://sein-near.vercel.app (overview, Arena replay, receipt verifie
 > real OutLayer custody with the real NEAR AI Cloud check, and each has a transaction anyone can look up; see [`evidence/custody-testnet`](evidence/custody-testnet).
 > A public registry holds the signing keys, agents and receipt batches. A mainnet payment, a swap and a live confidential route have not run yet, and the service is not hosted. See [Limits](#limits-read-this) and [SECURITY.md](SECURITY.md).
 
+**Check up and heal any NEAR wallet:** https://sein-near.vercel.app/checkup scans an agent's wallet or your own for risky app connections, look-alike accounts, bait NFTs and reported contacts, cuts what is wrong in one transaction signed by your own wallet, and turns the findings into lessons for your agent. It runs in the browser; nothing to install.
+
 **Use it with your own agent:** [GETTING-STARTED.md](GETTING-STARTED.md). Three commands: `pnpm sein setup` asks a few questions, `pnpm sein start` runs SeIn, `pnpm sein connect my-agent` connects Claude Desktop, Claude Code, Cursor, VS Code or your own code. The agent then has a `pay` tool and holds no wallet key.
 
 ---
