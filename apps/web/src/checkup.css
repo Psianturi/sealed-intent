@@ -149,3 +149,13 @@ body.no-webgl .cp-stage { background: radial-gradient(closest-side, #1a2a5a 0%, 
 .cp-who { margin: 8px 0 0; max-width: 300px; font-size: 12.5px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: color-mix(in srgb, #05070c 70%, transparent); color: var(--muted); }
 .cp-who:empty { display: none; }
 .cp-who.agent { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 45%, var(--line)); }
+.t-privacy { margin: 6px 0 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #070b14; }
+.t-privacy h3 { font-size: 15px; margin: 0 0 8px; }
+.t-ptable { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.t-ptable th, .t-ptable td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.t-ptable thead th { border-top: 0; color: var(--muted); font-weight: 600; font-size: 12.5px; }
+.t-ptable tbody th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.t-seal { color: var(--accent-ink); font-size: 12.5px; white-space: nowrap; }
+.t-ptable .ok { color: var(--allow); font-size: 12.5px; white-space: nowrap; }
+.t-ptable .bad { color: var(--block); font-size: 12.5px; }
+@media (max-width: 560px) { .t-ptable thead { display: none; } .t-ptable tr { display: grid; grid-template-columns: 1fr; } .t-ptable td, .t-ptable th { border-top: 0; padding: 2px 0; } .t-ptable tr { border-top: 1px solid var(--line); padding: 6px 0; } }

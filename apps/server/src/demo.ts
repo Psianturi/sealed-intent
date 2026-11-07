@@ -71,9 +71,13 @@ export function createDemo(deps: { preflight: Preflight; store: ReceiptStore }, 
           execution = { status: x.status, txHash: x.txHash, explorer: x.txHash ? explorer(opts.network, x.txHash) : undefined, refusedByCustody: x.refusedByCustody, executionReceipt: x.executionReceiptId ? deps.store.load(x.executionReceiptId) : undefined };
         }
       }
+      // the requester may see the openings of what they typed themselves, and nothing else: never the policy's
+      const opened = deps.store.loadOpenings(d.decisionId)?.openings ?? {};
+      const yours = Object.fromEntries((["recipient", "amountIn", "tokenIn", "taskText"] as const).filter((k) => opened[k]).map((k) => [k, opened[k]]));
       return {
         status: 200,
         body: {
+          openings: yours,
           decisionId: d.decisionId,
           verdict: d.verdict,
           reasonCodes: d.reasonCodes,

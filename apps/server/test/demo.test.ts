@@ -42,6 +42,13 @@ describe("try the firewall, as a website visitor", () => {
     expect(r.execution.status).toBe("simulated");
     expect(r.receipt.receiptId).toBe(r.decisionId);
     expect(r.receipt.issuer.publicKey).toMatch(/^[0-9a-f]{64}$/);
+    // the requester gets the openings of their own fields, which match the seals; never the policy
+    expect(Object.keys(r.openings).sort()).toEqual(["amountIn", "recipient", "taskText", "tokenIn"]);
+    expect(r.openings.recipient.value).toBe(routine.to);
+    const { createHash } = await import("node:crypto");
+    const { canonicalJson } = await import("@sealed-intent/receipt");
+    for (const [field, o] of Object.entries(r.openings) as [string, { value: unknown; salt: string }][]) expect(createHash("sha256").update(`${o.salt}:${canonicalJson(o.value)}`).digest("hex")).toBe(r.receipt.commitments[field]);
+    expect(JSON.stringify(r)).not.toMatch(/policyOpening|perTxUsd|allowedRecipients/);
   });
 
   it("refuses a tricked request and asks the owner about a stranger", async () => {

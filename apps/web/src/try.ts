@@ -2,7 +2,8 @@
 import { esc } from "./arena-data";
 import { reason } from "./copy";
 import { GATE_NAMES, sealedGates } from "./storyboard";
-import { verifyReceipt } from "./verify-core";
+import { formatAmount } from "./verify-chain";
+import { matchesSeal, verifyReceipt } from "./verify-core";
 
 interface Answer {
   decisionId: string;
@@ -13,6 +14,7 @@ interface Answer {
   receipt: Record<string, any>;
   execution?: { status: string; txHash?: string; explorer?: string; note?: string; refusedByCustody?: boolean };
   quota?: { requestsLeft: number; paymentsLeft: number };
+  openings?: Record<string, { value: unknown; salt: string }>;
   error?: string;
 }
 
@@ -39,6 +41,23 @@ function gatesHtml(state: "idle" | "running" | Answer) {
     .join("");
 }
 
+const FIELDS: [string, string][] = [["recipient", "Receiver"], ["amountIn", "Amount"], ["tokenIn", "Token"], ["taskText", "Instruction"]];
+
+/** Privacy made visible: the public receipt holds only seals; the requester's own openings match them, checked here. */
+function privacyHtml(a: Answer): string {
+  const c = (a.receipt.commitments ?? {}) as Record<string, string>;
+  const shown = (field: string, v: unknown) => (field === "amountIn" ? formatAmount(String(v), String(a.openings?.tokenIn?.value ?? "native")) : field === "tokenIn" && v === "native" ? "NEAR" : String(v));
+  const rows = FIELDS.filter(([k]) => c[k]).map(([k, label]) => {
+    const o = a.openings?.[k];
+    const ok = o ? matchesSeal(c[k], o) : false;
+    return `<tr><th>${label}</th><td class="mono t-seal">sealed ${esc(c[k]!.slice(0, 8))}…</td><td>${o ? `${esc(shown(k, o.value))} <span class="${ok ? "ok" : "bad"}">${ok ? "✓ matches its seal" : "✕ does not match"}</span>` : "-"}</td></tr>`;
+  });
+  const tee = a.receipt.tee as { attestation?: { tcbStatus?: string; gpus?: number; tlsBound?: boolean } } | undefined;
+  return `<div class="t-privacy"><h3>Who sees what</h3>
+    <table class="t-ptable"><thead><tr><th></th><th>The public receipt</th><th>Only you, the requester</th></tr></thead><tbody>${rows.join("")}</tbody></table>
+    <p class="t-note">The rules that judged it stay secret: not in the receipt, not in this answer. ${tee ? `Your instruction was read only inside a NEAR AI Cloud enclave (Intel TDX${tee.attestation?.gpus ? `, ${tee.attestation.gpus} NVIDIA GPUs` : ""}${tee.attestation?.tlsBound ? ", connection tied to its evidence" : ""}), and the enclave signed its answer.` : ""}</p></div>`;
+}
+
 function render(a: Answer) {
   $("t-gates").innerHTML = gatesHtml(a);
   const box = $("t-verdict");
@@ -57,6 +76,7 @@ function render(a: Answer) {
     ${a.execution?.note ? `<p class="t-note">${esc(a.execution.note)}</p>` : ""}
     ${a.execution?.refusedByCustody ? `<p class="t-note">The custody wallet refused it too: its own policy is the second lock.</p>` : ""}
     <div class="t-receipt"><span class="${v.valid ? "ok" : "bad"}">${v.valid ? "✓" : "✕"}</span> Signed receipt ${esc(a.decisionId.slice(0, 8))}… ${v.valid ? "checked in your browser: genuine and unchanged. Amount and receiver stay sealed." : "did not verify."}</div>
+    ${privacyHtml(a)}
     <div class="cp-actions">${tx}<a class="cp-ghost" href="${blob}" download="sein-receipt-${esc(a.decisionId)}.json">Download the receipt</a><a class="cp-ghost" href="/verify.html">Open the verifier</a></div>`;
   if (a.quota) $("t-quota").textContent = `${a.quota.requestsLeft} checks and ${a.quota.paymentsLeft} real payments left today.`;
 }
