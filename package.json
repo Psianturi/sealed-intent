@@ -36,6 +36,8 @@
     "custody:approval": "tsx scripts/approval-evidence.ts",
     "checkup:patient": "tsx scripts/checkup-patient.ts",
     "mcp:agent": "tsx apps/server/src/mcp-agent.ts",
+    "hosted": "tsx apps/server/src/hosted.ts",
+    "deploy:cloudrun": "bash scripts/deploy-cloudrun.sh",
     "tee:live": "tsx scripts/tee-live.ts",
     "isolation:check": "bash scripts/isolation-check.sh"
   },

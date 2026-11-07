@@ -51,11 +51,12 @@ async function applyPolicy(file: string) {
   const caller = env("SEIN_TESTNET_OWNER_ACCOUNT");
   const walletId = env("OUTLAYER_WALLET_ID");
   const enc = await api<{ encrypted_base64: string; wallet_pubkey: string }>("/wallet/v1/encrypt-policy", { wallet_id: walletId, ...policy });
-  const signed = await api<{ signature_hex: string; public_key_hex: string }>("/wallet/v1/sign-policy", { encrypted_data: enc.encrypted_base64, caller });
+  // the signature also covers version, lock and expiry, so they go to the contract exactly as signed
+  const signed = await api<{ signature_hex: string; public_key_hex: string; version?: number; locked?: boolean; valid_until?: number }>("/wallet/v1/sign-policy", { encrypted_data: enc.encrypted_base64, caller });
   const pub = `ed25519:${signed.public_key_hex}`;
   const near = owner();
   const cost = await near.view<string>(CONTRACT, "estimate_wallet_policy_cost", { wallet_pubkey: pub, encrypted_data: enc.encrypted_base64 });
-  const tx = await near.transaction(caller).functionCall(CONTRACT, "store_wallet_policy", { wallet_pubkey: pub, encrypted_data: enc.encrypted_base64, wallet_signature: signed.signature_hex }, { gas: "100 Tgas", attachedDeposit: `${BigInt(cost ?? "100000000000000000000000")} yocto` }).send();
+  const tx = await near.transaction(caller).functionCall(CONTRACT, "store_wallet_policy", { wallet_pubkey: pub, encrypted_data: enc.encrypted_base64, wallet_signature: signed.signature_hex, version: signed.version, locked: signed.locked, valid_until: signed.valid_until }, { gas: "100 Tgas", attachedDeposit: `${BigInt(cost ?? "100000000000000000000000")} yocto` }).send();
   console.log("stored, tx", tx.transaction.hash);
   await fetch(`${OUTLAYER}/wallet/v1/invalidate-cache`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wallet_id: walletId }) });
 }

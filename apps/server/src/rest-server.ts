@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { timingSafeEqual } from "node:crypto";
 import type { AccountWatcher, CustodyFreezer, Preflight, ReceiptStore, Reconciler, SharedBlocklist } from "@sealed-intent/core";
 import { bearer, type Auth } from "./auth";
+import type { Demo } from "./demo";
 
 /**
  * Every answer carries SeIn-Api-Version. Agents may send Idempotency-Key on preflight and execute: a
@@ -56,9 +57,11 @@ export interface RestDeps {
   webUrl?: string;
   publicUrl?: string;
   network?: string;
+  /** the public demo route, only on a hosted SeIn */
+  demo?: Demo;
 }
 
-const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze)|GET \/health)$/;
+const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze|try)|GET \/v1\/try|GET \/health)$/;
 
 async function readBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
@@ -106,6 +109,21 @@ export function createRestServer(deps: RestDeps): Server {
       if (req.method === "OPTIONS") {
         res.writeHead(browser ? 204 : 403);
         return res.end();
+      }
+      if (deps.demo && url.pathname === "/v1/try") {
+        if (req.method === "GET") return send(res, 200, { network: deps.network, ...deps.demo.quota() });
+        if (req.method === "POST") {
+          // behind Cloud Run the visitor's address is the first one in X-Forwarded-For
+          const visitor = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "?").split(",")[0]!.trim();
+          let input: Record<string, unknown>;
+          try {
+            input = JSON.parse(await readBody(req)) as Record<string, unknown>;
+          } catch {
+            return send(res, 400, { error: "send JSON" });
+          }
+          const out = await deps.demo.handle(visitor, input);
+          return send(res, out.status, out.body);
+        }
       }
       const token = bearer(req);
       const agentId = access?.agentForToken(token) ?? auth.agentForToken(token);

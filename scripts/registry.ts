@@ -6,6 +6,7 @@
  *   pnpm registry anchor [outDir]           anchor receipts not yet anchored, write proofs
  *   pnpm registry set-policy                record a salted commitment to SeIn's policy for agent-1
  *   pnpm registry status                    what the contract holds
+ *   pnpm registry hosted-key                give the hosted SeIn its own receipt key (kept in .env) and list it
  *   pnpm registry upgrade                   deploy the committed wasm over the live one; the state stays
  */
 import { createHash } from "node:crypto";
@@ -91,9 +92,26 @@ async function setPolicy() {
   console.log("policy commitment recorded, tx", tx.transaction.hash);
 }
 
+/** The hosted SeIn signs with its own key, so its receipts also pass the "key is on the registry" check. */
+async function hostedKey() {
+  const { createPrivateKey, createPublicKey, generateKeyPairSync } = await import("node:crypto");
+  // .env holds one line per value, so the PEM's line breaks are kept as \n
+  let pem = process.env.SEIN_HOSTED_ISSUER_PEM?.replace(/\\n/g, "\n");
+  if (!pem) {
+    pem = generateKeyPairSync("ed25519").privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    appendFileSync(".env", `SEIN_HOSTED_ISSUER_PEM=${pem.trim().replace(/\n/g, "\\n")}\n`);
+  }
+  const hex = (createPublicKey(createPrivateKey(pem)).export({ type: "spki", format: "der" }) as Buffer).subarray(-32).toString("hex");
+  const listed = await new Near({ network: { networkId: "testnet", rpcUrl: RPC } }).view(env("SEIN_REGISTRY_ACCOUNT"), "issuer_key", { public_key: hex });
+  if (listed) return console.log("hosted receipt key already listed:", hex);
+  const tx = await near(env("SEIN_OPERATOR_ACCOUNT"), env("SEIN_OPERATOR_KEY")).transaction(env("SEIN_OPERATOR_ACCOUNT")).functionCall(env("SEIN_REGISTRY_ACCOUNT"), "add_issuer_key", { public_key: hex }, { gas: "30 Tgas" }).send();
+  console.log("hosted receipt key", hex, "listed, tx", tx.transaction.hash);
+}
+
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === "deploy") await deploy();
 else if (cmd === "upgrade") await upgrade();
+else if (cmd === "hosted-key") await hostedKey();
 else if (cmd === "register") await register();
 else if (cmd === "set-policy") await setPolicy();
 else if (cmd === "status") await status();
