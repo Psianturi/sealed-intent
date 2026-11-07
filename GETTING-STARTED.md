@@ -111,6 +111,7 @@ node examples/rest-agent.mjs my-sein/agents/shop-bot/agent.env finish <decisionI
 | Stop every payment now | `pnpm sein freeze` |
 | Allow payments again | `pnpm sein unfreeze` |
 | Check everything | `pnpm sein doctor` |
+| Teach your agents a Checkpoint lesson | `pnpm sein learn sein-lesson-<account>.json` |
 
 Every decision leaves a signed receipt that anyone can check at https://sein-near.vercel.app/verify.html without seeing the amount or the receiver.
 

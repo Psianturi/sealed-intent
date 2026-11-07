@@ -8,6 +8,7 @@
  *   pnpm sein connect <agent>    gives an agent access and writes its settings for Claude, Cursor, VS Code or plain HTTP
  *                                add --install claude-desktop to put it into Claude Desktop for you
  *   pnpm sein pending            payments waiting for you, each with a link to answer it with your wallet
+ *   pnpm sein learn <lesson.json>  teach your agents a Checkpoint lesson: its accounts are blocked at once
  *   pnpm sein status | freeze [reason] | unfreeze
  *
  * Everything is kept in the folder my-sein (or --dir <folder>), never in the repository's own .env.
@@ -253,6 +254,19 @@ function connect(name: string | undefined) {
   }
 }
 
+/** A lesson downloaded from the Checkpoint goes to the running SeIn, which blocks its accounts and shows its rules to agents. */
+async function learn(file: string | undefined) {
+  if (!file || !existsSync(file)) return console.log("Give the lesson file downloaded from the Checkpoint, e.g.: pnpm sein learn sein-lesson-you.near.json");
+  if (!existsSync(ENV)) return console.log(`No settings in ${DIR}. Run: pnpm sein setup`);
+  const e = readEnv(readFileSync(ENV, "utf8"));
+  const lesson = JSON.parse(readFileSync(file, "utf8")) as { neverPay?: { account: string }[]; rules?: string[] };
+  const res = await fetch(`${e.SEALED_PUBLIC_URL ?? "http://127.0.0.1:8787"}/v1/lessons`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${e.SEALED_OWNER_TOKEN}` }, body: JSON.stringify(lesson) }).catch(() => undefined);
+  if (!res) return console.log("SeIn is not running. Start it with pnpm sein start, then try again.");
+  const out = (await res.json()) as { blocked?: number; rules?: number; error?: string };
+  if (!res.ok) return console.log(`SeIn refused it: ${out.error}`);
+  console.log(`Learned. ${out.blocked} account(s) are now blocked for every agent, and agents see ${out.rules} rule(s) with their lessons tool.`);
+}
+
 async function start() {
   if (!existsSync(ENV)) return console.log(`No settings in ${DIR}. Run: pnpm sein setup`);
   process.chdir(DIR);
@@ -282,6 +296,9 @@ switch (cmd) {
     break;
   case "connect":
     connect(rest[0]);
+    break;
+  case "learn":
+    await learn(rest[0]);
     break;
   case "pending":
   case "status":

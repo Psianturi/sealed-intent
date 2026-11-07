@@ -1,6 +1,7 @@
 import { agentView, checkApproval, checkFreeze, RateLimiter, type AccessStore, type ApprovalVerifier, type SignedApproval } from "@sealed-intent/core";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import type { AccountWatcher, CustodyFreezer, Preflight, ReceiptStore, Reconciler, SharedBlocklist } from "@sealed-intent/core";
 import { bearer, type Auth } from "./auth";
 import type { Demo } from "./demo";
@@ -28,6 +29,8 @@ import type { Demo } from "./demo";
  *   POST /v1/unfreeze           owner token
  *   POST /v1/counterparty/accept-code  owner token   { account }   accept a contract's current code
  *   POST /v1/blocklist/confirm  owner token   { account }   an agent's report now blocks
+ *   POST /v1/lessons            owner token   { neverPay[], rules[] }   from a Checkpoint: the accounts block at once, the rules go to the agents
+ *   GET  /v1/lessons            agent or owner token   -> the rules and accounts to avoid
  *   POST /v1/watch/accept       owner token   { account }   accept the account's keys and code as they are now
  *   POST /v1/reconcile/accept   owner token                 accept the wallet's transaction history as it is now
  *   GET  /v1/status                           -> { frozen, mode }; the owner also gets the reason
@@ -59,6 +62,8 @@ export interface RestDeps {
   network?: string;
   /** the public demo route, only on a hosted SeIn */
   demo?: Demo;
+  /** where taught lessons are kept; in memory only when absent */
+  lessonsPath?: string;
 }
 
 const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze|try)|GET \/v1\/try|GET \/health)$/;
@@ -101,6 +106,7 @@ function sameToken(a: string | undefined, b: string): boolean {
 export function createRestServer(deps: RestDeps): Server {
   const { preflight, blocklist, receipts, offline, auth, watcher, reconciler, custody, access, ownerAccount, approvals, webOrigins } = deps;
   const limiter = new RateLimiter(deps.agentRequestsPerMinute ?? 120);
+  const lessons: { rules: string[]; neverPay: string[] } = deps.lessonsPath && existsSync(deps.lessonsPath) ? JSON.parse(readFileSync(deps.lessonsPath, "utf8")) : { rules: [], neverPay: [] };
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
@@ -253,6 +259,25 @@ export function createRestServer(deps: RestDeps): Server {
       if (route === "POST /v1/reconcile/accept") {
         if (!isOwner) return send(res, 401, { error: "owner token required" });
         return send(res, 200, { ok: (await reconciler?.accept()) ?? false });
+      }
+      if (route === "POST /v1/lessons") {
+        if (!isOwner) return send(res, 401, { error: "owner token required" });
+        const b = (await body(req)) as { neverPay?: { account?: string; why?: string }[]; rules?: unknown[] };
+        const accounts = (b.neverPay ?? []).filter((n) => typeof n.account === "string" && /^[a-z0-9._-]{2,64}$/.test(n.account)).slice(0, 50);
+        const rules = (b.rules ?? []).filter((x): x is string => typeof x === "string").map((x) => x.slice(0, 300)).slice(0, 20);
+        // the owner taught it, so it blocks at once; the agent cannot pay these accounts even if it forgets the lesson
+        for (const n of accounts) {
+          if (blocklist.find(n.account!)) blocklist.confirm(n.account!);
+          else blocklist.report({ account: n.account!, reason: (n.why ?? "taught by the owner").slice(0, 200), evidence: ["SeIn Checkpoint lesson"], reportedBy: "owner", confirmed: true });
+        }
+        lessons.rules = [...new Set([...lessons.rules, ...rules])].slice(-40);
+        lessons.neverPay = [...new Set([...lessons.neverPay, ...accounts.map((n) => n.account!)])];
+        if (deps.lessonsPath) writeFileSync(deps.lessonsPath, JSON.stringify(lessons, null, 2), { mode: 0o600 });
+        return send(res, 200, { blocked: accounts.length, rules: lessons.rules.length });
+      }
+      if (route === "GET /v1/lessons") {
+        if (!agentId && !isOwner) return send(res, 401, { error: "agent token required" });
+        return send(res, 200, lessons);
       }
       if (route === "POST /v1/blocklist/confirm") {
         if (!isOwner) return send(res, 401, { error: "owner token required" });

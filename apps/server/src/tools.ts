@@ -8,6 +8,8 @@ export interface McpBackend {
   execute(decisionId: string): Promise<unknown>;
   report(args: { account: string; reason: string; evidence: string[] }): Promise<unknown>;
   receipt(decisionId: string): Promise<unknown>;
+  /** what the owner taught this agent, from a Checkpoint */
+  lessons?(): Promise<unknown>;
 }
 
 const text = (data: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] });
@@ -53,6 +55,19 @@ export function registerTools(server: McpServer, backend: McpBackend, network: N
       return text({ result: "error", details: d });
     },
   );
+
+  if (backend.lessons) {
+    const read = backend.lessons;
+    server.registerTool(
+      "lessons",
+      {
+        title: "What your owner taught you",
+        description: "Rules and accounts your owner wants you to remember, learned from wallet check-ups. Read them when you start and before paying someone new. Accounts listed here are blocked anyway.",
+        inputSchema: {},
+      },
+      async () => text(await read()),
+    );
+  }
 
   server.registerTool(
     "finish_payment",

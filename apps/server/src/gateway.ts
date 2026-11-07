@@ -23,7 +23,7 @@ export function startGateway(opts: { port?: number; host?: string; quiet?: boole
   const port = opts.port ?? Number(process.env.PORT ?? 8787);
   const host = opts.host ?? process.env.HOST ?? "127.0.0.1";
   const demo = opts.demo ? createDemo({ preflight: app.preflight, store: app.store }, opts.demo) : undefined;
-  const server = createRestServer({ ...app, receipts: new ReceiptStore(), demo });
+  const server = createRestServer({ ...app, receipts: new ReceiptStore(), demo, lessonsPath: join(".sealed", "lessons.json") });
 
   server.listen(port, host, () => {
     if (opts.quiet) return;
