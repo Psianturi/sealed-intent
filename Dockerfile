@@ -1,4 +1,4 @@
-# A public SeIn on testnet, for Cloud Run. See DEPLOY.md.
+# A public SeIn on testnet, for Cloud Run. Deploy with scripts/deploy-cloudrun.sh.
 FROM node:22-bookworm-slim
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0

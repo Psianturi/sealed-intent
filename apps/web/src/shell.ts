@@ -22,7 +22,7 @@ export function siteHeader(current: string): string {
   return `<header class="top"><div class="top-in"><a class="brand" href="/" aria-label="SeIn, short for Sealed Intent, home">${mark(30)}${WORDMARK}</a><nav aria-label="Main">${links}</nav>${cta}</div></header>`;
 }
 
-const FOOT_LINKS = `<nav class="foot-links" aria-label="More"><a href="/start">Get started</a><a href="/verify.html">Verify a receipt</a><a href="/a/agent-1">Agent profile</a><a href="/limits.html">Limits and threat model</a><a href="https://github.com/Psianturi/sealed-intent">Source code</a><a href="https://github.com/Psianturi/sealed-intent/blob/main/INTEGRATING.md">Integrate your agent</a></nav>`;
+const FOOT_LINKS = `<nav class="foot-links" aria-label="More"><a href="/start">Get started</a><a href="/verify.html">Verify a receipt</a><a href="/a/agent-1">Agent profile</a><a href="/limits.html">Limits and threat model</a><a href="https://github.com/Psianturi/sealed-intent">Source code</a><a href="https://github.com/Psianturi/sealed-intent#run-sein-for-your-own-agent">Integrate your agent</a></nav>`;
 
 export function siteFooter(note: string): string {
   return `<footer><div class="foot-brand">${mark(22)}${WORDMARK}<span class="foot-full">Sealed Intent</span></div><p>Built at NEAR HACKATHON, November 2026. ${note}</p>${FOOT_LINKS}</footer>`;

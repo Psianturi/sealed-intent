@@ -17,7 +17,7 @@ Live site: https://sein-near.vercel.app (overview, Arena replay, receipt verifie
 
 **Check up and heal any NEAR wallet:** https://sein-near.vercel.app/checkup scans an agent's wallet or your own for risky app connections, look-alike accounts, bait NFTs and reported contacts, cuts what is wrong in one transaction signed by your own wallet, and turns the findings into lessons for your agent. It runs in the browser; nothing to install.
 
-**Use it with your own agent:** [GETTING-STARTED.md](GETTING-STARTED.md). Three commands: `pnpm sein setup` asks a few questions, `pnpm sein start` runs SeIn, `pnpm sein connect my-agent` connects Claude Desktop, Claude Code, Cursor, VS Code or your own code. The agent then has a `pay` tool and holds no wallet key.
+**Use it with your own agent:** see [Run SeIn for your own agent](#run-sein-for-your-own-agent). Three commands: `pnpm sein setup` asks a few questions, `pnpm sein start` runs SeIn, `pnpm sein connect my-agent` connects Claude Desktop, Claude Code, Cursor, VS Code or your own code. The agent then has a `pay` tool and holds no wallet key.
 
 ---
 
@@ -302,9 +302,22 @@ fixtures            example policy (offline fixtures live in packages/core/src/f
 - **Blocklist reports are self-asserted.** An agent's report with "evidence" only warns until the owner confirms it; the shared list is a signal, not a verdict.
 - Not audited. Do not use with funds you cannot lose.
 
-## Integrating
+## Run SeIn for your own agent
 
-How an agent connects, through MCP or plain HTTP, and how the owner answers: [INTEGRATING.md](INTEGRATING.md).
+You need Node.js 22.13+, a NEAR account of your own, and an OutLayer custody wallet. Create the wallet in the OutLayer dashboard (https://app.outlayer.ai), and store its policy with your own NEAR wallet before its API key goes anywhere: the first account to store a policy controls it.
+
+```bash
+pnpm sein setup            # five questions; settings and encrypted rules go to ./my-sein
+pnpm sein doctor           # checks the key, the wallet, who controls its policy, the balance and the rules
+pnpm sein start            # runs SeIn; keep this window open, payments that need you appear here with a link
+pnpm sein connect my-agent # in a second window: writes ready settings for the agent
+```
+
+`connect` writes `mcp.json` (Claude Desktop, Cursor), `vscode-mcp.json`, `claude-code.txt` and `agent.env` (plain HTTP, see `examples/rest-agent.mjs`) into `my-sein/agents/my-agent/`; `--install claude-desktop` adds it to Claude Desktop for you. The agent gets two simple tools, `pay` (amount in normal units, NEAR, USDC or wNEAR) and `finish_payment`, plus `lessons`. It holds its own token and signing key and never sees the custody key or the rules.
+
+Day to day: `pnpm sein pending`, `freeze`, `unfreeze`, and `pnpm sein learn <lesson.json>` to load a lesson downloaded from the Checkpoint (its accounts are blocked at once). Keep each network in its own folder: `pnpm sein setup --dir my-sein-mainnet`, and the same `--dir` on every command.
+
+Plain HTTP, for agents that do not speak MCP: `POST /v1/preflight` with `{ intent }`, then `POST /v1/execute` with `{ decisionId }` after ALLOW or the owner's approval. Send `Authorization: Bearer <agent token>`, an `Idempotency-Key`, and, when the agent has a key, `X-SeIn-Timestamp` and `X-SeIn-Signature` (ed25519 over `timestamp.METHOD.path.sha256hex(body)`).
 
 ## Built with
 

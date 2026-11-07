@@ -3,7 +3,7 @@
  * A public SeIn on testnet, for Cloud Run or any container host. Visitors of the website try the
  * firewall through POST /v1/try; real checks, a real custody wallet, test tokens only.
  * Settings come from the environment (secrets from the host's secret store), because the disk is
- * thrown away on every restart. See DEPLOY.md.
+ * thrown away on every restart. Deploy with scripts/deploy-cloudrun.sh.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

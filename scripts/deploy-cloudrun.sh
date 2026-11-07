@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Deploys the public SeIn (testnet) to Cloud Run. Secrets are read from .env and stored in
-# Secret Manager; nothing is printed. Needs gcloud, logged in. See DEPLOY.md.
+# Secret Manager; nothing is printed. Needs gcloud, logged in.
 #   GCP_PROJECT=my-project [GCP_REGION=asia-southeast2] bash scripts/deploy-cloudrun.sh
 set -euo pipefail
 PROJECT="${GCP_PROJECT:?set GCP_PROJECT to your Google Cloud project id}"
