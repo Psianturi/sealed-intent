@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Try the firewall | SeIn</title>
+  <meta name="description" content="Play an AI agent and ask SeIn to pay. The real checks answer: a NEAR AI Cloud enclave, secret rules and an OutLayer custody wallet on NEAR testnet." />
+  <meta property="og:title" content="Try SeIn: be the agent, try to get paid" />
+  <meta property="og:description" content="Real checks on NEAR testnet. Routine payments go through, tricks are refused, strangers wait for the owner." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://sein-near.vercel.app/og.png" />
+  <meta name="theme-color" content="#05070c" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+  <link rel="stylesheet" href="/src/checkup.css" />
+</head>
+<body class="room" data-state="idle">
+  <!--header:try-->
+  <main class="cp">
+    <section class="t-hero">
+      <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>Try the firewall</p>
+      <h1 class="t-title">Be the agent. Try to get paid.</h1>
+      <p class="cp-lead">You play an AI agent with a wallet on NEAR testnet. Ask SeIn to pay. The real checks answer: a model in a NEAR AI Cloud enclave, the owner's secret rules and an OutLayer custody wallet. Test tokens only.</p>
+      <p class="t-offline" id="t-offline" hidden>The live firewall goes online soon. Until then, <a href="/arena.html">watch the Arena</a> or <a href="/checkup">check up a wallet</a>.</p>
+    </section>
+
+    <section class="t-grid">
+      <form class="cp-panel t-form" id="t-form" autocomplete="off">
+        <h2>Your request</h2>
+        <div class="t-scenarios" role="group" aria-label="Scenarios">
+          <button type="button" data-scenario="routine">Routine invoice</button>
+          <button type="button" data-scenario="stranger">New supplier</button>
+          <button type="button" data-scenario="cfo">The "CFO" in a hurry</button>
+          <button type="button" data-scenario="big">A big one</button>
+          <button type="button" data-scenario="own">Write your own</button>
+        </div>
+        <p class="t-expect" id="t-expect"></p>
+        <label class="t-field">Pay to<input id="t-to" spellcheck="false" /></label>
+        <label class="t-field">Amount in NEAR<input id="t-amount" inputmode="decimal" /></label>
+        <label class="t-field">The instruction you received<textarea id="t-task" rows="3"></textarea></label>
+        <button class="cp-go t-send" id="t-send" type="submit">Ask SeIn to pay</button>
+        <p class="t-quota" id="t-quota"></p>
+      </form>
+
+      <div class="t-side">
+        <div class="cp-panel t-path">
+          <p class="t-node">You, the agent<small>hold no key</small></p>
+          <ol class="t-gates" id="t-gates" aria-label="The five checks"></ol>
+          <p class="t-node">Custody wallet<small>OutLayer, testnet</small></p>
+        </div>
+        <div class="t-verdict" id="t-verdict" hidden aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="cp-how">
+      <h2>What is real here</h2>
+      <div class="cp-grid">
+        <article><h3>The checks</h3><p>The same code that guards a real agent: the five checks, the budget and the secret rules.</p></article>
+        <article><h3>The enclave</h3><p>A model inside a NEAR AI Cloud enclave reads your instruction and signs its opinion.</p></article>
+        <article><h3>The money</h3><p>An allowed payment is sent by a real OutLayer custody wallet on NEAR testnet, with test tokens.</p></article>
+        <article><h3>The receipt</h3><p>Every answer is signed. Your browser checks the signature; amount and receiver stay sealed.</p></article>
+      </div>
+      <p class="cp-note">The owner here is SeIn's test account, so a request that needs the owner stops at "waiting". To run SeIn for your own agent, see <a href="/start">Get started</a>.</p>
+    </section>
+    <!--footer:try-->
+  </main>
+  <script type="module" src="/src/try.ts"></script>
+</body>
+</html>
