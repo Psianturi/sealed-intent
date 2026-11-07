@@ -8,8 +8,9 @@ const PATTERNS = [
   ["PEM private key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
   ["GitHub token", /\bgh[pousr]_[A-Za-z0-9]{30,}/],
   ["provider API key", /\bsk-[A-Za-z0-9_-]{24,}/],
-  ["assigned secret", /^\+.*\b(NEARAI_API_KEY|OUTLAYER_API_KEY|ONECLICK_JWT|SEALED_POLICY_KEY|SEALED_DATA_KEY|SEALED_OWNER_TOKEN|SEIN_[A-Z_]*KEY)=(?!\$)(?!isolation)[^\s<"'`]{12,}/m],
+  ["assigned secret", /^\+.*\b(NEARAI_API_KEY|OUTLAYER_API_KEY|ONECLICK_JWT|SEALED_POLICY_KEY|SEALED_DATA_KEY|SEALED_OWNER_TOKEN|SEIN_[A-Z_]*KEY)=(?!\$)(?!isolation)(?![a-z0-9-]+:(?:latest|\d+)\b)[^\s<"'`]{12,}/m],
 ];
+// A value like name:latest points into a secret store, it is not the secret.
 // NEAR public keys are also ed25519:base58, but at most 44 characters, so the length above tells them apart.
 // A signature is as long as a private key, so a value held by a "signature" field is not a finding.
 const SIGNATURE = /"signature"\s*:\s*"ed25519:[1-9A-HJ-NP-Za-km-z]+"/;
