@@ -21,13 +21,22 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=I&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/src/style.css" />
   <link rel="stylesheet" href="/src/stage/stage.css" />
+  <link rel="stylesheet" href="/src/checkup.css" />
+  <link rel="stylesheet" href="/src/game.css" />
 </head>
 <body class="arena-page">
   <!--header:arena-->
   <main class="arena-intro">
     <h1 class="page-title">The Arena</h1>
-    <p class="lead">Three identical AI agents get the same message. One has no guard, one has a spending limit, one goes through SeIn. Watch where the money ends up. A referee that reads only the chain keeps score.</p>
+    <p class="lead">Play the guard yourself, or watch three identical AI agents get the same message: one with no guard, one with a spending limit, one through SeIn. A referee that reads only the chain keeps score.</p>
   </main>
+
+  <div class="ar-tabs" role="tablist" aria-label="Arena modes"><button type="button" role="tab" data-tab="play" aria-selected="true">Play: be the guard</button><button type="button" role="tab" data-tab="watch" aria-selected="false">Watch the recorded run</button></div>
+
+  <section class="gm" id="game" aria-label="Be the guard, a game">
+    <div class="gm-hud"><span>Request <b id="gm-round">1/10</b></span><span>Score <b id="gm-score">0</b></span><span>Stolen on your watch <b id="gm-stolen">$0</b></span><span>Honest payments blocked <b id="gm-blocked">0</b></span></div>
+    <div class="gm-screen" id="gm-screen" aria-live="polite"></div>
+  </section>
 
   <section class="vr" id="stage" tabindex="0" aria-label="Arena stage. Space plays or pauses. Left and right change the case.">
     <div class="vr-head">
@@ -83,5 +92,6 @@
     <!--footer:arena-->
   </main>
   <script type="module" src="/src/arena.ts"></script>
+  <script type="module" src="/src/game.ts"></script>
 </body>
 </html>

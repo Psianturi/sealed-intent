@@ -4,6 +4,7 @@ import { defineConfig, type Plugin } from "vite";
 import { renderEscaped, renderFingerprints, renderHonesty, renderMeta, renderRows, renderScore, scopeOf, scopeSentence, usd, type Run } from "./src/arena-data";
 import { mark, siteFooter, siteHeader } from "./src/shell";
 import { renderCaseFiles, renderStageFallback, renderTally } from "./src/stage/static";
+import { buildDeck } from "./src/game-data";
 import { buildStoryboard } from "./src/storyboard";
 
 /** The stage reads only these files, made from the official recordings. */
@@ -12,7 +13,11 @@ function writeStoryboards(): void {
   mkdirSync(out, { recursive: true });
   for (const dir of ["official", "official-lazy", "official-sandbox"]) {
     const run = readRun(dir);
-    if (run) writeFileSync(resolve(out, `${dir}.json`), JSON.stringify(buildStoryboard(run, dir)));
+    if (!run) continue;
+    const board = buildStoryboard(run, dir);
+    writeFileSync(resolve(out, `${dir}.json`), JSON.stringify(board));
+    // the game deals only from the official run
+    if (dir === "official") writeFileSync(resolve(out, "game.json"), JSON.stringify(buildDeck(run, board)));
   }
 }
 
