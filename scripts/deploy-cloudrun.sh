@@ -43,7 +43,7 @@ fi
 
 # scales to zero: nothing to pay while nobody uses it, and it wakes in a few seconds on the next visit.
 # One instance at most, because its budget and history live on its own disk until it sleeps.
-gcloud run deploy "$SERVICE" --source . --region "$REGION" --allow-unauthenticated \
+gcloud run deploy "$SERVICE" --source . --region "$REGION" --allow-unauthenticated --quiet \
   --min-instances 0 --max-instances 1 --cpu 1 --memory 1Gi --port 8080 --timeout 120 --concurrency 20 \
   --set-env-vars "$ENVS" --set-secrets "$SECRETS"
 URL="$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"

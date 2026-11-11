@@ -20,5 +20,7 @@ apps/web/public/proof
 apps/web/public/samples
 .claude
 .kilo
+.idea
+.vscode
 *.log
 .gcloudignore
