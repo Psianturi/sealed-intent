@@ -34,6 +34,13 @@ export interface TeeChecker {
   check(input: TeeCheckInput): Promise<TeeOpinion>;
 }
 
+// SEIN_TIMING=1 prints how long each step of the enclave check took
+const lap = Object.assign((step: string) => {
+  const now = Date.now();
+  if (process.env.SEIN_TIMING === "1") console.log(`enclave: ${step} ${((now - lap.start) / 1000).toFixed(1)} s`);
+  lap.start = now;
+}, { start: Date.now() });
+
 const SIGNAL_CODES = ["INTENT_QUOTE_MISMATCH", "SUSPICIOUS_TASK_TEXT", "SOCIAL_ENGINEERING", "POLICY_CONFLICT", "OTHER"];
 
 export function buildTeePrompt(input: TeeCheckInput): { system: string; user: string } {
@@ -128,7 +135,9 @@ export class NearAiCloudChecker implements TeeChecker {
   }
 
   async check(input: TeeCheckInput): Promise<TeeOpinion> {
+    lap.start = Date.now();
     const conn = await this.connect(this.baseUrl);
+    lap("tls connect");
     try {
       return await this.checkOver(conn, input);
     } finally {
@@ -144,10 +153,12 @@ export class NearAiCloudChecker implements TeeChecker {
     const attRes = await conn.fetch(attUrl, { headers: this.headers({ "x-no-aliasing": "true" }) });
     if (!attRes.ok) throw new Error(`attestation report HTTP ${attRes.status}`);
     const att = (await attRes.json()) as { gateway_attestation?: NearReport; model_attestations?: NearReport[] };
+    lap("attestation report");
 
     // 2. verify everything before the secret policy leaves this process
     if (!att.gateway_attestation) throw new TeeUnverifiedError("attestation report has no gateway_attestation");
     const gateway = await checkNearReport(att.gateway_attestation, nonce, { acceptedTcbStatuses: tee.acceptedTcbStatuses, verifyQuote: this.verifyQuote, peerSpkiSha256: conn.peerSpkiSha256 });
+    lap("gateway quote");
     if (!gateway.ok) throw new TeeUnverifiedError(`gateway attestation rejected: ${gateway.problems.join("; ")}`);
     const candidates = att.model_attestations ?? [];
     if (candidates.length === 0) throw new TeeUnverifiedError("attestation report has no model_attestations");
@@ -159,6 +170,7 @@ export class NearAiCloudChecker implements TeeChecker {
       if (tee.requireGpu && !gpu.ok) throw new TeeUnverifiedError(`GPU attestation rejected: ${gpu.problems.join("; ")}`);
       verifiedModels.push({ report, check, gpus: gpu.ok ? gpu.gpus : undefined });
     }
+    lap("model quotes and GPU");
 
     // 3. the completion; keep the exact request and response bytes
     const { system, user } = buildTeePrompt(input);
@@ -178,6 +190,7 @@ export class NearAiCloudChecker implements TeeChecker {
     const responseBytes = Buffer.from(await compRes.arrayBuffer());
     if (!compRes.ok) throw new Error(`completion HTTP ${compRes.status}: ${responseBytes.toString("utf8").slice(0, 200)}`);
     const completion = JSON.parse(responseBytes.toString("utf8")) as { id: string; choices: { message: { content: string } }[] };
+    lap("completion");
     const parsed = parseSignal(completion.choices[0]?.message.content ?? "");
 
     // 4. the enclave's signature over sha256(request):sha256(response)
@@ -193,6 +206,7 @@ export class NearAiCloudChecker implements TeeChecker {
       if (body?.error_code) throw new Error(`signature unavailable: ${body.error_code}`);
       sig = body;
     }
+    lap("signature");
     if (!sig?.signature || !sig.text || !sig.signing_address) throw new Error("no response signature available");
     if (sig.signature_kind !== "provider_tee" && sig.signature_kind !== "gateway") throw new Error(`unknown signature_kind ${String(sig.signature_kind)}`);
     if (sig.signature_kind === "gateway" && !tee.allowGatewaySignature) throw new TeeUnverifiedError("response was signed by the gateway, not by the model enclave");
