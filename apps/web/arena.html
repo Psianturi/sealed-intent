@@ -28,17 +28,22 @@
   <!--header:arena-->
   <main class="arena-intro">
     <h1 class="page-title">The Arena</h1>
-    <p class="lead">Play the guard yourself, or watch three identical AI agents get the same message: one with no guard, one with a spending limit, one through SeIn. A referee that reads only the chain keeps score.</p>
+    <p class="lead">Attacks modelled on real incidents, replayed against an AI agent on NEAR with test tokens. Play the guard yourself, watch three identical agents face them, or browse the cases and the final score.</p>
   </main>
 
-  <div class="ar-tabs" role="tablist" aria-label="Arena modes"><button type="button" role="tab" data-tab="play" aria-selected="true">Play: be the guard</button><button type="button" role="tab" data-tab="watch" aria-selected="false">Watch the recorded run</button></div>
+  <div class="ar-tabs" role="tablist" aria-label="Arena">
+    <button type="button" role="tab" id="tab-play" data-tab="play" aria-controls="game" aria-selected="true">Play<small>be the guard</small></button>
+    <button type="button" role="tab" id="tab-watch" data-tab="watch" aria-controls="stage" aria-selected="false">Watch<small>the recorded run</small></button>
+    <button type="button" role="tab" id="tab-cases" data-tab="cases" aria-controls="panel-cases" aria-selected="false">Cases<small>every attack</small></button>
+    <button type="button" role="tab" id="tab-results" data-tab="results" aria-controls="panel-results" aria-selected="false">Results<small>the final tally</small></button>
+  </div>
 
-  <section class="gm" id="game" aria-label="Be the guard, a game">
+  <section class="gm" id="game" role="tabpanel" aria-labelledby="tab-play">
     <div class="gm-hud"><span>Request <b id="gm-round">1/10</b></span><span>Score <b id="gm-score">0</b></span><span>Stolen on your watch <b id="gm-stolen">$0</b></span><span>Honest payments blocked <b id="gm-blocked">0</b></span></div>
     <div class="gm-screen" id="gm-screen" aria-live="polite"></div>
   </section>
 
-  <section class="vr" id="stage" tabindex="0" aria-label="Arena stage. Space plays or pauses. Left and right change the case.">
+  <section class="vr" id="stage" role="tabpanel" tabindex="0" aria-label="Arena stage. Space plays or pauses. Left and right change the case.">
     <div class="vr-head">
       <div class="vr-title" id="vr-title"></div>
       <div class="vr-side">
@@ -61,18 +66,21 @@
     </div>
   </section>
 
-  <main>
-    <h2 id="cases">Case files</h2>
-    <p class="note">Each attack follows the pattern of a real incident, replayed against an agent on NEAR with test tokens. Select one to play it on the stage.</p>
+  <section class="ar-panel" id="panel-cases" role="tabpanel" aria-labelledby="tab-cases" hidden>
+    <p class="note">Each attack follows the pattern of a real incident. Pick a kind of attack to narrow the list, then select a case to play it on the stage.</p>
     <div id="case-files"><!--case-files--></div>
+  </section>
 
-    <h2>Final tally</h2>
-    <div class="controls">
-      <label for="chainpick">Recording</label>
-      <select id="chainpick">
-        <option value="official">Simulated chain</option>
-        <option value="official-sandbox">Three real local NEAR nodes</option>
-      </select>
+  <section class="ar-panel" id="panel-results" role="tabpanel" aria-labelledby="tab-results" hidden>
+    <div class="ar-head">
+      <h2>Final tally</h2>
+      <div class="controls">
+        <label for="chainpick">Recording</label>
+        <select id="chainpick">
+          <option value="official">Simulated chain</option>
+          <option value="official-sandbox">Three real local NEAR nodes</option>
+        </select>
+      </div>
     </div>
     <p class="note" id="run-meta"><!--meta--></p>
     <div id="tally"><!--tally--></div>
@@ -80,15 +88,23 @@
     <p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design: a stolen custody key, a forged verdict, a compromised checker, a lying data source, a bug inside a token.</p>
     <p class="lead small" id="summary"><!--score-sentence--></p>
 
-    <h2>What got past SeIn</h2>
-    <p class="note">Shown on purpose. A checker in front of the wallet cannot stop these by itself; a custody policy or an on-chain guard is the layer that can.</p>
-    <ul id="escaped"><!--escaped--></ul>
-
-    <h2>What is real and what is simulated</h2>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="What is real and what is simulated"><table id="honesty"><tbody><!--honesty--></tbody></table></div>
-    <p class="note">Patterns are not replicas: how the real attackers got in, the victims' signing systems, the chains involved and the sums are not reproduced.</p>
+    <div class="ar-split">
+      <div>
+        <h2>What got past SeIn</h2>
+        <p class="note">Shown on purpose. A checker in front of the wallet cannot stop these by itself; a custody policy or an on-chain guard is the layer that can.</p>
+        <ul id="escaped"><!--escaped--></ul>
+      </div>
+      <div>
+        <h2>What is real and what is simulated</h2>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="What is real and what is simulated"><table id="honesty"><tbody><!--honesty--></tbody></table></div>
+        <p class="note">Patterns are not replicas: how the real attackers got in, the victims' signing systems, the chains involved and the sums are not reproduced.</p>
+      </div>
+    </div>
 
     <details class="dev"><summary>For builders: fingerprints of this run</summary><p id="repro"><!--fingerprints--></p></details>
+  </section>
+
+  <main class="ar-foot">
     <!--footer:arena-->
   </main>
   <script type="module" src="/src/arena.ts"></script>

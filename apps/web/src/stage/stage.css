@@ -104,7 +104,7 @@
 .vr-message.chip .vr-from { font-size: 11px; }
 .vr-message.chip .vr-msg-text { display: none; }
 .vr-message.chip .vr-from::before { content: "Message from "; }
-.vr-message { top: 3%; left: 2%; width: min(34%, 460px); background: rgba(15, 23, 40, 0.92); border: 1px solid #22314f; border-radius: 14px; padding: 10px 14px; }
+.vr-message { top: 3%; left: 2%; width: min(56%, 620px); background: rgba(15, 23, 40, 0.92); border: 1px solid #22314f; border-radius: 14px; padding: 10px 14px; }
 .vr-from { margin: 0; font: 600 12px "JetBrains Mono", monospace; color: var(--s-ink-2); }
 .vr-msg-text { margin: 4px 0 0; font-size: 15px; line-height: 1.45; color: var(--s-ink); }
 .vr-message mark { background: none; color: inherit; transition: color 0.2s, box-shadow 0.2s; }
@@ -161,19 +161,52 @@
 .vr-time { font: 500 13px "JetBrains Mono", monospace; color: var(--s-ink-2); min-width: 92px; }
 .vr-fallback { position: absolute; inset: 0; padding: 24px; color: var(--s-ink); font-size: 17px; }
 
-/* case files */
-.case-group h3 { margin: 22px 0 8px; font-size: 16px; color: var(--muted); }
-.case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.case-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
-.case-card.oos { border-style: dashed; border-color: #c9a24b; }
-.case-play { all: unset; display: block; padding: 14px 16px; cursor: pointer; border-radius: 14px; width: 100%; box-sizing: border-box; }
-.case-play:hover { background: var(--bg); }
-.case-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.case-play h4 { margin: 0 0 2px; font-size: 17px; }
-.case-sum { margin: 6px 0 8px; font-size: 14px; }
-.case-lanes { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-.case-lanes li { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
-.case-why { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+/* case files: one grid, narrowed by kind */
+.case-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 16px; }
+.case-filters button { border: 1px solid var(--line); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 7px 13px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.case-filters button b { font: 600 12px "JetBrains Mono", monospace; margin-left: 4px; opacity: 0.75; }
+.case-filters button:hover { color: var(--ink); }
+.case-filters button:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.case-filters button[aria-pressed="true"] { color: var(--ink); border-color: var(--glow); background: #6e8bff24; }
+.case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.case-card { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; transition: border-color 0.15s; }
+.case-card[hidden] { display: none; }
+.case-card:hover { border-color: #6e8bff80; }
+.case-card.oos { border-style: dashed; border-color: #c9a24b99; }
+.case-play { all: unset; display: flex; flex-direction: column; padding: 14px 16px 12px; cursor: pointer; border-radius: 14px; width: 100%; box-sizing: border-box; }
+.case-play:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.case-tag { font: 600 11px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); }
+.case-card.oos .case-tag { color: #f5c76b; }
+.case-play h4 { margin: 6px 0 2px; font-size: 16.5px; line-height: 1.25; }
+.case-src { margin: 0; font-size: 12.5px; color: var(--muted); }
+.case-sum { flex: 1; margin: 8px 0 10px; font-size: 14px; line-height: 1.45; color: var(--ink); }
+.case-lanes { list-style: none; margin: 0; padding: 8px 0 0; display: grid; gap: 3px; border-top: 1px solid var(--line); }
+.case-lanes li { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--muted); }
+.case-lanes .chip { font-size: 11.5px; padding: 1px 7px; }
+.case-why { margin: 8px 0 0; font-size: 12.5px; line-height: 1.4; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.case-go { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--glow); }
+.case-go::after { content: " →"; }
+
+/* the cases and results tabs */
+.ar-panel { margin-top: 6px; padding: 4px 0 8px; }
+.ar-panel > .note:first-child { margin: 16px 0 0; }
+.ar-panel h2 { margin: 30px 0 8px; font-size: clamp(22px, 2.4vw, 28px); }
+.ar-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 22px; }
+.ar-head h2 { margin: 0; }
+.ar-head .controls { margin: 0; flex: 0 1 380px; }
+.ar-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.ar-split ul { padding-left: 18px; font-size: 14.5px; line-height: 1.5; }
+.ar-split li + li { margin-top: 6px; }
+.ar-foot { padding-top: 24px; }
+@media (max-width: 900px) {
+  .ar-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .ar-tabs button { padding: 8px 4px; font-size: 14px; }
+  .ar-tabs button small { display: none; }
+  .case-filters { gap: 6px; }
+  .case-filters button { padding: 6px 10px; font-size: 13px; }
+}
 .tally-bars { display: grid; gap: 8px; max-width: 760px; margin: 8px 0 14px; }
 .tally-row { display: grid; grid-template-columns: 110px 1fr 100px; gap: 10px; align-items: center; }
 .tally-bar { height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; }
@@ -187,7 +220,7 @@
 
 @media (max-width: 1100px) {
   .vr-title h3 { font-size: 26px; }
-  .vr-message { width: 30%; top: 2%; }
+  .vr-message { width: 58%; top: 2%; }
   .vr-msg-text { font-size: 13px; }
   .vr-ledger-head { width: 150px; }
   .vr-ledger-note { display: none; }
@@ -235,9 +268,9 @@
 }
 
 /* presentation mode: only the stage */
-body.present header.top, body.present .arena-intro, body.present main:not(.arena-intro), body.present footer { display: none; }
+body.present header.top, body.present .arena-intro, body.present .ar-tabs, body.present .ar-panel, body.present main:not(.arena-intro), body.present footer { display: none; }
 body.present { background: #05070c; }
-body.present .vr { margin: 0 auto; min-height: 100vh; border-radius: 0; max-width: none; }
+body.present .vr { width: auto; margin: 0 auto; min-height: 100vh; border-radius: 0; max-width: none; }
 body.present .vr-caption { font-size: 28px; }
 
 /* a short intro, so the stage itself is on the first screen */

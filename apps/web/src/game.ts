@@ -187,30 +187,47 @@ function end() {
         </tbody>
       </table>
       <p class="gm-small">Score ${total.points}. Best ${Math.max(best(), total.points)}.${esc(beyondLine)}</p>
-      <div class="cp-actions"><button type="button" class="cp-go" id="gm-again">Play again</button><button type="button" class="cp-ghost" id="gm-watch">Watch the recorded run</button><a class="cp-ghost" href="/try">Try the live firewall</a></div>
+      <div class="cp-actions"><button type="button" class="cp-go" id="gm-again">Play again</button><button type="button" class="cp-ghost" id="gm-watch">Watch the recorded run</button><button type="button" class="cp-ghost" id="gm-cases">Browse every case</button><a class="cp-ghost" href="/try">Try the live firewall</a></div>
     </div>`;
   $("gm-again").onclick = start;
   $("gm-watch").onclick = () => show("watch");
+  $("gm-cases").onclick = () => show("cases");
   keys((k) => k === "Enter" && start());
 }
 
-function show(tab: "play" | "watch") {
-  $("game").hidden = tab !== "play";
-  $("stage").hidden = tab !== "watch";
+type Tab = "play" | "watch" | "cases" | "results";
+const PANELS: Record<Tab, string> = { play: "game", watch: "stage", cases: "panel-cases", results: "panel-results" };
+
+function show(tab: Tab) {
+  for (const [t, id] of Object.entries(PANELS)) $(id).hidden = t !== tab;
   for (const b of document.querySelectorAll<HTMLButtonElement>(".ar-tabs [data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
   // the stage sizes itself from the window; tell it once it is visible again
   if (tab === "watch") window.dispatchEvent(new Event("resize"));
-  history.replaceState(null, "", tab === "watch" ? "#watch" : location.pathname + location.search);
+  history.replaceState(null, "", tab === "play" ? location.pathname + location.search : `#${tab}`);
+  const bar = document.querySelector(".ar-tabs")!;
+  if (bar.getBoundingClientRect().top < 0) bar.scrollIntoView({ block: "start" });
+}
+
+function filters() {
+  const bar = document.querySelector<HTMLElement>(".case-filters");
+  bar?.addEventListener("click", (e) => {
+    const pick = (e.target as Element | null)?.closest?.<HTMLButtonElement>("[data-filter]");
+    if (!pick) return;
+    for (const b of bar.querySelectorAll("[data-filter]")) b.setAttribute("aria-pressed", String(b === pick));
+    for (const c of document.querySelectorAll<HTMLElement>(".case-card")) c.hidden = pick.dataset.filter !== "all" && c.dataset.group !== pick.dataset.filter;
+  });
 }
 
 async function main() {
-  for (const b of document.querySelectorAll<HTMLButtonElement>(".ar-tabs [data-tab]")) b.onclick = () => show(b.dataset.tab as "play" | "watch");
-  // a case picked from the files below plays on the stage
+  for (const b of document.querySelectorAll<HTMLButtonElement>(".ar-tabs [data-tab]")) b.onclick = () => show(b.dataset.tab as Tab);
+  // a picked case plays on the stage; capture runs first, so the stage is visible when it mounts
   document.addEventListener("click", (e) => {
-    if ((e.target as HTMLElement).closest("[data-case]")) show("watch");
-  });
+    if ((e.target as Element | null)?.closest?.("[data-case]")) show("watch");
+  }, true);
+  filters();
   const present = new URLSearchParams(location.search).has("present");
-  show(present || location.hash === "#watch" ? "watch" : "play");
+  const hash = location.hash.slice(1) as Tab;
+  show(present ? "watch" : Object.hasOwn(PANELS, hash) ? hash : "play");
   deck = await fetch("/storyboard/game.json").then((r) => r.json() as Promise<Card[]>).catch(() => []);
   if (!deck.length) {
     $("gm-screen").innerHTML = `<p class="gm-small">The game could not load. <button type="button" class="cp-ghost" id="gm-watch">Watch the recorded run</button></p>`;

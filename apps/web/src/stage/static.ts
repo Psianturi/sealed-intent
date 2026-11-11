@@ -5,16 +5,17 @@ import type { LaneStory, StoryCase, Storyboard } from "../storyboard";
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-export const GROUPS: [string, (c: StoryCase) => boolean][] = [
-  ["Baseline: an honest payment", (c) => c.kind === "everyday"],
-  ["Tricked by a message", (c) => !c.outOfScope && c.group === "fooled"],
-  ["The wrong receiver", (c) => !c.outOfScope && c.id === "S-LOOKALIKE"],
-  ["Too much at once", (c) => !c.outOfScope && c.id === "S-WHOLE-BALANCE"],
-  ["A bad deal", (c) => !c.outOfScope && c.group === "price"],
-  ["A dangerous action hidden inside", (c) => !c.outOfScope && (c.group === "tool" || c.group === "signing")],
-  ["A breached request path", (c) => !c.outOfScope && c.group === "breach"],
-  ["Out of scope by design", (c) => c.outOfScope],
+// key, filter label, card label, test
+export const GROUPS: [string, string, string, (c: StoryCase) => boolean][] = [
+  ["tricked", "Tricked", "Tricked by a message", (c) => !c.outOfScope && c.group === "fooled"],
+  ["mistake", "Wrong receiver", "Wrong receiver or too much", (c) => !c.outOfScope && c.group === "mistake"],
+  ["deal", "Bad deal", "A bad deal", (c) => !c.outOfScope && c.group === "price"],
+  ["hidden", "Hidden action", "A dangerous action hidden inside", (c) => !c.outOfScope && (c.group === "tool" || c.group === "signing")],
+  ["breach", "Breached path", "A breached request path", (c) => !c.outOfScope && c.group === "breach"],
+  ["honest", "Honest payment", "Baseline: an honest payment", (c) => c.kind === "everyday"],
+  ["oos", "Beyond any guard", "Out of scope by design", (c) => !!c.outOfScope],
 ];
+const groupOf = (c: StoryCase) => GROUPS.find(([, , , test]) => test(c)) ?? GROUPS[GROUPS.length - 1]!;
 
 export function laneText(st: LaneStory): [string, string] {
   if (st.outcome === "lost") return [`Lost ${usd(st.lostCents).replace(/\.00$/, "")}`, "lost"];
@@ -27,19 +28,23 @@ export function laneText(st: LaneStory): [string, string] {
 }
 
 function card(c: StoryCase): string {
+  const [key, , label] = groupOf(c);
   const chips = LANES.map((l: LaneId) => {
     const [text, cls] = laneText(c.lanes[l]);
     return `<li><span>${LANE_NAMES[l]}</span><span class="chip ${cls}">${esc(text)}</span></li>`;
   }).join("");
   const why = c.lanes.sealed.codes.length ? `<p class="case-why">${esc([...new Set(c.lanes.sealed.codes)].slice(0, 2).map(reason).join(". "))}.</p>` : "";
-  return `<article class="case-card${c.outOfScope ? " oos" : ""}"><button type="button" class="case-play" data-case="${esc(c.id)}" aria-label="Play ${esc(c.title)} on the stage"><h4>${esc(c.title)}</h4><p class="note">${c.pattern ? `${esc(c.pattern.incident)}, ${esc(c.pattern.date)}` : c.kind === "everyday" ? "No attack" : "Hypothetical"}</p><p class="case-sum">${esc(c.summary)}</p><ul class="case-lanes">${chips}</ul>${why}</button></article>`;
+  const source = c.pattern ? `${esc(c.pattern.incident)}, ${esc(c.pattern.date)}` : c.kind === "everyday" ? "No attack" : "Hypothetical";
+  return `<article class="case-card${c.outOfScope ? " oos" : ""}" data-group="${key}"><button type="button" class="case-play" data-case="${esc(c.id)}" aria-label="Play ${esc(c.title)} on the stage"><span class="case-tag">${esc(label)}</span><h4>${esc(c.title)}</h4><p class="case-src">${source}</p><p class="case-sum">${esc(c.summary)}</p><ul class="case-lanes">${chips}</ul>${why}<span class="case-go">Play on the stage</span></button></article>`;
 }
 
 export function renderCaseFiles(sb: Storyboard): string {
-  return GROUPS.map(([name, test]) => {
-    const list = sb.cases.filter(test);
-    return list.length ? `<section class="case-group"><h3>${esc(name)}</h3><div class="case-grid">${list.map(card).join("")}</div></section>` : "";
-  }).join("");
+  const count = (test: (c: StoryCase) => boolean) => sb.cases.filter(test).length;
+  const filters = [`<button type="button" data-filter="all" aria-pressed="true">All <b>${sb.cases.length}</b></button>`]
+    .concat(GROUPS.filter(([, , , t]) => count(t)).map(([key, short, , t]) => `<button type="button" data-filter="${key}" aria-pressed="false">${esc(short)} <b>${count(t)}</b></button>`))
+    .join("");
+  const order = GROUPS.flatMap(([, , , t]) => sb.cases.filter(t));
+  return `<div class="case-filters" role="group" aria-label="Filter cases">${filters}</div><div class="case-grid">${[...new Set(order)].map(card).join("")}</div>`;
 }
 
 export function renderTally(sb: Storyboard): string {
