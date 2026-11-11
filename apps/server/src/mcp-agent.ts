@@ -53,5 +53,6 @@ registerTools(server, {
   report: (args) => call("POST", "/v1/blocklist/report", args),
   receipt: (decisionId) => call("GET", `/v1/receipts/${encodeURIComponent(decisionId)}`),
   lessons: () => call("GET", "/v1/lessons"),
+  x402: (args) => call("POST", "/v1/x402/check", args),
 }, process.env.SEALED_NETWORK === "testnet" ? "testnet" : "mainnet");
 await server.connect(new StdioServerTransport());

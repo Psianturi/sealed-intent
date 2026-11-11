@@ -313,9 +313,11 @@ pnpm sein start            # runs SeIn; keep this window open, payments that nee
 pnpm sein connect my-agent # in a second window: writes ready settings for the agent
 ```
 
-`connect` writes `mcp.json` (Claude Desktop, Cursor), `vscode-mcp.json`, `claude-code.txt` and `agent.env` (plain HTTP, see `examples/rest-agent.mjs`) into `my-sein/agents/my-agent/`; `--install claude-desktop` adds it to Claude Desktop for you. The agent gets two simple tools, `pay` (amount in normal units, NEAR, USDC or wNEAR) and `finish_payment`, plus `lessons`. It holds its own token and signing key and never sees the custody key or the rules.
+`connect` writes `mcp.json` (Claude Desktop, Cursor), `vscode-mcp.json`, `claude-code.txt` and `agent.env` (plain HTTP, see `examples/rest-agent.mjs`) into `my-sein/agents/my-agent/`; `--install claude-desktop` adds it to Claude Desktop for you. The agent gets two simple tools, `pay` (amount in normal units, NEAR, USDC or wNEAR) and `finish_payment`, plus `lessons` and `check_x402_payment`. It holds its own token and signing key and never sees the custody key or the rules.
 
 Day to day: `pnpm sein pending`, `freeze`, `unfreeze`, and `pnpm sein learn <lesson.json>` to load a lesson downloaded from the Checkpoint (its accounts are blocked at once). Keep each network in its own folder: `pnpm sein setup --dir my-sein-mainnet`, and the same `--dir` on every command.
+
+**Paying another agent over x402** (for example on NEAR Agent Market): before the agent's wallet signs a 402 answer, `POST /v1/x402/check` with `{ resourceUrl, accept, taskText }`. SeIn reads the payees the service itself publishes at `/.well-known/x402` on the same origin; a payee it does not publish, another network or a bad amount is refused at once, and a sound request still goes through the five checks and the owner's limits, with a receipt.
 
 Plain HTTP, for agents that do not speak MCP: `POST /v1/preflight` with `{ intent }`, then `POST /v1/execute` with `{ decisionId }` after ALLOW or the owner's approval. Send `Authorization: Bearer <agent token>`, an `Idempotency-Key`, and, when the agent has a key, `X-SeIn-Timestamp` and `X-SeIn-Signature` (ed25519 over `timestamp.METHOD.path.sha256hex(body)`).
 

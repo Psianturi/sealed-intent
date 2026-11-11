@@ -10,6 +10,8 @@ export interface McpBackend {
   receipt(decisionId: string): Promise<unknown>;
   /** what the owner taught this agent, from a Checkpoint */
   lessons?(): Promise<unknown>;
+  /** a 402 payment request, checked before the agent's wallet signs it */
+  x402?(args: { resourceUrl: string; accept: Record<string, unknown>; taskText: string }): Promise<unknown>;
 }
 
 const text = (data: unknown) => ({ content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }] });
@@ -55,6 +57,23 @@ export function registerTools(server: McpServer, backend: McpBackend, network: N
       return text({ result: "error", details: d });
     },
   );
+
+  if (backend.x402) {
+    const check = backend.x402;
+    server.registerTool(
+      "check_x402_payment",
+      {
+        title: "Check a 402 payment request before signing it",
+        description: "When a service (for example an agent on NEAR Agent Market) answers 402 Payment Required, pass the URL you called and the accepts[] row you are about to sign. SeIn checks that the payee is one the service itself publishes, the network and asset, then runs its usual checks and your owner's limits. Sign only if the verdict is ALLOW; on WARN wait for the owner; on BLOCK do not pay.",
+        inputSchema: {
+          resourceUrl: z.string().describe("the URL that answered 402"),
+          accept: z.object({ scheme: z.string(), network: z.string(), asset: z.string(), amount: z.string(), payTo: z.string(), maxTimeoutSeconds: z.number().optional() }).passthrough().describe("the accepts[] row, exactly as received"),
+          taskText: z.string().describe("the user's instruction that led to this purchase, word for word"),
+        },
+      },
+      async (args) => text(await check(args)),
+    );
+  }
 
   if (backend.lessons) {
     const read = backend.lessons;

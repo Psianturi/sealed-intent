@@ -1,4 +1,4 @@
-import { agentView, checkApproval, checkFreeze, RateLimiter, type AccessStore, type ApprovalVerifier, type SignedApproval } from "@sealed-intent/core";
+import { agentView, checkApproval, checkFreeze, publishedRecipients, RateLimiter, x402Intent, x402Problems, type AccessStore, type ApprovalVerifier, type SignedApproval, type X402Accept, type X402Recipients } from "@sealed-intent/core";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -29,6 +29,7 @@ import type { Demo } from "./demo";
  *   POST /v1/unfreeze           owner token
  *   POST /v1/counterparty/accept-code  owner token   { account }   accept a contract's current code
  *   POST /v1/blocklist/confirm  owner token   { account }   an agent's report now blocks
+ *   POST /v1/x402/check         agent token   { resourceUrl, accept, taskText }   a 402 payment request, before the agent's wallet signs it
  *   POST /v1/lessons            owner token   { neverPay[], rules[] }   from a Checkpoint: the accounts block at once, the rules go to the agents
  *   GET  /v1/lessons            agent or owner token   -> the rules and accounts to avoid
  *   POST /v1/watch/accept       owner token   { account }   accept the account's keys and code as they are now
@@ -64,6 +65,8 @@ export interface RestDeps {
   demo?: Demo;
   /** where taught lessons are kept; in memory only when absent */
   lessonsPath?: string;
+  /** reads a service's published x402 payees; tests pass a stand-in */
+  x402Payees?: (resourceUrl: string) => Promise<X402Recipients | undefined>;
 }
 
 const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze|try)|GET \/v1\/try|GET \/health)$/;
@@ -198,6 +201,21 @@ export function createRestServer(deps: RestDeps): Server {
         if (!agentId) return send(res, 401, { error: "agent token required" });
         const input = await body(req);
         return once(async () => agentView(await preflight.evaluate({ agentId, intent: input.intent, agentQuote: input.agentQuote as never })));
+      }
+      if (route === "POST /v1/x402/check") {
+        if (!agentId) return send(res, 401, { error: "agent token required" });
+        const b = (await body(req)) as { resourceUrl?: string; accept?: X402Accept; taskText?: string };
+        if (!b.resourceUrl || !b.accept) return send(res, 400, { error: "resourceUrl and accept are required" });
+        let payees: X402Recipients | undefined;
+        try {
+          payees = await (deps.x402Payees ?? publishedRecipients)(b.resourceUrl);
+        } catch {
+          payees = undefined;
+        }
+        const problems = x402Problems(b.accept, payees, deps.network === "testnet" ? "testnet" : "mainnet");
+        // a 402 that is wrong in itself is refused before it costs a check; nothing is signed either way
+        if (problems.length) return send(res, 200, { verdict: "BLOCK", reasonCodes: problems, warnCodes: [], x402: { payeePublished: false } });
+        return once(async () => ({ ...agentView(await preflight.evaluate({ agentId, intent: x402Intent(b.accept!, b.taskText ?? "") })), x402: { payeePublished: true } }));
       }
       if (route === "POST /v1/execute") {
         if (!agentId) return send(res, 401, { error: "agent token required" });

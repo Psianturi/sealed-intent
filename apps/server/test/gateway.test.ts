@@ -3,18 +3,18 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AddressInfo } from "node:net";
-import { AccessStore, approvalMessage, ASSET, buildPreflight, DEMO_ACCOUNTS, ReceiptStore, requestToSign, reviewHash, type ApprovalVerifier, type OwnerReview, type SignedApproval } from "@sealed-intent/core";
+import { AccessStore, approvalMessage, ASSET, buildPreflight, DEMO_ACCOUNTS, ReceiptStore, requestToSign, reviewHash, type ApprovalVerifier, type OwnerReview, type SignedApproval, type X402Recipients } from "@sealed-intent/core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createRestServer } from "../src/rest-server";
 
 type Json = Record<string, any>;
 const intent = (over: Record<string, unknown> = {}) => ({ kind: "transfer", token: ASSET.USDC, amount: "5000000", recipient: DEMO_ACCOUNTS.payroll, taskText: "Pay the October invoice.", ...over });
 
-function start(opts: { ownerAccount?: string; approvals?: ApprovalVerifier; rpm?: number } = {}) {
+function start(opts: { ownerAccount?: string; approvals?: ApprovalVerifier; rpm?: number; x402Payees?: () => Promise<X402Recipients | undefined> } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "sein-gw-"));
   const env = buildPreflight({ offline: true, home: join(dir, ".sealed"), outDir: join(dir, "out"), ledgerPath: ":memory:" });
   const access = new AccessStore(":memory:");
-  const server = createRestServer({ ...env, receipts: new ReceiptStore(join(dir, "out"), join(dir, ".sealed")), offline: true, access, ownerAccount: opts.ownerAccount, approvals: opts.approvals, agentRequestsPerMinute: opts.rpm, auth: { agentForToken: () => undefined, ownerToken: "owner-secret", ownerTokenGenerated: false } });
+  const server = createRestServer({ ...env, receipts: new ReceiptStore(join(dir, "out"), join(dir, ".sealed")), offline: true, access, ownerAccount: opts.ownerAccount, approvals: opts.approvals, agentRequestsPerMinute: opts.rpm, x402Payees: opts.x402Payees, auth: { agentForToken: () => undefined, ownerToken: "owner-secret", ownerTokenGenerated: false } });
   return new Promise<{ base: string; access: AccessStore; close: () => void; env: typeof env }>((resolve) =>
     server.listen(0, "127.0.0.1", () => resolve({ base: `http://127.0.0.1:${(server.address() as AddressInfo).port}`, access, env, close: () => server.close() })),
   );
@@ -118,6 +118,37 @@ describe("no double payments", () => {
     const a = (await (await post(s.base, "/v1/preflight", { intent: intent() }, h(s.access.issue("a")))).json()) as Json;
     const b = (await (await post(s.base, "/v1/preflight", { intent: intent() }, h(s.access.issue("b")))).json()) as Json;
     expect(a.decisionId).not.toBe(b.decisionId);
+  });
+});
+
+describe("x402: a 402 payment request before the agent's wallet signs it", () => {
+  const usdc = ASSET.USDC.replace("nep141:", "");
+  const payees: X402Recipients = { x402Version: 2, recipients: [{ network: "near:mainnet", asset: usdc, payTo: DEMO_ACCOUNTS.payroll }] };
+  const accept = { scheme: "exact", network: "near:mainnet", asset: usdc, amount: "5000000", payTo: DEMO_ACCOUNTS.payroll, maxTimeoutSeconds: 300 };
+  const ask = (s: { base: string }, t: string, a: unknown) => post(s.base, "/v1/x402/check", { resourceUrl: "https://web-research.market.near.ai/a2a/v1", accept: a, taskText: "Get the October market brief." }, bearer(t));
+
+  it("refuses a payee the service does not publish, before any other check", async () => {
+    const s = await start({ x402Payees: async () => payees });
+    close = s.close;
+    const t = s.access.issue("agent-1");
+    const r = (await (await ask(s, t, { ...accept, payTo: "drainer-9f3a.near" })).json()) as Json;
+    expect(r).toMatchObject({ verdict: "BLOCK", reasonCodes: ["X402_PAYEE_NOT_PUBLISHED"] });
+    expect((await (await ask(s, t, accept)).json() as Json).x402).toEqual({ payeePublished: true });
+  });
+
+  it("a published payee still goes through SeIn's own checks and leaves a receipt", async () => {
+    const s = await start({ x402Payees: async () => payees });
+    close = s.close;
+    const r = (await (await ask(s, s.access.issue("agent-1"), accept)).json()) as Json;
+    expect(r.decisionId).toMatch(/[0-9a-f-]{36}/);
+    expect(["ALLOW", "WARN", "BLOCK"]).toContain(r.verdict);
+    expect(r.reasonCodes.some((c: string) => c.startsWith("X402_"))).toBe(false);
+  });
+
+  it("needs the agent's own token", async () => {
+    const s = await start({ x402Payees: async () => payees });
+    close = s.close;
+    expect((await post(s.base, "/v1/x402/check", { resourceUrl: "https://x.market.near.ai", accept })).status).toBe(401);
   });
 });
 
