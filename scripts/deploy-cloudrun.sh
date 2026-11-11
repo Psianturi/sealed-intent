@@ -6,6 +6,9 @@ set -euo pipefail
 PROJECT="${GCP_PROJECT:?set GCP_PROJECT to your Google Cloud project id}"
 REGION="${GCP_REGION:-asia-southeast2}"
 SERVICE="${SEIN_SERVICE:-sein}"
+# gcloud on PATH, or the portable copy in D:\tools
+GCLOUD="${GCLOUD:-$(command -v gcloud || echo /d/tools/google-cloud-sdk/bin/gcloud.cmd)}"
+gcloud() { "$GCLOUD" "$@"; }
 val() { grep "^$1=" .env | tail -1 | cut -d= -f2-; }
 need() { [ -n "$(val "$1")" ] || { echo "$1 is missing from .env" >&2; exit 2; }; }
 for k in SEIN_DEMO_OUTLAYER_API_KEY SEIN_DEMO_WALLET NEARAI_API_KEY SEIN_HOSTED_ISSUER_PEM; do need "$k"; done
@@ -28,7 +31,7 @@ secret sein-outlayer-key "$(val SEIN_DEMO_OUTLAYER_API_KEY)"
 secret sein-nearai-key "$(val NEARAI_API_KEY)"
 secret sein-policy-key "$(val SEIN_HOSTED_POLICY_KEY)"
 secret sein-owner-token "$(val SEIN_HOSTED_OWNER_TOKEN)"
-secret sein-issuer-pem "$(val SEIN_HOSTED_ISSUER_PEM | sed 's/\n/\n/g')"
+secret sein-issuer-pem "$(val SEIN_HOSTED_ISSUER_PEM | sed 's/\\n/\n/g')"
 SECRETS="OUTLAYER_API_KEY=sein-outlayer-key:latest,NEARAI_API_KEY=sein-nearai-key:latest,SEALED_POLICY_KEY=sein-policy-key:latest,SEALED_OWNER_TOKEN=sein-owner-token:latest,SEALED_ISSUER_PEM=sein-issuer-pem:latest"
 ENVS="SEALED_NETWORK=testnet,OUTLAYER_NEAR_ACCOUNT=$(val SEIN_DEMO_WALLET),SEIN_DEMO_OWNER=$(val SEIN_TESTNET_OWNER_ACCOUNT),SEIN_DEMO_RECEIVERS=$(val SEIN_TESTNET_VENDOR_ACCOUNT),NEARAI_MODEL=$(val NEARAI_MODEL)"
 # with the operator key the hosted SeIn also writes its receipts to the registry on chain
@@ -38,9 +41,10 @@ if [ -n "$(val SEIN_OPERATOR_KEY)" ]; then
   ENVS="$ENVS,SEIN_REGISTRY_ACCOUNT=$(val SEIN_REGISTRY_ACCOUNT),SEIN_OPERATOR_ACCOUNT=$(val SEIN_OPERATOR_ACCOUNT)"
 fi
 
-# one instance that never sleeps: its databases live in memory and its watchers run on a timer
+# scales to zero: nothing to pay while nobody uses it, and it wakes in a few seconds on the next visit.
+# One instance at most, because its budget and history live on its own disk until it sleeps.
 gcloud run deploy "$SERVICE" --source . --region "$REGION" --allow-unauthenticated \
-  --min-instances 1 --max-instances 1 --no-cpu-throttling --cpu 1 --memory 1Gi --port 8080 --timeout 120 \
+  --min-instances 0 --max-instances 1 --cpu 1 --memory 1Gi --port 8080 --timeout 120 --concurrency 20 \
   --set-env-vars "$ENVS" --set-secrets "$SECRETS"
 URL="$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"
 echo
