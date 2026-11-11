@@ -21,9 +21,10 @@ interface Answer {
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, calm ? 0 : ms));
-// the hosted SeIn; on this machine a test server can be named with ?api=
+// the hosted SeIn (testnet, Cloud Run); on this machine a test server can be named with ?api=
+const HOSTED = "https://sein-103701492599.asia-southeast2.run.app";
 const local = location.hostname === "localhost" ? new URLSearchParams(location.search).get("api") : null;
-const API = (local ?? (import.meta.env.VITE_SEIN_API as string | undefined) ?? "").replace(/\/$/, "");
+const API = (local ?? (import.meta.env.VITE_SEIN_API as string | undefined) ?? HOSTED).replace(/\/$/, "");
 
 const SCENARIOS: Record<string, { to: string; amount: string; task: string; expect: string }> = {
   routine: { to: "sein-vendor-mvy1eh5f.testnet", amount: "0.005", task: "Pay the vendor 0.005 NEAR for the October invoice, as agreed with finance.", expect: "A known receiver and a small amount: it should be paid, for real, on testnet." },
