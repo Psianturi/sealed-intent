@@ -20,6 +20,8 @@ done
 gcloud config set project "$PROJECT" >/dev/null
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com secretmanager.googleapis.com >/dev/null
 RUNNER="$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')-compute@developer.gserviceaccount.com"
+# new projects no longer give this account Editor, and Cloud Build builds the source with it
+gcloud projects add-iam-policy-binding "$PROJECT" --member "serviceAccount:$RUNNER" --role roles/run.builder --condition None >/dev/null
 
 secret() {
   if gcloud secrets describe "$1" >/dev/null 2>&1; then printf '%s' "$2" | gcloud secrets versions add "$1" --data-file=- >/dev/null

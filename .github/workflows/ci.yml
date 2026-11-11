@@ -2,6 +2,7 @@ name: ci
 on:
   push:
   pull_request:
+  workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -28,3 +29,39 @@ jobs:
       - run: pnpm secret:scan
       - run: pnpm audit --audit-level=high
       - run: sudo env "PATH=$PATH" bash scripts/isolation-check.sh
+
+  # server changes on main go to Cloud Run once the tests pass; keyless, through Workload Identity Federation
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: cloud-run
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: changed
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          files=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" 2>/dev/null) || files=all
+          if [ "$files" = all ] || echo "$files" | grep -qE '^(apps/server/|packages/|fixtures/|Dockerfile|\.gcloudignore|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)'; then
+            echo "server=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.changed.outputs.server == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/103701492599/locations/global/workloadIdentityPools/github/providers/sealed-intent
+          service_account: github-deployer@sein-near.iam.gserviceaccount.com
+      - if: steps.changed.outputs.server == 'true'
+        uses: google-github-actions/setup-gcloud@v2
+      # env and secrets set by scripts/deploy-cloudrun.sh stay on the service
+      - if: steps.changed.outputs.server == 'true'
+        run: gcloud run deploy sein --source . --region asia-southeast2 --quiet
+      - if: steps.changed.outputs.server == 'true'
+        run: curl -fsS "$(gcloud run services describe sein --region asia-southeast2 --format='value(status.url)')/v1/try"
