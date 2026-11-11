@@ -11,6 +11,8 @@ export interface DemoOptions {
   perDay: number;
   /** allowed payments that are really sent in a day; the custody service counts operations too */
   paymentsPerDay: number;
+  /** one line per request with its timing; never the request's content */
+  log?: (line: string) => void;
 }
 
 export interface Demo {
@@ -59,9 +61,12 @@ export function createDemo(deps: { preflight: Preflight; store: ReceiptStore }, 
       visits.set(visitor, [...recent, now]);
       requests++;
       const intent = { kind: "transfer", token: token.assetId, amount, recipient: to, taskText };
+      const started = Date.now();
       let d = await deps.preflight.evaluate({ agentId: opts.agentId, intent });
       // the enclave service sometimes answers too late; SeIn then blocks, and an agent may simply ask again
-      if (d.reasonCodes.includes("TEE_UNAVAILABLE")) d = await deps.preflight.evaluate({ agentId: opts.agentId, intent });
+      const retried = d.reasonCodes.includes("TEE_UNAVAILABLE");
+      if (retried) d = await deps.preflight.evaluate({ agentId: opts.agentId, intent });
+      const checked = Date.now();
       let execution: Record<string, unknown> | undefined;
       if (d.verdict === "ALLOW") {
         if (payments >= opts.paymentsPerDay) execution = { status: "not_sent", note: "Allowed. Today's real demo payments are used up, so this one was not sent." };
@@ -71,6 +76,8 @@ export function createDemo(deps: { preflight: Preflight; store: ReceiptStore }, 
           execution = { status: x.status, txHash: x.txHash, explorer: x.txHash ? explorer(opts.network, x.txHash) : undefined, refusedByCustody: x.refusedByCustody, executionReceipt: x.executionReceiptId ? deps.store.load(x.executionReceiptId) : undefined };
         }
       }
+      const secs = (ms: number) => (ms / 1000).toFixed(1);
+      opts.log?.(`try: ${d.verdict} checked in ${secs(checked - started)} s${retried ? " (enclave retried)" : ""}${execution ? `, sent in ${secs(Date.now() - checked)} s` : ""}`);
       // the requester may see the openings of what they typed themselves, and nothing else: never the policy's
       const opened = deps.store.loadOpenings(d.decisionId)?.openings ?? {};
       const yours = Object.fromEntries((["recipient", "amountIn", "tokenIn", "taskText"] as const).filter((k) => opened[k]).map((k) => [k, opened[k]]));

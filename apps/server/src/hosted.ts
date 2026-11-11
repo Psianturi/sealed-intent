@@ -32,6 +32,18 @@ need("NEARAI_API_KEY");
 const owner = need("SEIN_DEMO_OWNER");
 process.env.SEALED_OWNER_ACCOUNT ??= owner;
 
+// outbound calls slower than 2 s show up in the host's logs, by host name only
+const plainFetch = globalThis.fetch;
+globalThis.fetch = async (input, init) => {
+  const started = Date.now();
+  try {
+    return await plainFetch(input, init);
+  } finally {
+    const ms = Date.now() - started;
+    if (ms > 2000) console.log(`slow call: ${new URL(input instanceof Request ? input.url : String(input)).host} ${(ms / 1000).toFixed(1)} s`);
+  }
+};
+
 mkdirSync(".sealed", { recursive: true, mode: 0o700 });
 // the receipt signing key must survive restarts, or yesterday's receipts would name a key nobody lists
 if (process.env.SEALED_ISSUER_PEM) writeFileSync(join(".sealed", "issuer.pem"), process.env.SEALED_ISSUER_PEM.replace(/\\n/g, "\n"), { mode: 0o600 });
@@ -57,5 +69,6 @@ startGateway({
     perVisitor: Number(process.env.SEIN_DEMO_PER_VISITOR ?? 6),
     perDay: Number(process.env.SEIN_DEMO_PER_DAY ?? 300),
     paymentsPerDay: Number(process.env.SEIN_DEMO_PAYMENTS_PER_DAY ?? 40),
+    log: (line) => console.log(line),
   },
 });
