@@ -57,6 +57,17 @@
       <p class="proof-note">From a recorded Arena run with test tokens, on a simulated chain and again on three real local NEAR nodes, with identical results. <!--stat:lazy--> <a href="/arena.html">See every attack</a>.</p>
     </section>
 
+    <section id="start">
+      <h2>Start in a minute</h2>
+      <p class="lead">No account and no sign-up. Three things you can do in this browser right now.</p>
+      <div class="cards three">
+        <a class="card way" href="/try"><h3>Try the firewall</h3><p>Play an AI agent and ask SeIn to pay. The real checks answer, and an allowed payment really moves on NEAR testnet.</p><span class="way-go">Open Try it</span></a>
+        <a class="card way" href="/checkup"><h3>Check a wallet</h3><p>Type any NEAR account. See which apps hold keys to it and which look risky, then cut the dangerous ones with your own wallet.</p><span class="way-go">Open Checkpoint</span></a>
+        <a class="card way" href="/arena.html"><h3>Face the attacks</h3><p>Be the guard for ten requests modelled on real incidents, then compare your calls with SeIn's and with a wallet that has no guard.</p><span class="way-go">Open the Arena</span></a>
+      </div>
+      <p class="note">Ready to protect your own agent? <a href="/start#own">Run SeIn for your own agent</a>, about 15 minutes on testnet.</p>
+    </section>
+
     <section>
       <h2>The problem</h2>
       <p class="lead">An AI agent with a wallet is a new employee holding the company card. It never sleeps, it can be fooled, and on a blockchain nothing can be undone.</p>
@@ -100,7 +111,7 @@
         <article class="card"><h3>Sealed receipts <span class="status live">Live</span></h3><p>The verdict is public. Amount, receiver and instruction are sealed. The owner can open one field for an auditor.</p></article>
         <article class="card"><h3>A private route <span class="status todo">Not yet</span></h3><p>Policy can force payroll onto Confidential Intents. It hides origin and route, not the destination. The check exists; a live quote needs a NEAR Intents login.</p></article>
       </div>
-      <h3 class="table-title">Who sees what</h3>
+      <details class="more-table"><summary>Who sees what, cell by cell</summary>
       <div class="table-wrap" tabindex="0" role="region" aria-label="Who sees what">
         <table class="matrix">
           <thead><tr><th scope="col">Data</th><th scope="col">The agent</th><th scope="col">Public and chain</th><th scope="col">SeIn operator</th><th scope="col">Auditor</th><th scope="col">NEAR AI enclaves</th><th scope="col">Quote and custody services</th></tr></thead>
@@ -113,6 +124,7 @@
           </tbody>
         </table>
       </div>
+      </details>
       <p class="note">One thing stays readable on the operator's disk: how many dollars each hidden agent spent, because the budget must add them up. Each cell is backed by a test in the repository.</p>
     </section>
 
@@ -134,22 +146,7 @@
       </figure>
     </section>
 
-    <section>
-      <h2>Proof: the Arena</h2>
-      <p class="lead">Three identical agents, the same tasks, the same attacks. One has no guard, one has spending limits only, one goes through SeIn. A referee that reads only on-chain state keeps score.</p>
-      <div class="score"><!--score--></div>
-      <p class="legend-line"><span class="pip held">✓</span> stopped <span class="pip through">✕</span> got through. The left group is in scope. The right group is out of scope by design.</p>
-      <div class="btns"><a class="btn primary" href="/arena.html">Open the Arena</a></div>
-    </section>
 
-    <section>
-      <h2>A bridge for any agent</h2>
-      <div class="cards three">
-        <article class="card"><h3>Any agent <span class="status live">Live</span></h3><p>Agents connect through a standard tool interface (MCP) or a plain web API, and get a verdict with generic reasons.</p></article>
-        <article class="card"><h3>No keys near the agent <span class="status live">Live</span></h3><p>The agent holds neither the wallet key nor the custody API key. A check run on every build proves its OS user cannot reach them.</p></article>
-        <article class="card"><h3>The owner stays in charge <span class="status live">Live</span></h3><p>Only the owner can approve a WARN or lift a freeze. A watcher freezes the wallet if a key appears on the account by another path.</p></article>
-      </div>
-    </section>
 
     <section>
       <h2>Tested with real transactions</h2>
@@ -164,9 +161,9 @@
     <section>
       <h2>What is real, what is simulated, what is not done</h2>
       <div class="honest">
-        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li><li>Payments through OutLayer custody on NEAR testnet, each with a transaction anyone can look up.</li><li>A public registry on NEAR testnet: signing keys, agents and receipt batches.</li></ul><p class="note"><a href="/proof">Check each of these from your browser</a>.</p></div>
+        <div class="col"><span class="status live">Real today</span><ul><li>The rules: the same code runs in the Arena and live.</li><li>Quotes from NEAR Intents and their signatures.</li><li>The enclave check, on NEAR AI Cloud, with Intel and NVIDIA evidence and the TLS binding. A real run is kept as evidence.</li><li>Receipts, approvals, freeze and encrypted storage.</li><li>Payments through OutLayer custody on NEAR testnet, each with a transaction anyone can look up.</li><li>A public registry on NEAR testnet: signing keys, agents and receipt batches.</li><li>A hosted SeIn on testnet, the one that answers on the Try it page.</li></ul><p class="note"><a href="/proof">Check each of these from your browser</a>.</p></div>
         <div class="col"><span class="status sim">Simulated in the Arena</span><ul><li>The chain is a ledger, or local NEAR nodes with real token contracts. Both recordings match.</li><li>Quotes, the enclave opinion and custody are stand-ins there.</li><li>The agent is scripted and follows every message, so the Arena tests what happens after an agent is fooled.</li></ul></div>
-        <div class="col"><span class="status todo">Not yet</span><ul><li>A mainnet payment and swap.</li><li>A live confidential route.</li><li>A hosted service. Today the owner runs SeIn on their own machine.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen custody or owner key, a bug inside a token, a compromised SeIn host. <a href="/limits.html">All the limits</a>.</p></div>
+        <div class="col"><span class="status todo">Not yet</span><ul><li>A mainnet payment and swap.</li><li>A live confidential route.</li><li>A hosted SeIn for your own agent. The hosted one behind Try it is a shared testnet demo.</li><li>Encrypting the prompt to the model itself. Today it is protected up to the verified gateway enclave.</li></ul><p class="note">Out of reach by design: a stolen custody or owner key, a bug inside a token, a compromised SeIn host. <a href="/limits.html">All the limits</a>.</p></div>
       </div>
     </section>
 

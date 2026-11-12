@@ -21,9 +21,20 @@
 <body>
   <!--header:start-->
   <main>
-    <p class="eyebrow">For anyone who runs an AI agent with money</p>
-    <h1 class="page-title">Give your agent a wallet it cannot empty</h1>
-    <p class="lead">Your agent keeps doing its job. It just stops holding the key. It asks SeIn to pay, SeIn checks the payment against rules only you know, and anything unusual waits for your signature. About 15 minutes, on testnet first.</p>
+    <p class="eyebrow">Start here. No account, no sign-up</p>
+    <h1 class="page-title">Four ways to use SeIn</h1>
+    <p class="lead">Nothing on this site asks you to log in. Begin with the one that takes a minute; the first three need nothing installed.</p>
+
+    <div class="ways">
+      <a class="way" href="/try"><span class="way-n">1</span><h3>Try the firewall</h3><p>Play an AI agent and ask SeIn to pay. The real checks answer, and an allowed payment really moves on NEAR testnet.</p><p class="way-meta">A minute or two. Nothing to install, no wallet.</p><span class="way-go">Open Try it</span></a>
+      <a class="way" href="/checkup"><span class="way-n">2</span><h3>Check a wallet</h3><p>Type any NEAR account. See which apps hold keys to it and which look risky, then cut the dangerous ones.</p><p class="way-meta">Two minutes. Looking needs no wallet; cutting asks your own wallet to sign.</p><span class="way-go">Open Checkpoint</span></a>
+      <a class="way" href="/arena.html"><span class="way-n">3</span><h3>Face the attacks</h3><p>Be the guard for ten requests modelled on real incidents, then compare your calls with SeIn's.</p><p class="way-meta">Three minutes. A game with test tokens.</p><span class="way-go">Open the Arena</span></a>
+      <a class="way" href="#own"><span class="way-n">4</span><h3>Protect your own agent</h3><p>Give Claude, Cursor or your own code a wallet it cannot empty, with rules only you know.</p><p class="way-meta">About 15 minutes. Testnet first, on your computer.</p><span class="way-go">See the four steps</span></a>
+    </div>
+
+    <section id="own">
+    <h2>Give your agent a wallet it cannot empty</h2>
+    <p class="lead">Your agent keeps doing its job. It just stops holding the key. It asks SeIn to pay, SeIn checks the payment against rules only you know, and anything unusual waits for your signature.</p>
 
     <figure class="path" aria-label="How a payment travels: your agent asks SeIn, SeIn checks it, the custody wallet pays on NEAR, and you approve anything unusual with your wallet.">
       <div class="path-node"><b>Your AI agent</b><span>Claude, Cursor, VS Code or your own code. Holds no key.</span></div>
@@ -35,6 +46,7 @@
       <div class="path-node"><b>NEAR</b><span>A real transaction anyone can look up.</span></div>
       <div class="path-owner"><b>You</b><span>When SeIn is unsure, you get a link and answer with your NEAR wallet.</span></div>
     </figure>
+    </section>
 
     <section>
       <h2>Four steps</h2>
@@ -95,7 +107,8 @@
       <h2>Questions</h2>
       <div class="faq">
         <details><summary>Do I have to build an MCP server or an API?</summary><p>No. SeIn is both. Connecting an agent writes its settings for you; you paste them in, or SeIn adds them to Claude Desktop itself.</p></details>
-        <details><summary>Where does SeIn run?</summary><p>On your own computer for now, next to your agent, and it must stay running while the agent works. A hosted version is the next step.</p></details>
+        <details><summary>Do I need an account, or to connect a wallet?</summary><p>No account anywhere. Try it and the Arena need no wallet. Checkpoint asks for your wallet only if you choose to cut a key, and approving a payment for your own agent uses your NEAR wallet to sign.</p></details>
+        <details><summary>Where does SeIn run?</summary><p>The one behind Try it runs on our server, on testnet, shared by every visitor. The one that guards your own agent runs on your computer, next to the agent, and must stay running while the agent works. A hosted SeIn for your own agent is the next step.</p></details>
         <details><summary>What if someone gets into my agent?</summary><p>They get what the agent has: the right to ask. Your limits and your signature still stand between them and the money, and if a payment ever skips SeIn, SeIn notices within about a minute and stops everything.</p></details>
         <details><summary>Is it ready for real money?</summary><p>It runs on NEAR testnet and mainnet, but nobody has audited it yet. Start on testnet, then use a small mainnet balance you can afford to lose.</p></details>
       </div>

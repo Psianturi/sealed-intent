@@ -453,3 +453,23 @@ label.btn { position: relative; }
 .limits-list.steps li::before { content: counter(step) ". "; font-weight: 700; }
 .foot-links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0; }
 .foot-links a { color: var(--muted); }
+
+/* entry points: the ways to start */
+.ways { display: grid; gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 26px; }
+.way { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; color: inherit; text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
+.way:hover { border-color: var(--glow); transform: translateY(-2px); }
+.way:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.way h3 { margin: 10px 0 6px; font-size: 18px; }
+.card.way h3 { margin-top: 0; }
+.way p { margin: 0 0 10px; font-size: 15px; color: var(--muted); }
+.way-n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 14px "JetBrains Mono", monospace; color: #05070c; background: linear-gradient(135deg, var(--cyan), var(--glow)); }
+.way .way-meta { font-size: 13px; }
+.way-go { margin-top: auto; font-weight: 600; font-size: 14.5px; color: var(--glow); }
+.way-go::after { content: " →"; }
+header.top .btn.top-cta[aria-current="page"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--cyan); }
+.more-table { margin-top: 18px; }
+.more-table > summary { cursor: pointer; font-weight: 600; color: var(--glow); }
+.more-table .table-wrap { margin-top: 12px; }
+@media (max-width: 1040px) { .ways { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .ways { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .way { transition: none; } .way:hover { transform: none; } }

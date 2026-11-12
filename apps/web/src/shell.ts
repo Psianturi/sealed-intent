@@ -13,12 +13,12 @@ const NAV: [string, string, string][] = [
   ["proof", "/proof", "Proof"],
 ];
 // pages without their own tab light up the tab they belong to
-const PARENT: Record<string, string> = { verify: "proof", agent: "proof", limits: "proof", approve: "home", start: "home" };
+const PARENT: Record<string, string> = { verify: "proof", agent: "proof", limits: "proof", approve: "home" };
 
 export function siteHeader(current: string): string {
   const here = PARENT[current] ?? current;
   const links = NAV.map(([id, href, label]) => `<a href="${href}"${id === here ? ' aria-current="page"' : ""}>${label}</a>`).join("");
-  const cta = current === "start" ? "" : `<a class="btn primary top-cta" href="/start">Get started</a>`;
+  const cta = `<a class="btn primary top-cta" href="/start"${current === "start" ? ' aria-current="page"' : ""}>Get started</a>`;
   return `<header class="top"><div class="top-in"><a class="brand" href="/" aria-label="SeIn, short for Sealed Intent, home">${mark(30)}${WORDMARK}</a><nav aria-label="Main">${links}</nav>${cta}</div></header>`;
 }
 
