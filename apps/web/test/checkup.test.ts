@@ -25,6 +25,19 @@ describe("the check-up", () => {
     expect(r.findings.filter((f) => f.heal)).toEqual([]);
   });
 
+  it("points at keys inside NEAR Intents that the account's own key list does not show", () => {
+    const stray = scan({ ...base, intentsKeys: ["ed25519:a", "ed25519:old-device"] });
+    const f = stray.findings.find((x) => x.id === "intents-stray")!;
+    expect(f.severity).toBe("caution");
+    expect(f.detail).toContain("ed25519:old-device");
+    expect(f.detail).not.toContain("ed25519:a,");
+    expect(f.heal).toBeFalsy();
+    const clean = scan({ ...base, intentsKeys: ["ed25519:a"] });
+    expect(clean.findings.find((x) => x.id === "intents-keys")?.severity).toBe("ok");
+    expect(clean.grade).toBe("Healthy");
+    expect(scan(base).findings.some((x) => x.id.startsWith("intents"))).toBe(false);
+  });
+
   it("flags look-alike, reported and dead connections for cutting, and never a full-access key", () => {
     const r = scan({ ...base, keys: [fullKey("ed25519:a"), fullKey("ed25519:b"), fc("wrap-near.near"), fc("drainer.near"), fc("gone.near"), fc("social.near")], missing: ["gone.near"], flagged: [{ account: "drainer.near", network: "mainnet", reason: "Drained wallets", source: "test" }] });
     const heal = r.findings.filter((f) => f.heal).map((f) => f.target);

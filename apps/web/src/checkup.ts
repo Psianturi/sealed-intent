@@ -80,6 +80,16 @@ async function gather(account: string, network: Network, flagged: Flag[]): Promi
   step.className = full ? "done" : "warn";
   await sleep(250);
 
+  // NEAR Intents exists on mainnet only, and keeps its own key list per account
+  let intentsKeys: string[] | undefined;
+  if (network === "mainnet") {
+    step = log("Reading the keys registered inside NEAR Intents");
+    intentsKeys = await view<string[]>(network, "intents.near", "public_keys_of", { account_id: account });
+    step.className = intentsKeys ? "done" : "warn";
+    if (intentsKeys) step.textContent = `${intentsKeys.length} keys inside NEAR Intents`;
+    await sleep(250);
+  }
+
   step = log("Looking for signs of an AI agent");
   const who = await identify(account, network).catch(() => ({ agent: false, notes: [] as string[] }));
   identity = who;
@@ -98,6 +108,7 @@ async function gather(account: string, network: Network, flagged: Flag[]): Promi
     codeHash: acct.result.code_hash,
     balance: acct.result.amount,
     keys: keys.result?.keys ?? [],
+    intentsKeys,
     missing: receivers.filter((_, i) => !exists[i]),
     tokens: (full?.tokens ?? []).map((t) => t.contract_id),
     nfts: (full?.nfts ?? []).map((t) => t.contract_id),

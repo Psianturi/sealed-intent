@@ -24,6 +24,8 @@ export interface ScanInput {
   /** accounts this one recently sent to or received from */
   contacts: string[];
   flagged: Flag[];
+  /** keys registered for this account inside NEAR Intents, which keeps its own list */
+  intentsKeys?: string[];
 }
 
 export interface Finding {
@@ -136,6 +138,11 @@ export function scan(input: ScanInput): ScanResult {
     conn.push({ id, label: known[to] ?? to, kind: "key", severity, key: k.public_key });
   }
   if (fc.length > 12) f.push({ id: "many-keys", severity: "caution", kind: "key", title: `${fc.length} app connections`, detail: "Every login key stays until you delete it. Old ones are risk with no benefit." });
+  const own = new Set(input.keys.map((k) => k.public_key));
+  const stray = (input.intentsKeys ?? []).filter((k) => !own.has(k));
+  const brief = (k: string) => (k.length > 26 ? `${k.slice(0, 16)}…${k.slice(-6)}` : k);
+  if (stray.length) f.push({ id: "intents-stray", severity: "caution", kind: "key", title: `${plural(stray.length, "key")} inside NEAR Intents that a wallet's key list does not show`, detail: `NEAR Intents keeps its own list of keys that may move the tokens this account holds there. ${stray.length === 1 ? "This one is" : "These are"} not among the account's own keys, so deleting keys in a wallet does not remove ${stray.length === 1 ? "it" : "them"}. It may be yours, from another wallet or device. If you do not recognise it, remove it inside NEAR Intents: ${stray.map(brief).join(", ")}` });
+  else if (input.intentsKeys?.length) f.push({ id: "intents-keys", severity: "ok", kind: "key", title: `NEAR Intents: ${plural(input.intentsKeys.length, "key")}, all still on this account`, detail: "Every key registered for this account inside NEAR Intents is one of the account's own keys." });
   if (fc.length === 0) f.push({ id: "no-connections", severity: "ok", kind: "key", title: "No app connections", detail: "No website holds a login key for this account." });
 
   for (const t of input.tokens) {
