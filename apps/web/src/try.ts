@@ -111,7 +111,10 @@ async function send() {
 function pick(name: string) {
   const s = SCENARIOS[name];
   for (const b of document.querySelectorAll<HTMLButtonElement>("[data-scenario]")) b.setAttribute("aria-pressed", String(b.dataset.scenario === name));
-  if (!s) return void $<HTMLInputElement>("t-to").focus();
+  if (!s) {
+    $("t-expect").textContent = "Your turn. Change the receiver, the amount or the instruction, and see if you can get paid.";
+    return void $<HTMLTextAreaElement>("t-task").focus();
+  }
   $<HTMLInputElement>("t-to").value = s.to;
   $<HTMLInputElement>("t-amount").value = s.amount;
   $<HTMLTextAreaElement>("t-task").value = s.task;

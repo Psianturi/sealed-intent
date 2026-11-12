@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Get started | SeIn</title>
+  <title>Protect your own agent | SeIn</title>
   <meta name="description" content="Give your AI agent a wallet it cannot empty. Create a custody wallet, run SeIn, connect Claude, Cursor, VS Code or your own code, and answer from your NEAR wallet when it asks." />
-  <meta property="og:title" content="Get started with SeIn" />
+  <meta property="og:title" content="Protect your own agent with SeIn" />
   <meta property="og:description" content="Four steps: a custody wallet, SeIn on your computer, your agent connected, and you approving from your NEAR wallet." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://sein-near.vercel.app/og.png" />
@@ -21,20 +21,9 @@
 <body>
   <!--header:start-->
   <main>
-    <p class="eyebrow">Start here. No account, no sign-up</p>
-    <h1 class="page-title">Four ways to use SeIn</h1>
-    <p class="lead">Nothing on this site asks you to log in. Begin with the one that takes a minute; the first three need nothing installed.</p>
-
-    <div class="ways">
-      <a class="way" href="/try"><span class="way-n">1</span><h3>Try the firewall</h3><p>Play an AI agent and ask SeIn to pay. The real checks answer, and an allowed payment really moves on NEAR testnet.</p><p class="way-meta">About a minute. Each answer comes in 10 to 20 seconds. Nothing to install, no wallet.</p><span class="way-go">Open Try it</span></a>
-      <a class="way" href="/checkup"><span class="way-n">2</span><h3>Check a wallet</h3><p>Type any NEAR account. See which apps hold keys to it and which look risky, then cut the dangerous ones.</p><p class="way-meta">Two minutes. Looking needs no wallet; cutting asks your own wallet to sign.</p><span class="way-go">Open Checkpoint</span></a>
-      <a class="way" href="/arena.html"><span class="way-n">3</span><h3>Face the attacks</h3><p>Be the guard for ten requests modelled on real incidents, then compare your calls with SeIn's.</p><p class="way-meta">Three minutes. A game with test tokens.</p><span class="way-go">Open the Arena</span></a>
-      <a class="way" href="#own"><span class="way-n">4</span><h3>Protect your own agent</h3><p>Give Claude, Cursor or your own code a wallet it cannot empty, with rules only you know.</p><p class="way-meta">About 15 minutes. Testnet first, on your computer.</p><span class="way-go">See the four steps</span></a>
-    </div>
-
-    <section id="own">
-    <h2>Give your agent a wallet it cannot empty</h2>
-    <p class="lead">Your agent keeps doing its job. It just stops holding the key. It asks SeIn to pay, SeIn checks the payment against rules only you know, and anything unusual waits for your signature.</p>
+    <p class="eyebrow">For people who run an AI agent</p>
+    <h1 class="page-title" id="own">Give your agent a wallet it cannot empty</h1>
+    <p class="lead">Your agent keeps doing its job. It just stops holding the key. It asks SeIn to pay, SeIn checks the payment against rules only you know, and anything unusual waits for your signature. About 15 minutes, on testnet first.</p>
 
     <figure class="path" aria-label="How a payment travels: your agent asks SeIn, SeIn checks it, the custody wallet pays on NEAR, and you approve anything unusual with your wallet.">
       <div class="path-node"><b>Your AI agent</b><span>Claude, Cursor, VS Code or your own code. Holds no key.</span></div>
@@ -46,7 +35,6 @@
       <div class="path-node"><b>NEAR</b><span>A real transaction anyone can look up.</span></div>
       <div class="path-owner"><b>You</b><span>When SeIn is unsure, you get a link and answer with your NEAR wallet.</span></div>
     </figure>
-    </section>
 
     <section>
       <h2>Four steps</h2>

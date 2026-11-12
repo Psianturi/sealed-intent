@@ -28,10 +28,10 @@
     <section class="hero">
       <div class="hero-copy">
         <h1>Your AI agent can ask for money. It can't take it.</h1>
-        <p class="lead">SeIn, short for Sealed Intent, stands between an AI agent and its wallet on NEAR. Every payment is checked before it moves. The rules stay secret, so an attacker cannot aim just under a limit it cannot see, and each decision leaves a sealed receipt.</p>
+        <p class="lead">SeIn (Sealed Intent) is a safety checkpoint between an AI agent and its wallet on NEAR. Every payment is checked before it moves: safe ones go through, unusual ones wait for the owner, scams are stopped. The rules stay secret, so an attacker cannot aim just under a limit it cannot see.</p>
         <div class="btns">
           <a class="btn primary big" href="/try">Try the firewall</a>
-          <a class="btn big" href="/arena.html">Watch the attacks</a>
+          <a class="btn big" href="/checkup">Check a wallet</a>
         </div>
         <p class="pitch">Signers check format. SeIn checks meaning.</p>
         <p class="legend-status"><span class="ls"><span class="status live">Live</span> rules, receipts, enclave check, payments on testnet</span><span class="ls"><span class="status sim">Simulated</span> the Arena's chain</span><span class="ls"><span class="status todo">Not yet</span> a mainnet payment</span></p>
@@ -48,24 +48,15 @@
       <span class="livebar-go">Check it yourself</span>
     </a>
 
-    <section class="proof" aria-labelledby="proof-title">
-      <h2 id="proof-title" class="sr-only">The result in numbers</h2>
-      <div class="stat"><p class="stat-num"><!--stat:stopped--></p><p class="stat-label">attacks in scope stopped</p><p class="stat-sub"><!--stat:how--></p></div>
-      <div class="stat"><p class="stat-num"><!--stat:lost--></p><p class="stat-label">lost to those attacks</p><p class="stat-sub"><!--stat:lost-others--></p></div>
-      <div class="stat"><p class="stat-num"><!--stat:tasks--></p><p class="stat-label">everyday tasks finished</p><p class="stat-sub"><!--stat:blocked--></p></div>
-      <div class="stat"><p class="stat-num"><!--stat:out--></p><p class="stat-label">out of reach by design</p><p class="stat-sub">Shown on purpose. No checker in front of a wallet stops a stolen custody or owner key.</p></div>
-      <p class="proof-note">From a recorded Arena run with test tokens, on a simulated chain and again on three real local NEAR nodes, with identical results. <!--stat:lazy--> <a href="/arena.html">See every attack</a>.</p>
-    </section>
-
     <section id="start">
-      <h2>Start in a minute</h2>
-      <p class="lead">No account and no sign-up. Three things you can do in this browser right now.</p>
+      <h2>What you can do here</h2>
+      <p class="lead">One main feature, a companion for any wallet, and the evidence. No account, nothing to install.</p>
       <div class="cards three">
-        <a class="card way" href="/try"><h3>Try the firewall</h3><p>Play an AI agent and ask SeIn to pay. The real checks answer, and an allowed payment really moves on NEAR testnet.</p><span class="way-go">Open Try it</span></a>
-        <a class="card way" href="/checkup"><h3>Check a wallet</h3><p>Type any NEAR account. See which apps hold keys to it and which look risky, then cut the dangerous ones with your own wallet.</p><span class="way-go">Open Checkpoint</span></a>
-        <a class="card way" href="/arena.html"><h3>Face the attacks</h3><p>Be the guard for ten requests modelled on real incidents, then compare your calls with SeIn's and with a wallet that has no guard.</p><span class="way-go">Open the Arena</span></a>
+        <a class="card way" href="/try"><span class="way-tag main">Main feature</span><h3>Payment firewall for AI agents</h3><p>Play an AI agent and ask SeIn to pay. A safe payment really goes through on NEAR testnet; a trick is stopped. Then try to trick it yourself.</p><span class="way-go">Try it</span></a>
+        <a class="card way" href="/checkup"><span class="way-tag">For any wallet</span><h3>Wallet check-up</h3><p>Type any NEAR account, yours or an agent's. See how it is most likely to lose money, then cut risky connections with your own wallet.</p><span class="way-go">Open Checkpoint</span></a>
+        <a class="card way" href="/arena.html"><span class="way-tag">The evidence</span><h3>Attack arena</h3><p>Be the guard against ten requests modelled on real incidents, or watch three wallets face them: no guard, limits only, SeIn.</p><span class="way-go">Open the Arena</span></a>
       </div>
-      <p class="note">Ready to protect your own agent? <a href="/start#own">Run SeIn for your own agent</a>, about 15 minutes on testnet.</p>
+      <p class="note">Every claim on this site can be checked from your browser on the <a href="/proof">Proof</a> page. Running an AI agent of your own? <a href="/start">Put SeIn in front of it</a>.</p>
     </section>
 
     <section>
@@ -102,6 +93,15 @@
       </div>
     </section>
 
+    <section class="proof" aria-labelledby="proof-title">
+      <h2 id="proof-title" class="proof-title">Does it hold? The recorded result</h2>
+      <div class="stat"><p class="stat-num"><!--stat:stopped--></p><p class="stat-label">attacks in scope stopped</p><p class="stat-sub"><!--stat:how--></p></div>
+      <div class="stat"><p class="stat-num"><!--stat:lost--></p><p class="stat-label">lost to those attacks</p><p class="stat-sub"><!--stat:lost-others--></p></div>
+      <div class="stat"><p class="stat-num"><!--stat:tasks--></p><p class="stat-label">everyday tasks finished</p><p class="stat-sub"><!--stat:blocked--></p></div>
+      <div class="stat"><p class="stat-num"><!--stat:out--></p><p class="stat-label">out of reach by design</p><p class="stat-sub">Shown on purpose. No checker in front of a wallet stops a stolen custody or owner key.</p></div>
+      <p class="proof-note">From a recorded Arena run with test tokens, on a simulated chain and again on three real local NEAR nodes, with identical results. <!--stat:lazy--> <a href="/arena.html">See every attack</a>.</p>
+    </section>
+
     <section id="privacy">
       <h2>Private by default</h2>
       <p class="lead">A checker that reads your payments must not become the leak. Four layers keep the rules and the money private.</p>
@@ -132,7 +132,7 @@
       <div>
         <h2>Check a receipt yourself</h2>
         <p class="lead">Edit one character and the receipt turns invalid. No account, no upload, nothing to trust but the math in your browser.</p>
-        <div class="btns"><a class="btn primary" href="/verify.html">Try a real receipt</a></div>
+        <div class="btns"><a class="btn primary" href="/verify.html">Try a real receipt</a><a class="btn" href="/proof">See the live proof</a></div>
       </div>
       <figure class="paper" aria-label="A receipt: the verdict and reasons are visible, the amount and receiver are sealed.">
         <div class="paper-head"><strong>Receipt</strong><span class="chip block">✕ BLOCK</span></div>
@@ -147,16 +147,6 @@
     </section>
 
 
-
-    <section>
-      <h2>Tested with real transactions</h2>
-      <p class="lead">On NEAR testnet, through real custody, with the real enclave. Test tokens only.</p>
-      <div class="cards three">
-        <article class="card"><h3>Two locks, each covering the other</h3><p>A careless owner approved a stranger, and custody refused. A tricked agent asked to pay tokens to a stranger, which custody alone would have let through, and SeIn refused.</p></article>
-        <article class="card"><h3>Money that skips SeIn gets caught</h3><p>We sent a payment straight to custody, around SeIn. SeIn noticed in <!--custody:found--> seconds, and the wallet was frozen on chain in <!--custody:frozen-->.</p></article>
-        <article class="card"><h3>Anyone can check</h3><p>Each decision is signed, written to the chain in a batch and tied to its transaction, while the amount stays sealed. <a href="/a/agent-1">See the live agent</a>.</p></article>
-      </div>
-    </section>
 
     <section>
       <h2>What is real, what is simulated, what is not done</h2>
