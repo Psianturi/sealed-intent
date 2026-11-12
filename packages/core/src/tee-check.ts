@@ -174,9 +174,13 @@ export class NearAiCloudChecker implements TeeChecker {
 
     // 3. the completion; keep the exact request and response bytes
     const { system, user } = buildTeePrompt(input);
+    // the answer is one short JSON line; long hidden reasoning only made payments wait about a minute
+    const effort = process.env.NEARAI_REASONING_EFFORT ?? "low";
     const requestBody = JSON.stringify({
       model: this.model,
       temperature: 0,
+      max_tokens: 1500,
+      ...(effort === "default" ? {} : { reasoning_effort: effort }),
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
