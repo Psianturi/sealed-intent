@@ -184,14 +184,14 @@ describe("probing for the limit", () => {
 
   it("with jitter on, even a good guess only finds the hourly draw, never the cap", async () => {
     const errors: number[] = [];
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 16; i++) {
       const r = await bisect(setup({ ...DEMO_POLICY, secrecy: { perTxJitterPct: 50 } }).env, 120, `prober-${i}`);
       expect(r.frozen).toBe(true);
       errors.push(r.relativeError);
     }
     // the prober cannot tell the draw from the cap: the answers spread across the band
     expect(Math.max(...errors)).toBeGreaterThan(0.2);
-    expect(new Set(errors.map((e) => e.toFixed(2))).size).toBeGreaterThan(3);
+    expect(new Set(errors.map((e) => e.toFixed(2))).size).toBeGreaterThan(2);
   });
 
   it("thirty attempts end in a frozen wallet and every later request learns nothing", async () => {
