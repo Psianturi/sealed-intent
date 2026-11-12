@@ -27,6 +27,15 @@ function browser() {
 
 const port = 9700 + Math.floor(Math.random() * 200);
 const proc = spawn(browser(), ["--headless=new", "--no-sandbox", "--hide-scrollbars", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", `--remote-debugging-port=${port}`, `--user-data-dir=${mkdtempSync(join(tmpdir(), "audit-"))}`, "about:blank"], { stdio: "ignore" });
+// never leave a browser behind, even when a page hangs or the run is interrupted
+const stopBrowser = () => {
+  try {
+    if (process.platform === "win32") execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: "ignore" });
+    else proc.kill();
+  } catch {}
+};
+setTimeout(() => { stopBrowser(); console.log("Stopped: the audit ran longer than 12 minutes"); process.exit(1); }, 12 * 60_000).unref();
+for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, () => { stopBrowser(); process.exit(1); });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let ws;
 for (let i = 0; i < 60 && !ws; i++) {
@@ -72,10 +81,6 @@ for (const p of PAGES) {
   }
 }
 ws.close();
-// on Windows the browser's helper processes outlive the main one unless the whole tree goes
-try {
-  if (process.platform === "win32") execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: "ignore" });
-  else proc.kill();
-} catch {}
+stopBrowser();
 console.log(failed ? `${failed} checks failed` : "All pages fit at every width");
 process.exit(failed ? 1 : 0);
