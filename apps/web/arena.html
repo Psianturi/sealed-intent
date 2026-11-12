@@ -69,6 +69,11 @@
   <section class="ar-panel" id="panel-cases" role="tabpanel" aria-labelledby="tab-cases" hidden>
     <p class="note">Each attack follows the pattern of a real incident. Pick a kind of attack to narrow the list, then select a case to play it on the stage.</p>
     <div id="case-files"><!--case-files--></div>
+    <div class="iw" id="incident-watch">
+      <h2>Incident watch</h2>
+      <p class="note">Not part of the recorded run. Mapped by pattern, not tested.</p>
+      <div id="iw-list"><p class="note">Loading recent incidents…</p></div>
+    </div>
   </section>
 
   <section class="ar-panel" id="panel-results" role="tabpanel" aria-labelledby="tab-results" hidden>
@@ -109,5 +114,6 @@
   </main>
   <script type="module" src="/src/arena.ts"></script>
   <script type="module" src="/src/game.ts"></script>
+  <script type="module" src="/src/incident-watch.ts"></script>
 </body>
 </html>
