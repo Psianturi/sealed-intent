@@ -13,6 +13,8 @@ export const Policy = z.object({
   allowedRecipients: z.array(z.string()).min(1),
   /** recipient not on the allow-list: refuse outright, or ask a human (WARN) */
   unknownRecipient: z.enum(["block", "warn"]),
+  /** refuse a receiver whose name imitates a trusted one (address poisoning) */
+  lookalikeRecipient: z.enum(["block"]).optional(),
   /** younger counterparties are flagged for human review */
   minAccountAgeDays: z.number().int().min(0),
   ownAccounts: z.array(z.string()).min(1),

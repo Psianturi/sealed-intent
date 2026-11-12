@@ -1,3 +1,4 @@
+import { imitates } from "./lookalike";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { canonicalJson, signBytes, verifyBytes, type IssuerKey, type Vault } from "@sealed-intent/receipt";
@@ -236,6 +237,13 @@ export async function assessCounterparty(
 
   // Not on the owner's allow-list: look closer, then block or ask a human.
   (policy.unknownRecipient === "block" ? block : review).push("RECIPIENT_NOT_ALLOWLISTED");
+  if (policy.lookalikeRecipient === "block") {
+    const like = imitates(account, [...policy.allowedRecipients, ...policy.ownAccounts]);
+    if (like) {
+      block.push("RECIPIENT_LOOKALIKE");
+      signals.imitates = like;
+    }
+  }
   if (info) {
     const implicit = /^[0-9a-f]{64}$/.test(account);
     if (!info.exists && !implicit) block.push("COUNTERPARTY_NOT_FOUND");

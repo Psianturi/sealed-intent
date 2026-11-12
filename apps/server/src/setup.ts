@@ -61,6 +61,7 @@ export function policyFrom(a: Answers): Policy {
     // an empty list would fail the schema; the owner's own account is always a safe receiver
     allowedRecipients: [...new Set([...a.receivers, a.owner])],
     unknownRecipient: a.newReceiver,
+    lookalikeRecipient: "block",
     minAccountAgeDays: a.network === "testnet" ? 0 : DEMO_POLICY.minAccountAgeDays,
     ownAccounts: [a.wallet, a.owner],
     perTxUsd: a.perPaymentUsd,

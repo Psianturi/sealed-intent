@@ -13,6 +13,7 @@ export const REASON: Record<string, string> = {
   COUNTERPARTY_FIRST_CONTACT: "Never paid before",
   COUNTERPARTY_CODE_CHANGED: "The contract's code changed",
   RECIPIENT_NOT_ALLOWLISTED: "The receiver is not a known partner",
+  RECIPIENT_LOOKALIKE: "The receiver's name imitates a known partner",
   ACTION_CLASS_FORBIDDEN: "This kind of action is never allowed",
   WALLET_FROZEN: "The wallet is frozen",
   LOOKALIKE_ASSET: "A look-alike token",
