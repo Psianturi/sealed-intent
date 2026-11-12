@@ -1,0 +1,1185 @@
+{
+  "schema": 1,
+  "updated": "2026-11-12",
+  "license": "CC BY 4.0",
+  "about": "Real incidents mapped by pattern to SeIn's checks. Not tested against SeIn.",
+  "incidents": [
+    {
+      "id": "2026-11-mercado-bitcoin-wallet-drain",
+      "title": "Mercado Bitcoin halts deposits and withdrawals after wallet outflows",
+      "date": "2026-11-02",
+      "datePrecision": "day",
+      "category": "other",
+      "target": "Mercado Bitcoin (Brazilian exchange) hot wallets",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "Mercado Bitcoin said it identified and contained a security incident in one of its systems early on 2 Nov 2026 and paused deposits and withdrawals; it said customers would not bear losses. Outflows went across EVM chains, Bitcoin, Solana, Stellar and Tron, and the exchange published destination addresses. No technical root cause was given in the coverage seen.",
+      "loss": {
+        "usd": 46300000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Exchange-side custody compromise with no published vector; nothing an agent-side check sees. Out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://theblock.co/news/defi/2026-11-02-mercado-bitcoin-hack-46-million-brazil-exchange-432333",
+          "publisher": "The Block (citing Arkham)",
+          "date": "2026-11-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://decrypt.co/382341/mercado-bitcoin-halts-withdrawals-40-million-hack",
+          "publisher": "Decrypt",
+          "date": "2026-11-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://crypto.news/brazils-mercado-bitcoin-reports-security-incident-freezes-withdrawals/",
+          "publisher": "crypto.news",
+          "date": "2026-11-02",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-11-btcpay-outdated-instances-hot-wallets",
+      "title": "BTCPay Server warns of hot-wallet thefts on instances at 2.4.1 or earlier",
+      "date": "2026-11-02",
+      "datePrecision": "day",
+      "category": "other",
+      "target": "Self-hosted BTCPay Server merchants running 2.4.1 or earlier with hot wallets",
+      "chain": "Bitcoin",
+      "aiAgent": false,
+      "aiAgentWhy": "Self-hosted payment servers that hold hot-wallet keys are the same shape as an agent's payment backend: whoever gets admin on the host can spend.",
+      "path": "BTCPay said it identified an attack vector targeting instances on 2.4.1 (23 Jul 2026) or earlier, told operators to take such instances offline and update to 2.4.7, and said it had no credible drain reports on 2.4.7. Coverage describes theft from merchant hot wallets (Bitcoin and Litecoin); the technical vector had not been disclosed. This follows a separate August 2026 flaw (fixed in 2.4.2) used to steal LND admin macaroons.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Host compromise of the payment server gives direct key access, which no transaction preflight can see. Out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": "B-GATE-HOST",
+      "sources": [
+        {
+          "url": "https://bleepingcomputer.com/news/security/btcpay-server-warns-of-hot-wallet-thefts-targeting-outdated-instances",
+          "publisher": "BleepingComputer",
+          "date": "2026-11-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.scworld.com/brief/btcpay-server-urges-users-to-update-after-hot-wallet-attacks",
+          "publisher": "SC Media",
+          "date": "2026-11",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://github.com/btcpayserver/btcpayserver/releases",
+          "publisher": "BTCPay Server (GitHub releases)",
+          "date": "2026-11",
+          "kind": "primary"
+        },
+        {
+          "url": "https://blog.btcpayserver.org/btcpay-server-security-incident-response-and-next-steps/",
+          "publisher": "BTCPay Server blog",
+          "date": "2026-11",
+          "kind": "primary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-10-namecom-registrar-dns-hijack",
+      "title": "Registrar-level DNS hijack sends users of ~15 DeFi sites to a Step Drainer kit",
+      "date": "2026-10-31",
+      "datePrecision": "day",
+      "category": "frontend-dns-hijack",
+      "target": "DeFi front ends registered at Name.com (Flap, Kintsu, Pickle Finance, Origami Finance and others)",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "An agent that reaches a dApp by its domain trusts the same DNS; a hijacked front end serves real-looking transactions to an attacker spender.",
+      "path": "Blockaid flagged about 12 DeFi domains redirecting to pages running the Step Drainer toolkit; Name.com later confirmed unauthorized redirection of 15 client domains and restored them. The affected domains used four different DNS providers, so the registrar was the common factor; how the attacker got in has not been published. About $138K was traced on-chain at the time of reporting.",
+      "loss": {
+        "usd": 138000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "action",
+      "seinNote": "Drainer kits ask for approvals, permits or transfers to an attacker-controlled spender. Blocking non-payment approvals (action) and unknown spenders (receiver) are the matching layers. The matching SeIn check is action (pattern only, not tested against this incident).",
+      "arenaCase": "S-SIGN",
+      "sources": [
+        {
+          "url": "https://theblock.co/news/defi/2026-10-31-hackers-hijack-a-dozen-defi-websites-all-registered-with-name-com-and-steal-about-138000-432251",
+          "publisher": "The Block",
+          "date": "2026-10-31",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://unchainedcrypto.com/wallet-drainer-attack-on-defi-front-ends-traces-to-name-com-with-cause-still-unclear/",
+          "publisher": "Unchained",
+          "date": "2026-11",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://cryptobriefing.com/name-com-restores-hijacked-defi-domains/",
+          "publisher": "Crypto Briefing",
+          "date": "2026-11",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-10-binance-postmortem-engineer-compromise",
+      "title": "Binance hot-wallet drain: post-mortem traces entry to targeted wallet engineers",
+      "date": "2026-10-29",
+      "datePrecision": "day",
+      "category": "insider-social",
+      "target": "Binance hot wallets (wallet engineering and DevOps staff as the entry point)",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": "Reported pivot through a compromised internal AI tool and a tampered AI-coding-tool install; no AI agent held or moved the funds.",
+      "path": "Per press coverage of Binance's 3 Nov 2026 post-mortem, the campaign ran for months: in June a wallet DevOps engineer installed a tampered package while looking for an AI coding tool, in September a second engineer ran a malicious take-home assignment from a fake job interview, and on 20 Oct the attacker reportedly used a compromised internal AI tool to reach an engineer holding a container deployment token. A deployed container then triggered withdrawals through the wallet signing service; TRM reports pre-signed transactions across 50 consecutive nonces and EIP-7702 delegation used to sweep.",
+      "loss": {
+        "usd": 6360000000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "The signing service itself was made to authorize withdrawals, which is a compromised-custody pattern beyond any agent-side preflight. The matching SeIn layer is out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": "B-NEAT",
+      "sources": [
+        {
+          "url": "https://www.trmlabs.com/resources/blog/north-korea-steals-usd-6-36-billion-from-binance-in-the-largest-hack-in-history",
+          "publisher": "TRM Labs",
+          "date": "2026-10",
+          "kind": "primary"
+        },
+        {
+          "url": "https://cointelegraph.com/news/binance-fake-job-interviews-compromised-ai-tool-hack",
+          "publisher": "Cointelegraph",
+          "date": "2026-11-03",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://futurism.com/future-society/binance-heist-vibe-code-ai",
+          "publisher": "Futurism",
+          "date": "2026-11",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-10-x402-sdk-uncapped-spend",
+      "title": "x402 agent-payment SDK flaws: default client could sign for the full token balance",
+      "date": "2026-10-22",
+      "datePrecision": "day",
+      "category": "agent-framework-vuln",
+      "target": "AI agents paying for APIs with x402 client SDKs",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "Agents that auto-pay HTTP 402 requests sign whatever amount a hostile API asks for unless the client enforces a cap.",
+      "path": "Security firm V12 disclosed 25 findings in x402 agent-payment code, three rated critical. The most serious: the default client had no spending cap, so a malicious API could request a payment up to the agent's full token balance, after an earlier small payment exposed the wallet address so the server could check the balance first. V12's proof was a local test with no live transaction, and no exploitation in the wild was reported; CSA notes the fixes shipped with little advisory trail.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "budget",
+      "seinNote": "Per-payment and per-period limits held outside the agent are the layer that matches an uncapped auto-pay request; receiver checks also apply to unknown payees. The matching SeIn check is budget (pattern only, not tested against this incident).",
+      "arenaCase": "S-WHOLE-BALANCE",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/10/critical-x402-sdk-flaw-could-let.html",
+          "publisher": "The Hacker News",
+          "date": "2026-10",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://labs.cloudsecurityalliance.org/research/csa-research-note-x402-agent-payment-sdk-flaws-20261026-csa/",
+          "publisher": "Cloud Security Alliance Labs",
+          "date": "2026-10-26",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-10-near-intents-deposit-bug",
+      "title": "NEAR Intents halts services after a deposit-handling contract bug is exploited",
+      "date": "2026-10-01",
+      "datePrecision": "day",
+      "category": "other",
+      "target": "NEAR Intents (cross-chain intents protocol)",
+      "chain": "NEAR",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "Press coverage of the post-mortem by NEAR Intents GM Alex Shevchenko says 23 failed deposit transactions between 29 Sep and 1 Oct 2026 created account balances in the Intents contract that were not backed by tokens it held, and these were withdrawn. Early statements blamed the Omni deposit/withdrawal infrastructure; the post-mortem reportedly put the cause in the smart contract. Monitoring compared origin-chain totals with NEAR totals but not per-account balances against contract holdings.",
+      "loss": {
+        "usd": 3800000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "A contract trust bug in the settlement layer, not a bad transaction an agent proposed; an agent-side preflight would see a normal deposit or withdrawal. The matching SeIn check is out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": null,
+      "sources": [
+        {
+          "url": "https://theblock.co/news/ecosystems/2026-10-01-near-intents-halts-services-after-3-8-million-exploit-promises-full-compensation-417404",
+          "publisher": "The Block",
+          "date": "2026-10-01",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://thedefiant.io/news/security/near-intents-postmortem-links-3-8-million-exploit-to-deposit-bug",
+          "publisher": "The Defiant",
+          "date": "2026-10",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://cointelegraph.com/news/near-intents-recovers-entire-stolen-38m-after-ultimatum-to-exploiter",
+          "publisher": "Cointelegraph",
+          "date": "2026-10",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://decrypt.co/380014/near-intents-recovers-3-8-million-after-48-hour-ultimatum",
+          "publisher": "Decrypt",
+          "date": "2026-10",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-06-cryptobandits-usb-clipper-tor",
+      "title": "USB shortcut worm spreads a Tor-based crypto clipper that swaps addresses and steals seed phrases",
+      "date": "2026-06-17",
+      "datePrecision": "day",
+      "category": "malware-infostealer",
+      "target": "Windows users who handle crypto wallets",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": "Any agent or operator that copies addresses or keys through a shared clipboard on an infected host can have the recipient swapped after the decision is made.",
+      "path": "Microsoft Threat Intelligence reports that since February 2026 malicious .lnk shortcuts on USB drives install a worm and a clipper. The clipper watches the clipboard for 12- or 24-word BIP39 seed phrases, Ethereum and Bitcoin WIF private keys, and replaces copied Bitcoin, Tron and Monero addresses with attacker addresses; it also takes screenshots and talks to .onion C2 through a bundled Tor client, which can return script to run (backdoor).",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": 0
+      },
+      "seinCheck": "receiver",
+      "seinNote": "The address swap is a changed-recipient pattern: the matching SeIn check is receiver (unknown or new account) (pattern only, not tested against this incident). Seed and key theft from the host is out-of-scope.",
+      "arenaCase": "S-REWRITTEN",
+      "sources": [
+        {
+          "url": "https://www.microsoft.com/en-us/security/blog/2026/06/17/crypto-clipper-uses-tor-worm-like-propagation-for-persistence-control/",
+          "publisher": "Microsoft Threat Intelligence",
+          "date": "2026-06-17",
+          "kind": "primary"
+        },
+        {
+          "url": "https://securityaffairs.com/193860/uncategorized/tor-based-clipper-malware-targets-wallet-seed-phrases.html",
+          "publisher": "Security Affairs",
+          "date": "2026-06",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "2026-05-trapdoor-ai-assistant-poisoning",
+      "title": "TrapDoor: cross-registry packages steal wallet keystores and plant hidden AI-assistant instructions",
+      "date": "2026-05-22",
+      "datePrecision": "month",
+      "category": "supply-chain",
+      "target": "Crypto and AI developers installing packages from npm, PyPI and crates.io",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "Packages wrote hidden instructions into .cursorrules and CLAUDE.md so AI coding assistants in the project would act on them.",
+      "path": "Socket tracked 34+ malicious packages (npm 21, PyPI 7, crates.io 6) that stole wallet keystores, SSH keys, cloud credentials and tokens. Reported as distinctive: hidden instructions inserted into AI-assistant project config files (.cursorrules, CLAUDE.md), concealed with zero-width Unicode; Socket called the AI-directed part experimental.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "tricked",
+      "seinNote": "Hidden instructions in config files are an injection channel into the agent; screening instructions before they drive a payment is the matching layer, while the keystore theft itself is out-of-scope. The matching SeIn check is tricked (pattern only, not tested against this incident).",
+      "arenaCase": "S-MEMORY",
+      "sources": [
+        {
+          "url": "https://cointelegraph.com/news/coordinated-crypto-stealer-campaign-trapdoor-detected-targeting-developers",
+          "publisher": "Cointelegraph (citing Socket)",
+          "date": "2026-05",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://phoenix.security/trapdoor-supply-chain-ai-poisoning-npm-pypi-crates/",
+          "publisher": "Phoenix Security",
+          "date": "2026-05",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://expertinsights.com/news/trapdoor-crypto-stealer-targets-ai-developers",
+          "publisher": "Expert Insights",
+          "date": "2026-05",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-05-verus-ethereum-bridge",
+      "title": "Verus-Ethereum bridge drained through missing source-amount validation",
+      "date": "2026-05-17",
+      "datePrecision": "day",
+      "category": "bridge",
+      "target": "Verus-Ethereum bridge reserves",
+      "chain": "Ethereum",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "An attacker exploited a missing source-amount check in the Verus-Ethereum bridge contract to withdraw more than was locked, draining about $11.58M of reserves on 17-18 May 2026. Independent analysts point to a missing checkCCEValues check; the Verus team had not published a confirmed post-mortem at the time of reporting. PeckShield counted eight bridge incidents totalling $328.6M in May 2026 by mid-month.",
+      "loss": {
+        "usd": 11580000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "A contract bug in a bridge, not a transaction an agent was tricked into. The matching SeIn check is out-of-scope (contract bug) (pattern only, not tested against this incident).",
+      "arenaCase": null,
+      "sources": [
+        {
+          "url": "https://www.merklescience.com/blog/hack-track-the-11-58m-verus-bridge-hack",
+          "publisher": "Merkle Science",
+          "date": "2026-05",
+          "kind": "primary"
+        },
+        {
+          "url": "https://news.bitcoin.com/crypto-bridge-exploits-328-million-may-2026-peckshield/",
+          "publisher": "Bitcoin.com News (citing PeckShield)",
+          "date": "2026-05",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.theblock.co/post/401571/verus-ethereum-bridge-exploit",
+          "publisher": "The Block (citing Blockaid)",
+          "date": "2026-05-17",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.halborn.com/blog/post/explained-the-verus-ethereum-bridge-hack-may-2026",
+          "publisher": "Halborn",
+          "date": "2026-05",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-05-openclaw-hologram-fake-installer",
+      "title": "Fake OpenClaw installer ships the Hologram Rust infostealer aimed at 201 wallet extensions",
+      "date": "2026-05-07",
+      "datePrecision": "day",
+      "category": "malware-infostealer",
+      "target": "Users looking for the OpenClaw AI agent",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "The lure is an AI agent install; people setting up agents are being targeted for the wallet and password-manager data on the same machine.",
+      "path": "Netskope reports a look-alike download site (openclaw-installer.com, registered March 2026) that points to a typosquatted GitHub organisation and delivers a Rust dropper with sandbox checks and defence disabling. Its manifest lists about 250 browser extensions, 201 of them crypto wallets (MetaMask, Phantom, Coinbase Wallet and others) and 49 password managers or 2FA apps. Netskope calls it a second wave after a February 2026 fake OpenClaw installer documented by Huntress (Vidar and GhostSocks).",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Key and extension theft on the operator's machine happens before any transaction. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://www.netskope.com/blog/openclaw-hologram-fake-installer-ships-rust-infostealer",
+          "publisher": "Netskope Threat Labs",
+          "date": "2026-05-07",
+          "kind": "primary"
+        },
+        {
+          "url": "https://vpncentral.com/fake-openclaw-installer-targets-crypto-wallets-and-password-managers/",
+          "publisher": "VPNCentral",
+          "date": "2026-05",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-05-grok-bankr-morse-injection",
+      "title": "Grok-linked Bankr wallet drained via prompt injection hidden in Morse code",
+      "date": "2026-05-04",
+      "datePrecision": "day",
+      "category": "prompt-injection",
+      "target": "Wallet controlled by Grok through the Bankr trading bot on X",
+      "chain": "Base",
+      "aiAgent": true,
+      "aiAgentWhy": "A public AI agent with signing authority executed a transfer on instructions smuggled in through a post it read.",
+      "path": "As reported, the attacker first sent a 'Bankr Club Membership' NFT to the Grok-controlled wallet, which acted as a permission-granting object in Bankr, then posted a Morse-encoded instruction that Grok decoded and relayed, causing Bankr to execute a transfer. About 80% of the funds were later returned, per Giskard.",
+      "loss": {
+        "usd": 150000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "tricked",
+      "seinNote": "An instruction from untrusted social content drove a payment to an unknown receiver; screening the instruction and checking the receiver are the matching layers. The matching SeIn check is tricked (pattern only, not tested against this incident).",
+      "arenaCase": "S-MORSE",
+      "sources": [
+        {
+          "url": "https://giskard.ai/knowledge/how-grok-got-prompt-injected-an-x-user-drained-150-000-from-an-ai-wallet",
+          "publisher": "Giskard",
+          "date": "2026-05-07",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://neuraltrust.ai/blog/grok-morse-code",
+          "publisher": "NeuralTrust",
+          "date": "2026-05",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://cointelegraph.com/news/grok-bankr-wallet-free-nft-prompt-injection",
+          "publisher": "Cointelegraph",
+          "date": "2026-05",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://oecd.ai/en/incidents/2026-05-04-4a73",
+          "publisher": "OECD AI Incidents Monitor",
+          "date": "2026-05",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-04-litecoin-mweb-reorg-near-intents",
+      "title": "Litecoin MWEB zero-day and 13-block reorg leave NEAR Intents holding reversed LTC",
+      "date": "2026-04-25",
+      "datePrecision": "day",
+      "category": "other",
+      "target": "Litecoin network; NEAR Intents and THORChain as swap venues",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "An attacker used a zero-day in Litecoin's MWEB privacy layer; non-updated nodes accepted invalid MWEB transactions and a 13-block reorg followed on 25 Apr 2026. Per the Litecoin post-mortem as reported, the attacker swapped 11,000 LTC for 7.78814476 BTC through NEAR Intents (and 10 LTC on THORChain) before the reorg removed the LTC from the valid chain. An earlier MWEB inflation bug had allowed a fabricated 85,034 LTC pegout, which developers froze.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "The loss came from base-layer finality failing after a swap settled; no per-transaction check on the paying side sees a later reorg. The matching SeIn check is out-of-scope (lying data source / chain finality) (pattern only, not tested against this incident).",
+      "arenaCase": "C-LYING-RPC",
+      "sources": [
+        {
+          "url": "https://litecoin.com/news/litecoin-mweb-security-incident-postmortem",
+          "publisher": "Litecoin Foundation",
+          "date": "2026-04",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.theblock.co/post/398892/litecoin-rewrites-three-hours-of-history-to-undo-its-first-major-privacy-layer-exploit",
+          "publisher": "The Block",
+          "date": "2026-04-25",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://news.bitcoin.com/litecoin-postmortem-mweb-bug-let-attacker-fake-85034-ltc-pegout-before-devs-froze-funds/",
+          "publisher": "Bitcoin.com News",
+          "date": "2026-04",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-04-kelp-dvn-rpc-node-binary-swap",
+      "title": "Kelp rsETH released after verifier RPC nodes were swapped for lying builds",
+      "date": "2026-04-18",
+      "datePrecision": "day",
+      "category": "rpc-mitm",
+      "target": "Kelp DAO rsETH via LayerZero DVN verification",
+      "chain": "Ethereum",
+      "aiAgent": false,
+      "aiAgentWhy": "Shows that a node an automated system trusts for chain state can lie; agents that check balances or deposits through one RPC share the pattern.",
+      "path": "Per LayerZero's statement (20 Apr), the attacker reached the RPC list used by the LayerZero Labs DVN, compromised two nodes it relied on and replaced their op-geth binaries, then used DDoS pressure to force failover onto the poisoned nodes. With rsETH on a single-verifier (1-of-1 DVN) setup, the false attestation released about 116,500 rsETH. LayerZero's later report traces initial access to a developer socially engineered in March; Kelp disputes who set the 1-of-1 default.",
+      "loss": {
+        "usd": 292000000,
+        "status": "reported",
+        "source": 2
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "A lying data source is listed as beyond any guard. The matching SeIn check is out-of-scope (lying data source) (pattern only, not tested against this incident).",
+      "arenaCase": "C-LYING-RPC",
+      "sources": [
+        {
+          "url": "https://layerzero.network/blog/kelpdao-incident-statement",
+          "publisher": "LayerZero",
+          "date": "2026-04-20",
+          "kind": "primary"
+        },
+        {
+          "url": "https://layerzero.network/blog/layerzero-labs-kelpdao-incident-report",
+          "publisher": "LayerZero",
+          "date": "2026-05-18",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.theblock.co/post/398204/kelp-dao-shifts-blame-layerzero",
+          "publisher": "The Block",
+          "date": "2026-04",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://blocksec.com/blog/weekly-web3-security-incident-roundup-apr-13-apr-19-2026",
+          "publisher": "BlockSec",
+          "date": "2026-04",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-04-rhea-margin-fake-pools",
+      "title": "Rhea Finance margin trading drained through a slippage-check flaw and attacker-built routes",
+      "date": "2026-04-16",
+      "datePrecision": "day",
+      "category": "other",
+      "target": "Rhea Finance (formerly Burrow), NEAR lending and margin protocol",
+      "chain": "NEAR",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "The attacker hit Rhea's margin-trading module with a fabricated swap route through attacker-created tokens and pools; per Rhea's post-mortem as reported, the code borrowed real assets against the route without checking that the swap output matched expectations (a slippage-protection flaw). The post-mortem raised the loss from about $7.6M to $18.4M. The attacker later returned about $3.3M in USDC and 1.56M NEAR, as reported.",
+      "loss": {
+        "usd": 18400000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Per the README, this is not an agent-side preflight scenario: the attacker drained the protocol with its own crafted route. The matching SeIn check is out-of-scope (protocol logic) (pattern only, not tested against this incident). A deal check against a reference price only helps an agent avoid trading into a fake pool, not the protocol.",
+      "arenaCase": null,
+      "sources": [
+        {
+          "url": "https://www.theblock.co/post/397961/rhea-finance-post-mortem-exploit-losses-18-4-million-double-initial-estimates",
+          "publisher": "The Block",
+          "date": "2026-04-17",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.halborn.com/blog/post/explained-the-rhea-finance-hack-april-2026",
+          "publisher": "Halborn",
+          "date": "2026-04",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://blocksec.com/blog/newsletter-april-2026",
+          "publisher": "BlockSec",
+          "date": "2026-04",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-04-malicious-llm-api-routers",
+      "title": "Study finds third-party LLM API routers injecting malicious code and abusing credentials",
+      "date": "2026-04-10",
+      "datePrecision": "day",
+      "category": "rpc-mitm",
+      "target": "AI agents and developers using third-party LLM proxy routers",
+      "chain": "n/a",
+      "aiAgent": true,
+      "aiAgentWhy": "A router sits between the agent and the model in plaintext, so it can rewrite tool calls such as a payment recipient, or read keys in prompts.",
+      "path": "Researchers tested 428 LLM API routers (28 paid, 400 free); 9 injected malicious code into responses and 17 touched AWS canary credentials the researchers planted. Because a router terminates TLS and opens its own upstream connection, it sees and can change all traffic; in a controlled test one router drained Ether from a researcher-owned decoy wallet.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": 0
+      },
+      "seinCheck": "receiver",
+      "seinNote": "A rewritten tool call after the model decides is a changed-recipient pattern; the matching SeIn checks are receiver and action (pattern only, not tested against this incident). Keys sent through the router are out-of-scope.",
+      "arenaCase": "S-REWRITTEN",
+      "sources": [
+        {
+          "url": "https://arxiv.org/abs/2604.08407",
+          "publisher": "arXiv (Your Agent Is Mine)",
+          "date": "2026-04",
+          "kind": "primary"
+        },
+        {
+          "url": "https://labs.cloudsecurityalliance.org/research/csa-research-note-llm-proxy-router-risk-20260416-csa-styled/",
+          "publisher": "Cloud Security Alliance",
+          "date": "2026-04-16",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "2026-04-drift-durable-nonce-multisig",
+      "title": "Drift Protocol drained with pre-signed durable-nonce transactions after months of social engineering",
+      "date": "2026-04-01",
+      "datePrecision": "day",
+      "category": "key-compromise",
+      "target": "Drift Protocol (Solana perpetuals DEX) admin multisig",
+      "chain": "Solana",
+      "aiAgent": true,
+      "aiAgentWhy": "Pre-signed transactions with durable nonces stay valid for later use; an agent that pre-signs or signs batches can hand an attacker a delayed execution.",
+      "path": "Drift described a roughly six-month operation that began in person at a conference in fall 2025, with malware on developer devices leading to multisig signer compromise. The attacker prepared durable-nonce accounts about eight days ahead and, about a minute after a routine test withdrawal, submitted pre-signed transactions that took admin control and drained user assets. TRM attributes it to likely North Korean actors.",
+      "loss": {
+        "usd": 285000000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Signer keys and approvals were obtained off-chain; the drain was signed by real keys. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident). A per-period budget held outside the signers is the only partial layer.",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://www.trmlabs.com/resources/blog/north-korean-hackers-attack-drift-protocol-in-285-million-heist",
+          "publisher": "TRM Labs",
+          "date": "2026-04",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.theblock.co/post/396361/drift-links-280-million-exploit-to-six-month-social-engineering-op-run-by-suspected-north-korean-actors",
+          "publisher": "The Block",
+          "date": "2026-04",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://nexusmutual.io/blog/drift-protocol-incident-report",
+          "publisher": "Nexus Mutual",
+          "date": "2026-04",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://blocksec.com/blog/drift-protocol-incident-multisig-governance-compromise-via-durable-nonce-exploitation",
+          "publisher": "BlockSec",
+          "date": "2026-04",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-03-aave-position-address-poisoning-24m",
+      "title": "Address-poisoning victim sends about $24M in aEthUSDC to a look-alike address",
+      "date": "2026-03-05",
+      "datePrecision": "day",
+      "category": "address-poisoning",
+      "target": "Individual holder (known as 'Sillytuna') with an Aave position",
+      "chain": "Ethereum",
+      "aiAgent": true,
+      "aiAgentWhy": "Agents that pick a payee from transaction history are exposed to the same look-alike entries.",
+      "path": "Reports say the holder sent about $24M in aEthUSDC to an address planted in their history to resemble a known one. PeckShield tracked the receiving wallets, which had not yet mixed or withdrawn significant funds at the time of reporting. One outlet links the case to violent threats against the victim.",
+      "loss": {
+        "usd": 24000000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "receiver",
+      "seinNote": "A new account that only resembles a known payee is what a receiver check against known accounts looks at. The matching SeIn check is receiver (pattern only, not tested against this incident).",
+      "arenaCase": "S-LOOKALIKE",
+      "sources": [
+        {
+          "url": "https://www.theblock.co/post/392363/sillytuna-x-account-claims-crypto-stolen",
+          "publisher": "The Block",
+          "date": "2026-03",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://beincrypto.com/crypto-attack-sillytuna-violent-threats",
+          "publisher": "BeInCrypto",
+          "date": "2026-03",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-02-promptmink-ai-commit-trading-agent",
+      "title": "PromptMink: AI-assisted commit pulls credential-stealing package into a Solana trading agent",
+      "date": "2026-02-28",
+      "datePrecision": "day",
+      "category": "supply-chain",
+      "target": "openpaw-graveyard, an open-source autonomous Solana trading agent, and its users' keys",
+      "chain": "Solana",
+      "aiAgent": true,
+      "aiAgentWhy": "Malicious packages were written to look attractive to AI coding agents, and one was added to a money-holding trading agent by an AI-co-authored commit.",
+      "path": "A 28 Feb 2026 commit co-authored by an AI coding assistant added @solana-launchpad/sdk to an autonomous Solana trading agent; the malicious code arrived via a transitive dependency, @validate-sdk/v2, whose functions posed as encoding and hash validation while exfiltrating secrets from the environment. ReversingLabs ties it to a DPRK (Famous Chollima) campaign of 60+ packages since Sep 2025 and says the packages were LLM-generated and tuned to be picked by coding agents that judge packages by docs and metadata.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Stolen wallet keys let the attacker sign directly, bypassing any agent-side guard; a payment firewall only helps if keys never sit in the agent's environment. Out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://reversinglabs.com/blog/claude-promptmink-malware-crypto",
+          "publisher": "ReversingLabs",
+          "date": "2026-04",
+          "kind": "primary"
+        },
+        {
+          "url": "https://infosecurity-magazine.com/news/ai-npm-dependency-targets-crypto",
+          "publisher": "Infosecurity Magazine",
+          "date": "2026-04",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://labs.cloudsecurityalliance.org/research/csa-research-note-promptmink-dprk-ai-generated-supply-chain",
+          "publisher": "Cloud Security Alliance Labs",
+          "date": "2026-04-30",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-02-moonwell-cbeth-oracle-misconfig",
+      "title": "Moonwell oracle misconfiguration prices cbETH without the ETH/USD leg; bots extract about $1.8M",
+      "date": "2026-02-15",
+      "datePrecision": "day",
+      "category": "price-oracle",
+      "target": "Moonwell lending markets (Base / Optimism)",
+      "chain": "Base",
+      "aiAgent": true,
+      "aiAgentWhy": "Reported to involve code changes written with an AI assistant; also shows agents trading against a data source that is simply wrong.",
+      "path": "A Moonwell oracle configuration derived the USD value of cbETH from the raw cbETH/ETH exchange rate without multiplying by ETH/USD, so cbETH was priced near 1 USD. Bots used the mispricing, leaving the protocol with about $1.78M to $1.8M of bad debt. Cointelegraph's coverage ties the faulty change to AI-assisted commits and gaps in testing and audits.",
+      "loss": {
+        "usd": 1779045,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "The data source itself was wrong, which no check that trusts it can catch. The matching SeIn check is out-of-scope (lying data source) (pattern only, not tested against this incident). For an agent, a deal check against an independent reference price is the related layer.",
+      "arenaCase": "C-LYING-RPC",
+      "sources": [
+        {
+          "url": "https://www.theblock.co/post/390302/defi-lending-protocol-moonwell-hit-with-1-8-million-bad-debt-after-oracle-misconfiguration",
+          "publisher": "The Block",
+          "date": "2026-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://cointelegraph.com/news/moonwell-exploit-cbeth-oracle-misprice-ai-commits-testing-audits",
+          "publisher": "Cointelegraph",
+          "date": "2026-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://decrypt.co/358374/oracle-error-leaves-defi-lender-moonwell-1-8-million-bad-debt",
+          "publisher": "Decrypt",
+          "date": "2026-02",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-02-clawhub-malicious-crypto-skills",
+      "title": "Hundreds of malicious OpenClaw skills on ClawHub target crypto users",
+      "date": "2026-02-01",
+      "datePrecision": "month",
+      "category": "supply-chain",
+      "target": "OpenClaw (formerly Moltbot) agent users installing ClawHub skills",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "Skills extend a personal AI agent; a poisoned skill marketplace reaches the machines where agents keep exchange API keys and wallet keys.",
+      "path": "Researchers found hundreds of malicious skills on ClawHub (Koi Security: 341 of 2,857 audited; crypto utilities such as Solana and Phantom wallet trackers were the largest group, 111). Skills used ClickFix-style social engineering, such as asking the user to download a zip 'to make authentication work', delivering a macOS Atomic Stealer variant that takes exchange API keys, wallet keys, SSH credentials and browser passwords. OpenClaw added skill reporting and VirusTotal scanning on 7 Feb.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Infostealer theft of keys and API credentials happens outside any transaction path. Out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2026/02/researchers-find-341-malicious-clawhub.html",
+          "publisher": "The Hacker News (citing Koi Security)",
+          "date": "2026-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://opensourcemalware.com/blog/malicious-clawhub-skills-target-openclaw-users",
+          "publisher": "OpenSourceMalware (Paul McCarty)",
+          "date": "2026-02",
+          "kind": "primary"
+        },
+        {
+          "url": "https://infosecurity-magazine.com/news/malicious-crypto-trading-skills",
+          "publisher": "Infosecurity Magazine",
+          "date": "2026-02",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2026-02-sandworm-mode-npm-worm",
+      "title": "SANDWORM_MODE npm worm impersonates AI coding tools to steal crypto keys and CI secrets",
+      "date": "2026-02-01",
+      "datePrecision": "month",
+      "category": "supply-chain",
+      "target": "Developers and AI development environments installing npm packages",
+      "chain": "n/a",
+      "aiAgent": true,
+      "aiAgentWhy": "It impersonated AI coding tools and targeted AI development environments where agent keys and wallet secrets live.",
+      "path": "Socket reported a self-spreading npm worm that impersonated widely used developer utilities, crypto libraries and AI coding tools (including look-alikes of supports-color, Claude Code and OpenClaw), stealing crypto keys and CI secrets. Endor Labs published a multi-stage analysis.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Key and secret theft at install time sits outside any payment check. Out-of-scope (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://endorlabs.com/learn/sandworm-mode-dissecting-a-multi-stage-npm-supply-chain-attack",
+          "publisher": "Endor Labs",
+          "date": "2026-02",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.scworld.com/news/sandwormmode-shai-hulud-with-an-ai-twist",
+          "publisher": "SC Media",
+          "date": "2026-02",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2025-12-trust-wallet-extension-2-68",
+      "title": "Trust Wallet browser extension 2.68 trojanised through leaked Chrome Web Store key",
+      "date": "2025-12-24",
+      "datePrecision": "day",
+      "category": "supply-chain",
+      "target": "Trust Wallet Chrome extension users",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "Trust Wallet's post-mortem, as reported, says the Nov 2025 Sha1-Hulud npm worm exposed developer GitHub secrets, including the extension source and the Chrome Web Store API key. The attacker uploaded a tampered 2.68 build based on older code that captured seed phrases from stored wallets on unlock and sent them to a look-alike metrics domain. Version 2.69 replaced it on 25 Dec and refunds were promised.",
+      "loss": {
+        "usd": 8500000,
+        "status": "reported",
+        "source": 1
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "The seed phrase itself was stolen, so the attacker signed directly and never went through any guard. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2025/12/trust-wallet-chrome-extension-hack.html",
+          "publisher": "The Hacker News",
+          "date": "2025-12",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.halborn.com/blog/post/explained-the-trust-wallet-hack-december-2025",
+          "publisher": "Halborn",
+          "date": "2025-12",
+          "kind": "primary"
+        },
+        {
+          "url": "https://securityaffairs.com/186398/hacking/trust-wallet-confirms-second-shai-hulud-supply-chain-attack-8-5m-in-crypto-stolen.html",
+          "publisher": "Security Affairs",
+          "date": "2025-12",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2025-10-contagious-interview-npm-wave",
+      "title": "Contagious Interview: fake recruiters push crypto and AI developers to run trojanised coding tasks",
+      "date": "2025-10",
+      "datePrecision": "month",
+      "category": "insider-social",
+      "target": "Web3, crypto and AI developers",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "Developers who build agents are a named target group, and the payloads steal wallet data and keys from the machine where agent code runs.",
+      "path": "The DPRK-linked campaign approaches developers on LinkedIn, Discord and similar, then asks them to run an interview assignment from a repository or npm package. Payloads such as BeaverTail and InvisibleFerret steal browser wallet data and open a backdoor; Socket counted 338 malicious npm packages in the October 2025 wave, and later variants pull payloads from JSON storage services. Binance's 2026 post-mortem (run 1) reported a fake interview in its own entry chain.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Developer-machine compromise is beyond any transaction guard. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://www.esecurityplanet.com/news/338-malicious-npm-packages-linked-to-north-korean-hackers/",
+          "publisher": "eSecurity Planet (citing Socket)",
+          "date": "2025-10",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://kudelskisecurity.com/research/how-dprks-contagious-interview-campaign-targets-developers",
+          "publisher": "Kudelski Security",
+          "date": "2025",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.infoworld.com/article/4090984/north-koreas-job-test-trap-upgrades-to-json-malware-dropboxes-2.html",
+          "publisher": "InfoWorld",
+          "date": "2025-11",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2025-09-npm-chalk-debug-address-swap",
+      "title": "Phished npm maintainer: chalk, debug and ~18 other packages ship wallet-address-swapping code",
+      "date": "2025-09-08",
+      "datePrecision": "day",
+      "category": "supply-chain",
+      "target": "npm packages with about 2 billion weekly downloads (chalk, debug, color-convert and others)",
+      "chain": "multi",
+      "aiAgent": true,
+      "aiAgentWhy": "Agent stacks are built from npm dependencies; code in the bundle can rewrite a destination address after the agent decides and before it signs.",
+      "path": "A maintainer received a phishing email from a look-alike domain (npmjs.help) asking for a 2FA update, and the attacker published malicious versions such as chalk@5.6.1 and debug@4.4.2. The payload hooked browser fetch/XMLHttpRequest and wallet calls, replaced detected crypto addresses with visually similar attacker addresses before signing. npm removed the versions within hours; reported thefts were small because the code only ran where the packages reached a browser bundle.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "receiver",
+      "seinNote": "The payload changes the payee after the decision. A receiver check against known payees, done on the final transaction outside the compromised process, is the matching layer. The matching SeIn check is receiver (pattern only, not tested against this incident).",
+      "arenaCase": "S-REWRITTEN",
+      "sources": [
+        {
+          "url": "https://thehackernews.com/2025/09/20-popular-npm-packages-with-2-billion.html",
+          "publisher": "The Hacker News",
+          "date": "2025-09",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://blockaid.io/blog/attack-report-the-september-2025-npm-supply-chain-attack",
+          "publisher": "Blockaid",
+          "date": "2025-09",
+          "kind": "primary"
+        },
+        {
+          "url": "https://rekt.news/npm-heist",
+          "publisher": "Rekt",
+          "date": "2025-09",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "2025-08-greedybear-firefox-wallet-extensions",
+      "title": "GreedyBear: 150+ fake wallet extensions on Firefox steal credentials, over $1M reported",
+      "date": "2025-08",
+      "datePrecision": "month",
+      "category": "malware-infostealer",
+      "target": "Users installing MetaMask, TronLink, Exodus, Rabby look-alikes",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": null,
+      "path": "Koi Security found more than 150 Firefox add-ons posing as wallets that captured secrets typed into their popups and sent them to attacker servers. The group uploaded harmless versions first, then pushed malicious updates and fake reviews; Koi also linked nearly 500 Windows executables and phishing sites, mostly on one IP. Mozilla removed the add-ons after the report.",
+      "loss": {
+        "usd": 1000000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Seed and password capture by a fake wallet is key theft. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://koi.ai/blog/greedybear-650-attack-tools-one-coordinated-campaign",
+          "publisher": "Koi Security",
+          "date": "2025-08",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.bleepingcomputer.com/news/security/wave-of-150-crypto-draining-extensions-hits-firefox-add-on-store/",
+          "publisher": "BleepingComputer",
+          "date": "2025-08",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "2025-05-lumma-stealer-disruption",
+      "title": "Lumma infostealer, which harvested crypto wallets, disrupted after 394,000 Windows infections in two months",
+      "date": "2025-05-21",
+      "datePrecision": "day",
+      "category": "malware-infostealer",
+      "target": "Windows users worldwide; wallets, passwords, bank and card data",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": "Commodity stealers lift hot keys and API secrets from any machine, including hosts that run agents with wallet access.",
+      "path": "Microsoft's Digital Crimes Unit, under a court order from the Northern District of Georgia, took down, suspended or blocked about 2,300 Lumma domains (action from 13 May 2025), while the DOJ seized the central command panel and Europol and Japan's JC3 handled local infrastructure. Microsoft counted over 394,000 infected Windows computers between 16 March and 16 May 2025; Lumma stole passwords, cards, bank accounts and crypto wallets.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Endpoint theft of keys is beyond any transaction guard. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://blogs.microsoft.com/on-the-issues/2025/05/21/microsoft-leads-global-action-against-favored-cybercrime-tool/",
+          "publisher": "Microsoft On the Issues",
+          "date": "2025-05-21",
+          "kind": "primary"
+        },
+        {
+          "url": "https://thehackernews.com/2025/05/fbi-and-europol-disrupt-lumma-stealer.html",
+          "publisher": "The Hacker News",
+          "date": "2025-05",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.malwarebytes.com/blog/news/2025/05/lumma-information-stealer-infrastructure-disrupted",
+          "publisher": "Malwarebytes",
+          "date": "2025-05",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "2025-05-coinbase-support-insider-data-theft",
+      "title": "Coinbase: bribed support personnel leak customer data used for impersonation scams",
+      "date": "2025-05-14",
+      "datePrecision": "day",
+      "category": "insider-social",
+      "target": "Coinbase retail customers (under 1%)",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": "Leaked account data powers 'support' impersonation that tells holders to move funds to a 'safe' address; an agent that accepts such instructions faces the same pattern.",
+      "path": "Coinbase's Item 1.05 8-K says personnel who accessed data without business need, detected in prior months, were part of a single campaign that took customer data from internal systems; the attacker emailed an extortion demand on 11 May 2025 ($20M, refused). Names, addresses, emails, masked bank data, last-four SSN digits and ID images were exposed, not keys or 2FA; the data was used to socially engineer customers into sending funds. Coinbase estimated $180M-$400M in costs and later booked $307M (Q2 2025) plus $48M (Q3 2025).",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": null
+      },
+      "seinCheck": "receiver",
+      "seinNote": "The data leak itself is beyond any guard; the follow-on scam ('move funds to this safe wallet') is a new-receiver pattern. The matching SeIn check is receiver (pattern only, not tested against this incident).",
+      "arenaCase": null,
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1679788/000167978825000094/coin-20250514.htm",
+          "publisher": "Coinbase Global, Form 8-K (SEC)",
+          "date": "2025-05-14",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1679788/000167978825000153/q225shareholderletter.htm",
+          "publisher": "Coinbase Q2 2025 shareholder letter (SEC)",
+          "date": "2025-07",
+          "kind": "primary"
+        },
+        {
+          "url": "https://www.helpnetsecurity.com/?p=331195",
+          "publisher": "Help Net Security",
+          "date": "2025-05",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "2025-04-elusive-comet-zoom-remote-control",
+      "title": "ELUSIVE COMET: fake media interviews use Zoom remote control to take over crypto holders' machines",
+      "date": "2025-04-17",
+      "datePrecision": "day",
+      "category": "insider-social",
+      "target": "Crypto founders, investors and engineers",
+      "chain": "multi",
+      "aiAgent": false,
+      "aiAgentWhy": "Operators of money-holding agents are high-value targets: one approved remote-control prompt hands over the machine that holds the keys.",
+      "path": "Trail of Bits reported that a group posing as 'Bloomberg Crypto' and similar outlets invites targets to a Zoom call, renames a participant to 'Zoom' and requests remote control so the prompt looks like a system notice. Once granted, the attackers can install malware or move funds directly. Trail of Bits advised using the web client and blocking Zoom's accessibility permission on macOS; SEAL urged disabling remote-control requests.",
+      "loss": {
+        "usd": null,
+        "status": "unknown",
+        "source": 0
+      },
+      "seinCheck": "out-of-scope",
+      "seinNote": "Device takeover of the operator is beyond transaction checks. The matching SeIn check is out-of-scope (stolen custody key) (pattern only, not tested against this incident).",
+      "arenaCase": "N-STOLEN-KEY",
+      "sources": [
+        {
+          "url": "https://blog.trailofbits.com/2025/04/17/mitigating-elusive-comet-zoom-remote-control-attacks/",
+          "publisher": "Trail of Bits",
+          "date": "2025-04-17",
+          "kind": "primary"
+        },
+        {
+          "url": "https://securityweek.com/north-korean-cryptocurrency-thieves-caught-hijacking-zoom-remote-control-feature",
+          "publisher": "SecurityWeek",
+          "date": "2025-04",
+          "kind": "secondary"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "2025-02-bybit-safe-ui-spoof",
+      "title": "Bybit cold-wallet loss: tampered Safe{Wallet} UI hid a malicious contract upgrade from signers",
+      "date": "2025-02-21",
+      "datePrecision": "day",
+      "category": "blind-signing",
+      "target": "Bybit Ethereum multisig cold wallet (Safe{Wallet})",
+      "chain": "Ethereum",
+      "aiAgent": true,
+      "aiAgentWhy": "An agent that signs what a UI or API presents faces the same gap: what is shown is not what is signed.",
+      "path": "Attackers compromised a Safe developer machine and injected JavaScript into Safe{Wallet}'s front-end assets on AWS S3, set to activate only for Bybit's wallet. On 21 Feb 2025 three of six signers approved what looked like a routine transfer; the signed payload instead changed the wallet's implementation to an attacker contract (a self-upgrade, not a changed counterparty), which then swept about 401,347 ETH and other assets. Sygnia and Verichains found no compromise of Bybit's own infrastructure.",
+      "loss": {
+        "usd": 1400000000,
+        "status": "reported",
+        "source": 0
+      },
+      "seinCheck": "action",
+      "seinNote": "The signed action was a wallet upgrade, not a payment. A check that decodes the actual calldata and allows only swaps, transfers and approved calls is the matching layer. The matching SeIn check is action (pattern only, not tested against this incident).",
+      "arenaCase": "S-OWNERSHIP",
+      "sources": [
+        {
+          "url": "https://crypto.news/bybit-1-4b-theft-originated-from-compromised-safe-ui/",
+          "publisher": "crypto.news (citing Sygnia and Verichains)",
+          "date": "2025-02",
+          "kind": "secondary"
+        },
+        {
+          "url": "https://www.nccgroup.com/research/in-depth-technical-analysis-of-the-bybit-hack/",
+          "publisher": "NCC Group",
+          "date": "2025",
+          "kind": "primary"
+        },
+        {
+          "url": "https://slowmist.medium.com/bybits-1-5-billion-theft-unveiled-safe-wallet-front-end-code-tampered-84b78f0fa9c2",
+          "publisher": "SlowMist",
+          "date": "2025-02",
+          "kind": "primary"
+        }
+      ],
+      "confidence": "high"
+    }
+  ]
+}
