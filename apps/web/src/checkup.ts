@@ -1,6 +1,7 @@
 // SeIn Checkpoint: scan any NEAR account from this browser, cut bad connections with the owner's wallet, keep the lesson.
 import { esc } from "./arena-data";
 import { lessonFrom, safeToCut, scan, type AccessKey, type Finding, type Flag, type Lesson, type Network, type ScanInput, type ScanResult } from "./checkup-core";
+import { outlook, type Outlook, type Tx } from "./checkup-outlook";
 import type { Scene } from "./checkup-scene";
 import { explorerTx } from "./verify-chain";
 
@@ -15,7 +16,7 @@ const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, calm ? 0 : ms));
 
 async function rpc<T>(network: Network, params: Record<string, unknown>): Promise<{ result?: T; error?: string }> {
-  const res = await fetch(RPC[network], { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "checkup", method: "query", params: { finality: "final", ...params } }) });
+  const res = await fetch(RPC[network], { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: "checkup", method: "query", params: { finality: "final", ...params } }), signal: AbortSignal.timeout(12_000) });
   const j = (await res.json()) as { result?: T & { error?: string }; error?: { cause?: { name?: string } } };
   if (j.error) return { error: j.error.cause?.name ?? "error" };
   if (j.result?.error) return { error: j.result.error };
@@ -76,8 +77,10 @@ async function gather(account: string, network: Network, flagged: Flag[]): Promi
   await sleep(250);
 
   step = log("Reading tokens, NFTs and staking");
-  const full = await fetch(`${FAST[network]}/v1/account/${encodeURIComponent(account)}/full`).then((r) => r.json() as Promise<{ tokens?: { contract_id: string }[]; nfts?: { contract_id: string }[]; pools?: { pool_id: string }[] }>).catch(() => undefined);
+  // a data source that hangs must not hold up the whole check-up
+  const full = await fetch(`${FAST[network]}/v1/account/${encodeURIComponent(account)}/full`, { signal: AbortSignal.timeout(10_000) }).then((r) => (r.ok ? (r.json() as Promise<{ tokens?: { contract_id: string }[]; nfts?: { contract_id: string }[]; pools?: { pool_id: string }[] }>) : undefined)).catch(() => undefined);
   step.className = full ? "done" : "warn";
+  if (!full) step.textContent = "Tokens and NFTs could not be read right now; the rest of the check goes on";
   await sleep(250);
 
   // NEAR Intents exists on mainnet only, and keeps its own key list per account
@@ -97,10 +100,11 @@ async function gather(account: string, network: Network, flagged: Flag[]): Promi
   step.textContent = who.agent ? "An AI agent's wallet" : "No sign of an AI agent";
 
   step = log("Checking who it recently dealt with");
-  const txs = await fetch(`${BLOCKS[network]}/v3/accounts/${encodeURIComponent(account)}/txns?limit=25`).then((r) => (r.ok ? (r.json() as Promise<{ data?: { signer_account_id: string; receiver_account_id: string }[] }>) : undefined)).catch(() => undefined);
+  const txs = await fetch(`${BLOCKS[network]}/v3/accounts/${encodeURIComponent(account)}/txns?limit=50`, { signal: AbortSignal.timeout(10_000) }).then((r) => (r.ok ? (r.json() as Promise<{ data?: RawTx[] }>) : undefined)).catch(() => undefined);
+  past = (txs?.data ?? []).map((t) => ({ signer: t.signer_account_id, receiver: t.receiver_account_id, actions: t.actions ?? [], deposit: t.actions_agg?.deposit ?? "0", time: Number(BigInt(t.block_timestamp ?? "0") / 1_000_000n), ok: t.outcomes?.status !== false }));
   const contacts = (txs?.data ?? []).flatMap((t) => [t.signer_account_id, t.receiver_account_id]).filter((c) => c && c !== account);
   step.className = txs ? "done" : "warn";
-  if (!txs) step.textContent = "Recent contacts could not be read right now";
+  if (!txs) step.textContent = "Recent history could not be read right now, so the outlook below has less to go on";
 
   return {
     ...base,
@@ -115,6 +119,19 @@ async function gather(account: string, network: Network, flagged: Flag[]): Promi
     pools: (full?.pools ?? []).map((p) => p.pool_id),
     contacts,
   };
+}
+
+interface RawTx { signer_account_id: string; receiver_account_id: string; actions?: { action: string; method?: string | null }[]; actions_agg?: { deposit?: string }; block_timestamp?: string; outcomes?: { status?: boolean } }
+let past: Tx[] = [];
+
+const LEVEL = { low: "Low", elevated: "Elevated", high: "High" } as const;
+function renderOutlook(o: Outlook) {
+  $("cp-outlook-head").textContent = o.headline;
+  $("cp-outlook-basis").textContent = o.basis;
+  $("cp-outlook-lanes").innerHTML = o.lanes
+    .map((l) => `<article class="cp-lane ${l.level}"><p class="cp-lane-level"><span class="cp-meter" aria-hidden="true"><i></i><i></i><i></i></span>${LEVEL[l.level]}</p><h3>${esc(l.title)}</h3><ul>${l.reasons.map((r) => `<li>${esc(r)}</li>`).join("")}</ul><p class="cp-lane-do">${esc(l.action)}</p></article>`)
+    .join("");
+  $("cp-outlook").hidden = false;
 }
 
 const ICON: Record<Finding["severity"], string> = { danger: "!", caution: "?", ok: "✓", info: "i" };
@@ -181,6 +198,7 @@ async function run(account: string, network: Network) {
   history.replaceState(null, "", `?account=${encodeURIComponent(account)}&network=${network}`);
   document.body.dataset.state = "scanning";
   $("cp-result").hidden = true;
+  $("cp-outlook").hidden = true;
   scene?.scanning(true);
   const input = await gather(account, network, flagged);
   const result = scan(input);
@@ -189,6 +207,7 @@ async function run(account: string, network: Network) {
   scene?.scanning(false);
   scene?.show(result.connections, result.score);
   renderScore(result);
+  renderOutlook(outlook(input, result, past, identity));
   renderFindings(result);
   renderHeal(result);
   renderLesson(lessonFrom(input, result));

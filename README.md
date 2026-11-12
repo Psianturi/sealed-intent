@@ -20,7 +20,7 @@ Built at NEAR HACKATHON, November 2026. Tracks: `security`, `privacy`, `agents`.
 | 4 | Open https://sein-near.vercel.app/proof | Five tiles turn green. Your browser reads the registry contract, the custody payments, the NEAR AI enclave key, a fresh NEAR Intents quote and a NEP-413 owner signature from NEAR, NEAR AI Cloud and 1Click directly; nothing passes through a SeIn server |
 | 5 | Open https://sein-near.vercel.app/verify.html, press **Try a real receipt**, then **Change the verdict and check again** | Valid, then invalid |
 | 6 | Open https://sein-near.vercel.app/arena.html | Play ten requests as the guard, watch the recorded run, browse 15 cases and the incident list |
-| 7 | Open https://sein-near.vercel.app/checkup and type any NEAR account | Its keys, the apps connected to it, look-alike and reported contacts, and keys registered inside NEAR Intents |
+| 7 | Open https://sein-near.vercel.app/checkup and type any NEAR account | A risk outlook read from its last 50 transactions (being steered to a look-alike receiver, keys that can act without the owner, who it pays), then its keys, the apps connected to it, look-alike and reported contacts, and keys registered inside NEAR Intents |
 
 **On your machine, no keys and no funds** (Node.js 22.13+ and pnpm through `corepack enable`):
 
@@ -56,7 +56,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | Owner approval with a NEAR wallet signature (NEP-413), from the browser | Built, live on testnet |
 | A hosted SeIn on Google Cloud Run, behind the Try it page | Built. A shared testnet demo wallet with small limits, not a service for your own agent |
 | MCP server, REST API, and a check for x402 payment requests | Built. x402 is covered by tests and reads the payees a service publishes |
-| Checkpoint: scan and heal any NEAR account | Built, runs in the browser against NEAR mainnet or testnet |
+| Checkpoint: scan and heal any NEAR account, with a risk outlook from its history | Built, runs in the browser against NEAR mainnet or testnet. The outlook is explainable rules over public data, a forecast and not a guarantee |
 | The Arena run | Recorded with test tokens on an in-memory ledger and again on three local NEAR nodes. Quotes, the enclave opinion and custody are stand-ins there |
 | Incident watch: 29 real incidents with sources | A dataset mapped to SeIn's checks by pattern. Not tested against SeIn |
 | A mainnet payment or swap, a live confidential route | Not done |

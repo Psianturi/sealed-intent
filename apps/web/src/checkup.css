@@ -159,3 +159,23 @@ body.no-webgl .cp-stage { background: radial-gradient(closest-side, #1a2a5a 0%, 
 .t-ptable .ok { color: var(--allow); font-size: 12.5px; white-space: nowrap; }
 .t-ptable .bad { color: var(--block); font-size: 12.5px; }
 @media (max-width: 560px) { .t-ptable thead { display: none; } .t-ptable tr { display: grid; grid-template-columns: 1fr; } .t-ptable td, .t-ptable th { border-top: 0; padding: 2px 0; } .t-ptable tr { border-top: 1px solid var(--line); padding: 6px 0; } }
+
+/* risk outlook: three exposures read from the wallet's history */
+.cp-outlook { margin-top: 36px; }
+.cp-outlook h2 { margin: 4px 0 14px; font-size: clamp(22px, 2.6vw, 30px); }
+.cp-lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.cp-lane { padding: 16px 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+.cp-lane.elevated { border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
+.cp-lane.high { border-color: color-mix(in srgb, var(--block) 65%, var(--line)); }
+.cp-lane-level { margin: 0; display: flex; align-items: center; gap: 8px; font: 600 12px "JetBrains Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--allow); }
+.cp-lane.elevated .cp-lane-level { color: var(--warn); }
+.cp-lane.high .cp-lane-level { color: var(--block); }
+.cp-meter { display: inline-flex; gap: 3px; }
+.cp-meter i { width: 14px; height: 6px; border-radius: 3px; background: var(--line); }
+.cp-lane .cp-meter i:nth-child(1), .cp-lane.elevated .cp-meter i:nth-child(2), .cp-lane.high .cp-meter i:nth-child(-n + 3) { background: currentColor; }
+.cp-lane h3 { margin: 8px 0 6px; font-size: 17px; }
+.cp-lane ul { margin: 0 0 12px; padding-left: 18px; font-size: 14.5px; line-height: 1.5; color: var(--ink); flex: 1; }
+.cp-lane li + li { margin-top: 6px; }
+.cp-lane-do { margin: 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13.5px; color: var(--muted); }
+.cp-outlook .cp-note { margin-top: 12px; }
+@media (max-width: 900px) { .cp-lanes { grid-template-columns: minmax(0, 1fr); } }

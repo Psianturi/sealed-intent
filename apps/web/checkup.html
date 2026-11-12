@@ -26,7 +26,7 @@
       <div class="cp-copy">
         <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>SeIn Checkpoint</p>
         <h1>Check up any NEAR wallet. Heal what is wrong.</h1>
-        <p class="cp-lead">An AI agent's wallet or your own. SeIn reads it straight from the chain: who can sign for it, which apps it is connected to, what it holds and who it dealt with. Then you cut what is risky with your own wallet, and the lesson stays with your agent.</p>
+        <p class="cp-lead">An AI agent's wallet or your own. SeIn reads it straight from the chain: who can sign for it, which apps it is connected to, what it holds, who it dealt with, and how its history says it is most likely to lose money. Then you cut what is risky with your own wallet, and the lesson stays with your agent.</p>
         <form class="cp-form" id="cp-form" autocomplete="off">
           <label class="sr-only" for="cp-account">NEAR account</label>
           <input id="cp-account" name="account" placeholder="you.near or an agent's wallet" spellcheck="false" />
@@ -47,6 +47,13 @@
         </div>
         <p class="cp-legend"><span class="d danger"></span>urgent <span class="d caution"></span>check <span class="d ok"></span>known <span class="d info"></span>holding</p>
       </div>
+    </section>
+
+    <section class="cp-outlook" id="cp-outlook" hidden aria-labelledby="cp-outlook-title">
+      <p class="cp-eyebrow" id="cp-outlook-title">Risk outlook</p>
+      <h2 id="cp-outlook-head"></h2>
+      <div class="cp-lanes" id="cp-outlook-lanes"></div>
+      <p class="cp-note" id="cp-outlook-basis"></p>
     </section>
 
     <section class="cp-result" id="cp-result" hidden>
@@ -79,6 +86,7 @@
         <article><h3>App connections</h3><p>Each site you log in to leaves a key on your account. Keys to look-alike, reported or deleted apps are cut.</p></article>
         <article><h3>Bait</h3><p>Look-alike tokens and unsolicited NFTs carry text meant to make a person, or an agent, pay. SeIn names them.</p></article>
         <article><h3>Contacts</h3><p>Recent counterparties are checked against SeIn's list of reported accounts and the names of well-known contracts.</p></article>
+        <article><h3>History</h3><p>The last 50 transactions are read for the patterns that come before a loss: look-alike senders, planted dust, lure contracts and one-off receivers.</p></article>
       </div>
       <p class="cp-note">Read-only until you choose to heal. Data from NEAR RPC, FastNEAR and NearBlocks, read by your browser. SeIn's list of reported accounts starts small and grows from what its agents report; a clean result is not a guarantee.</p>
     </section>
