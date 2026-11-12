@@ -30,7 +30,7 @@ function relay(peerSpkiSha256: string, onPrompt: () => void): BoundConnection {
     }) as typeof fetch,
   };
 }
-const checker = (conn: BoundConnection) => new NearAiCloudChecker({ apiKey: "k", model: "m", baseUrl: "https://cloud-api.near.ai/v1", connect: async () => conn, verifyQuote: parseOnly, randomNonce: () => fixture.nonce });
+const checker = (conn: BoundConnection) => new NearAiCloudChecker({ apiKey: "k", model: "m", baseUrl: "https://cloud-api.near.ai/v1", connect: async () => conn, verifyQuote: parseOnly, randomNonce: () => fixture.nonce, fetch: (async () => new Response("[]", { status: 503 })) as typeof fetch });
 
 describe("gateway TLS binding", () => {
   it("a genuine report relayed over another certificate never receives the prompt", async () => {
