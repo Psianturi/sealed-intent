@@ -53,6 +53,8 @@ jobs:
           if [ "$files" = all ] || echo "$files" | grep -qE '^(apps/server/|packages/|fixtures/|Dockerfile|\.gcloudignore|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)'; then
             echo "server=true" >> "$GITHUB_OUTPUT"
           fi
+      - if: steps.changed.outputs.server != 'true'
+        run: echo "This push did not touch the server, so Cloud Run keeps its current revision." >> "$GITHUB_STEP_SUMMARY"
       - if: steps.changed.outputs.server == 'true'
         uses: google-github-actions/auth@v2
         with:
