@@ -72,6 +72,10 @@ for (const p of PAGES) {
   }
 }
 ws.close();
-proc.kill();
+// on Windows the browser's helper processes outlive the main one unless the whole tree goes
+try {
+  if (process.platform === "win32") execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: "ignore" });
+  else proc.kill();
+} catch {}
 console.log(failed ? `${failed} checks failed` : "All pages fit at every width");
 process.exit(failed ? 1 : 0);
