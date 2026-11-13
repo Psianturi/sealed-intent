@@ -410,3 +410,4 @@ body.present .vr-caption { font-size: 28px; }
 :root[data-theme="light"] .vr .vr-cap-glow { opacity: 0.35; }
 :root[data-theme="light"] .vr { border: 1px solid var(--s-line); box-shadow: var(--shadow); }
 :root[data-theme="light"] :is(.vr-owner, .vr-receipt-paper) { background: #fffdf8; border: 1px solid var(--s-line); }
+:root[data-theme="light"] .vr-stamp { border-color: var(--stamp); color: var(--stamp); }

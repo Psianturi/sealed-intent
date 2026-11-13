@@ -8,6 +8,8 @@ import { join } from "node:path";
 const base = (process.argv[2] ?? "http://localhost:4173").replace(/\/$/, "");
 const PAGES = ["/", "/try.html", "/try.html#check", "/checkup.html", "/arena.html", "/arena.html#cases", "/arena.html#results", "/proof.html", "/verify.html", "/agent.html?id=agent-1", "/start.html", "/limits.html"];
 const WIDTHS = [390, 768, 1024, 1366, 1920];
+// THEME=dark checks the other skin; without it the page's own default is checked
+const THEME = process.env.THEME === "dark" || process.env.THEME === "light" ? process.env.THEME : "";
 
 function browser() {
   if (process.env.CHROME) return process.env.CHROME;
@@ -67,7 +69,11 @@ for (const p of PAGES) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: w < 600 });
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: base + p });
-    await sleep(2200);
+    await sleep(THEME ? 1700 : 2200);
+    if (THEME) {
+      await ev(`document.documentElement.dataset.theme = "${THEME}"; document.dispatchEvent(new CustomEvent("sein:theme", { detail: "${THEME}" })); 1`);
+      await sleep(500);
+    }
     const r = await ev(`(() => {
       const W = document.documentElement.clientWidth;
       const wide = [...document.querySelectorAll('body *')].filter(e => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > W + 1 && getComputedStyle(e).position !== 'fixed'; })

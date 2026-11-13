@@ -10,8 +10,16 @@ export interface Scene {
   destroy(): void;
 }
 
-const COLOR: Record<Severity | "core", number> = { danger: 0xff5a4e, caution: 0xffb547, ok: 0x3ee6a8, info: 0x6e8bff, core: 0x6e8bff };
-const health = (score: number) => new THREE.Color(score >= 85 ? 0x3ee6d0 : score >= 60 ? 0xffb547 : 0xff6a4e);
+// light on a dark screen, ink on paper: the same scene in both themes
+const PALETTE = {
+  dark: { danger: 0xff5a4e, caution: 0xffb547, ok: 0x3ee6a8, info: 0x6e8bff, core: 0x6e8bff, ring: 0x6e8bff, dust: 0x8fa6ff, good: 0x3ee6d0, bad: 0xff6a4e, flash: 0xffffff },
+  light: { danger: 0xb0321c, caution: 0x8a5608, ok: 0x256b4a, info: 0x2b48b0, core: 0x2b48b0, ring: 0x2b48b0, dust: 0x867960, good: 0x256b4a, bad: 0xb0321c, flash: 0x1d2330 },
+};
+const isLight = () => document.documentElement.dataset.theme === "light";
+let pal: Record<Severity | "core" | "ring" | "dust" | "good" | "bad" | "flash", number> = PALETTE[isLight() ? "light" : "dark"];
+// glowing dots add up on a dark screen; on paper they have to cover instead
+const blend = () => (isLight() ? THREE.NormalBlending : THREE.AdditiveBlending);
+const health = (score: number) => new THREE.Color(score >= 85 ? pal.good : score >= 60 ? pal.caution : pal.bad);
 
 function fibonacci(n: number, r: number): THREE.Vector3[] {
   const out: THREE.Vector3[] = [];
@@ -58,25 +66,26 @@ export function createScene(canvas: HTMLCanvasElement): Scene | undefined {
   // the core: a shell of glowing particles with a faint lattice inside
   const corePts = fibonacci(1800, 1.15);
   const coreGeo = new THREE.BufferGeometry().setFromPoints(corePts);
-  const coreMat = new THREE.PointsMaterial({ size: 0.055, map: dot, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: COLOR.core });
+  const coreMat = new THREE.PointsMaterial({ size: 0.055, map: dot, transparent: true, depthWrite: false, blending: blend(), color: pal.core });
   const core = new THREE.Points(coreGeo, coreMat);
   world.add(core);
-  const lattice = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(0.85, 1)), new THREE.LineBasicMaterial({ color: COLOR.core, transparent: true, opacity: 0.22 }));
+  const lattice = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(0.85, 1)), new THREE.LineBasicMaterial({ color: pal.core, transparent: true, opacity: 0.22 }));
   world.add(lattice);
 
   // two orbit rings and a scan ring that sweeps while the chain is read
   const ring = (r: number, tilt: number, opacity: number) => {
     const pts = Array.from({ length: 129 }, (_, i) => new THREE.Vector3(Math.cos((i / 128) * Math.PI * 2) * r, 0, Math.sin((i / 128) * Math.PI * 2) * r));
-    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0x6e8bff, transparent: true, opacity }));
+    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: pal.ring, transparent: true, opacity }));
     l.rotation.x = tilt;
     return l;
   };
-  world.add(ring(2.35, 1.25, 0.25), ring(2.6, 1.9, 0.12));
+  const rings = [ring(2.35, 1.25, 0.25), ring(2.6, 1.9, 0.12)];
+  world.add(...rings);
   const scanRing = ring(1.5, 0, 0);
   scene.add(scanRing);
 
   // ambient dust far out
-  const dust = new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 260 }, () => new THREE.Vector3((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8 - 2))), new THREE.PointsMaterial({ size: 0.04, map: dot, transparent: true, opacity: 0.5, depthWrite: false, color: 0x8fa6ff }));
+  const dust = new THREE.Points(new THREE.BufferGeometry().setFromPoints(Array.from({ length: 260 }, () => new THREE.Vector3((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 8 - 2))), new THREE.PointsMaterial({ size: 0.04, map: dot, transparent: true, opacity: 0.5, depthWrite: false, color: pal.dust }));
   scene.add(dust);
 
   interface Node { id: string; mesh: THREE.Sprite; line: THREE.Line; home: THREE.Vector3; severity: Severity; gone?: number; tag?: HTMLElement }
@@ -86,7 +95,8 @@ export function createScene(canvas: HTMLCanvasElement): Scene | undefined {
   canvas.parentElement?.append(tags);
   const v = new THREE.Vector3();
   let nodes: Node[] = [];
-  const target = { core: new THREE.Color(COLOR.core) };
+  const target = { core: new THREE.Color(pal.core) };
+  let lastScore: number | undefined;
   let scanOn = false;
   let raf = 0;
   const clock = new THREE.Clock();
@@ -157,18 +167,35 @@ export function createScene(canvas: HTMLCanvasElement): Scene | undefined {
   }
   frame();
 
+  const retheme = () => {
+    pal = PALETTE[isLight() ? "light" : "dark"];
+    coreMat.blending = blend();
+    coreMat.needsUpdate = true;
+    target.core = lastScore === undefined ? new THREE.Color(pal.core) : health(lastScore);
+    for (const r of [...rings, scanRing]) (r.material as THREE.LineBasicMaterial).color.set(pal.ring);
+    (dust.material as THREE.PointsMaterial).color.set(pal.dust);
+    for (const n of nodes) {
+      const m = n.mesh.material as THREE.SpriteMaterial;
+      m.blending = blend();
+      m.needsUpdate = true;
+      m.color.set(pal[n.severity]);
+      (n.line.material as THREE.LineBasicMaterial).color.set(pal[n.severity]);
+    }
+  };
+  document.addEventListener("sein:theme", retheme);
+
   return {
     scanning(on) {
       scanOn = on;
-      if (on) target.core.set(COLOR.core);
+      if (on) target.core.set(pal.core);
     },
     show(connections, score) {
       clearNodes();
       const shown = connections.slice(0, 60);
       const homes = fibonacci(Math.max(shown.length, 1), 2.2);
       shown.forEach((c, i) => {
-        const color = COLOR[c.severity];
-        const mesh = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+        const color = pal[c.severity];
+        const mesh = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color, transparent: true, depthWrite: false, blending: blend() }));
         const big = c.severity === "danger" ? 0.42 : c.severity === "caution" ? 0.32 : 0.24;
         mesh.scale.setScalar(big);
         const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), homes[i]!.clone()]), new THREE.LineBasicMaterial({ color, transparent: true, opacity: c.severity === "danger" ? 0.6 : 0.28 }));
@@ -182,20 +209,23 @@ export function createScene(canvas: HTMLCanvasElement): Scene | undefined {
         }
         nodes.push({ id: c.id, mesh, line, home: homes[i]!, severity: c.severity, tag });
       });
+      lastScore = score;
       target.core = health(score);
     },
     async heal(ids, score) {
       for (const n of nodes.filter((x) => ids.includes(x.id))) {
-        (n.line.material as THREE.LineBasicMaterial).color.set(0xffffff);
-        (n.mesh.material as THREE.SpriteMaterial).color.set(0xffffff);
+        (n.line.material as THREE.LineBasicMaterial).color.set(pal.flash);
+        (n.mesh.material as THREE.SpriteMaterial).color.set(pal.flash);
         n.gone = 0;
         await new Promise((r) => setTimeout(r, calm ? 0 : 220));
       }
+      lastScore = score;
       target.core = health(score);
       await new Promise((r) => setTimeout(r, calm ? 0 : 1600));
     },
     destroy() {
       cancelAnimationFrame(raf);
+      document.removeEventListener("sein:theme", retheme);
       ro.disconnect();
       clearNodes();
       tags.remove();
