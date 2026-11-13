@@ -561,16 +561,15 @@ h1, h2, h3, .t-title, .page-title, .vr-title h3, .gm h2, .gm h3 { font-family: v
 :root[data-theme="light"] :is(.cp-grid article, .cp-how article, .t-field input, .t-field textarea, .t-field select, .tabs, .vr, .cp-outlook) { border-radius: 8px; }
 
 /* the mark takes its ink from the theme */
-.mark-seal { fill: var(--stamp); stroke: var(--stamp); }
+.mark-seal { fill: var(--stamp); }
 .mark-cut { fill: var(--bg); }
-.mark-ring { fill: none; stroke: var(--bg); stroke-width: 1.6; opacity: 0.6; }
 
 /* header: the tabs answer the pointer */
 header.top nav { gap: 4px; }
 header.top nav a { position: relative; padding: 7px 13px; border-radius: 6px; transition: color 0.2s, background 0.2s, transform 0.2s; }
 header.top nav a:hover { transform: translateY(-1px); }
 .brand .mark { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.brand:hover .mark { transform: rotate(30deg) scale(1.08); }
+.brand:hover .mark { transform: rotate(-10deg) scale(1.1); }
 .theme-toggle { transition: transform 0.15s, color 0.2s, border-color 0.2s; }
 .theme-toggle svg { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .theme-toggle:hover svg { transform: rotate(35deg); }
