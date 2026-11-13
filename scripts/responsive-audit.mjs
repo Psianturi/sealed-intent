@@ -71,7 +71,7 @@ for (const p of PAGES) {
     const r = await ev(`(() => {
       const W = document.documentElement.clientWidth;
       const wide = [...document.querySelectorAll('body *')].filter(e => { const b = e.getBoundingClientRect(); return b.width > 0 && b.right > W + 1 && getComputedStyle(e).position !== 'fixed'; })
-        .filter(e => !e.closest('.table-wrap, [style*="overflow"]'))
+        .filter(e => !e.closest('.table-wrap, [style*="overflow"]') && !(e.ownerSVGElement))
         .slice(0, 4).map(e => e.tagName.toLowerCase() + (typeof e.className === 'string' && e.className ? '.' + e.className.split(' ')[0] : '') + ' ' + Math.round(e.getBoundingClientRect().right) + 'px');
       return { scroll: document.documentElement.scrollWidth, W, height: document.documentElement.scrollHeight, wide };
     })()`);
