@@ -1,0 +1,57 @@
+{
+  "rules": {
+    "transaction_types": [
+      "transfer"
+    ],
+    "allowed_tokens": [
+      "native"
+    ],
+    "addresses": {
+      "mode": "whitelist",
+      "list": [
+        "mobile-dev.near",
+        "1e7f14ff1d363689ce9f0fae2ee965a91e54074d3813d4d3b6b144a484083185"
+      ]
+    },
+    "limits": {
+      "per_transaction": {
+        "native": "50000000000000000000000"
+      },
+      "daily": {
+        "native": "300000000000000000000000"
+      }
+    },
+    "rate_limit": {
+      "max_per_hour": 10
+    }
+  },
+  "capabilities": {
+    "sign_message": {
+      "allowed": false
+    },
+    "raw_sign": {
+      "allowed": false
+    },
+    "swap": {
+      "allowed": false
+    },
+    "cross_chain_withdraw": {
+      "allowed": false
+    },
+    "limit_order": {
+      "allowed": false
+    },
+    "payment_check": {
+      "allowed": false
+    },
+    "confidential": {
+      "allowed": false
+    },
+    "evm_sign": {
+      "allowed": false
+    },
+    "solana_sign": {
+      "allowed": false
+    }
+  }
+}
