@@ -6,7 +6,7 @@ import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 const base = (process.argv[2] ?? "http://localhost:4173").replace(/\/$/, "");
-const PAGES = ["/", "/try.html", "/try.html#check", "/checkup.html", "/arena.html", "/arena.html#cases", "/arena.html#results", "/proof.html", "/verify.html", "/agent.html?id=agent-1", "/start.html", "/limits.html"];
+const PAGES = ["/", "/try.html", "/try.html#check", "/checkup.html", "/arena.html", "/arena.html#cases", "/arena.html#results", "/proof.html", "/verify.html", "/agent.html?id=agent-1", "/start.html", "/limits.html", "/approve.html"];
 const WIDTHS = [390, 768, 1024, 1366, 1920];
 // THEME=dark checks the other skin; without it the page's own default is checked
 const THEME = process.env.THEME === "dark" || process.env.THEME === "light" ? process.env.THEME : "";

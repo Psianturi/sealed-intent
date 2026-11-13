@@ -16,7 +16,7 @@ const NAV: [string, string, string][] = [
   ["proof", "/proof", "Proof"],
 ];
 // pages without their own tab light up the tab they belong to
-const PARENT: Record<string, string> = { verify: "proof", agent: "proof", limits: "proof", approve: "home" };
+const PARENT: Record<string, string> = { verify: "proof", agent: "proof", limits: "proof", approve: "home", start: "home" };
 
 const THEME_TOGGLE = `<button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch between dark and light" title="Dark or light"><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>`;
 // goes in the head, so the theme is set before anything is drawn; light unless the visitor chose dark
@@ -28,7 +28,20 @@ export function siteHeader(current: string): string {
   return `<header class="top"><div class="top-in"><a class="brand" href="/" aria-label="SeIn, short for Sealed Intent, home">${mark(34)}${WORDMARK}</a><nav aria-label="Main">${links}</nav>${THEME_TOGGLE}</div></header>`;
 }
 
-const FOOT_LINKS = `<nav class="foot-links" aria-label="More"><a href="/start">Protect your own agent</a><a href="/verify.html">Verify a receipt</a><a href="/a/agent-1">Agent profile</a><a href="/limits.html">Limits and threat model</a></nav>`;
+// the pages under Proof, shown as one group so each one says where it belongs
+const PROOF_PAGES: [string, string, string, string][] = [
+  ["proof", "/proof", "Live checks", "Your browser checks the chain"],
+  ["verify", "/verify.html", "Verify a receipt", "Paste a link, an ID or a file"],
+  ["agent", "/a/agent-1", "Agent profile", "One agent's public record"],
+  ["limits", "/limits.html", "Limits", "What SeIn cannot stop"],
+];
+
+export function subNav(current: string): string {
+  const items = PROOF_PAGES.map(([id, href, label, hint]) => `<a href="${href}"${id === current ? ' aria-current="page"' : ""}><b>${label}</b><small>${hint}</small></a>`).join("");
+  return `<nav class="subnav" aria-label="Proof">${items}</nav>`;
+}
+
+const FOOT_LINKS = `<div class="foot-map"><nav aria-label="Use SeIn"><span>Use it</span><a href="/try">Try the firewall</a><a href="/try#check">Check a real payment</a><a href="/checkup">Check up a wallet</a><a href="/start">Protect your own agent</a></nav><nav aria-label="Check it"><span>Check it</span><a href="/proof">Live checks</a><a href="/verify.html">Verify a receipt</a><a href="/a/agent-1">Agent profile</a><a href="/limits.html">Limits and threat model</a></nav></div>`;
 
 export function siteFooter(note: string): string {
   return `<footer><div class="foot-brand">${mark(22)}${WORDMARK}<span class="foot-full">Sealed Intent</span></div><p>Built at NEAR HACKATHON, November 2026. ${note}</p>${FOOT_LINKS}</footer>`;

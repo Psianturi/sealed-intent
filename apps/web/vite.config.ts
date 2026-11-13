@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import { renderEscaped, renderFingerprints, renderHonesty, renderMeta, renderRows, renderScore, scopeOf, scopeSentence, usd, type Run } from "./src/arena-data";
-import { mark, siteFooter, siteHeader, THEME_HEAD } from "./src/shell";
+import { mark, siteFooter, siteHeader, subNav, THEME_HEAD } from "./src/shell";
 import { renderCaseFiles, renderScoreStrip, renderStageFallback, renderTally } from "./src/stage/static";
 import { buildDeck } from "./src/game-data";
 import { buildStoryboard } from "./src/storyboard";
@@ -55,7 +55,11 @@ function staticContent(): Plugin {
         "header:start": siteHeader("start"),
         "header:checkup": siteHeader("checkup"),
         "header:try": siteHeader("try"),
-        "footer:try": siteFooter("Test tokens only. The checks are real."),
+        "subnav:proof": subNav("proof"),
+        "subnav:verify": subNav("verify"),
+        "subnav:agent": subNav("agent"),
+        "subnav:limits": subNav("limits"),
+        "footer:try": siteFooter("The demo uses test tokens. Every check is real."),
         "footer:checkup": siteFooter("Read-only until you choose to heal. Not audited."),
         "footer:start": siteFooter("Start on testnet. Not audited."),
         "footer:proof": siteFooter("Every check on this page runs in your browser."),

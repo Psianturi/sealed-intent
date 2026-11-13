@@ -99,7 +99,7 @@ footer p { margin: 0; }
 .stage-text { display: block; font-size: 15px; font-weight: 500; }
 .stage-rail { display: grid; grid-template-columns: 78px minmax(0, 1fr) 78px; align-items: center; gap: 8px; margin-top: 10px; }
 .stage-node { text-align: center; font-size: 13px; font-weight: 600; padding: 10px 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
-.stage-node small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
+.stage-node small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
 .stage-node.wallet { border-color: var(--allow); }
 .stage-track { position: relative; height: 56px; }
 .stage-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px dashed var(--line); }
@@ -467,8 +467,11 @@ label.btn { position: relative; }
 .limits-list.steps { counter-reset: step; }
 .limits-list.steps li { counter-increment: step; }
 .limits-list.steps li::before { content: counter(step) ". "; font-weight: 700; }
-.foot-links { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0; }
-.foot-links a { color: var(--muted); }
+.foot-map { flex-basis: 100%; display: grid; gap: 8px; margin: 6px 0 4px; }
+.foot-map nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.foot-map span { font: 600 12.5px "JetBrains Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); min-width: 76px; }
+.foot-map a { color: var(--muted); }
+.foot-map a:hover { color: var(--ink); }
 
 /* entry points: the ways to start */
 .ways { display: grid; gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 26px; }
@@ -491,7 +494,7 @@ header.top .btn.top-cta[aria-current="page"] { box-shadow: 0 0 0 2px var(--bg), 
 @media (prefers-reduced-motion: reduce) { .way { transition: none; } .way:hover { transform: none; } }
 
 /* what each entry point is */
-.way-tag { align-self: flex-start; margin-bottom: 10px; padding: 2px 9px; border-radius: 999px; font: 600 11.5px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); }
+.way-tag { align-self: flex-start; margin-bottom: 10px; padding: 2px 9px; border-radius: 999px; font: 600 12px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); }
 .way-tag.main { color: var(--on-accent); border-color: transparent; background: linear-gradient(135deg, var(--cyan), var(--glow)); }
 .proof .proof-title { grid-column: 1 / -1; margin: 0; font-size: 20px; color: var(--navy-ink); }
 /* the five checks light up in turn, then the verdict */
@@ -522,7 +525,7 @@ h1, h2, h3, .t-title, .page-title, .vr-title h3, .gm h2, .gm h3 { font-family: v
 :root[data-theme="light"] body { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .28 0 0 0 0 .14 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"), var(--bg); }
 :root[data-theme="light"] :is(h1, .t-title, .page-title) { font-weight: 600; letter-spacing: -0.02em; }
 :root[data-theme="light"] :is(h2, h3, .vr-title h3) { font-weight: 600; letter-spacing: -0.01em; }
-:root[data-theme="light"] :is(.card, .cp-panel, .stage, .drop, .result, .cp-form, .t-verdict, .gm, .cp-stage, .t-modes, .live) { border-radius: 8px; box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 9%, transparent); }
+:root[data-theme="light"] :is(.card, .cp-panel, .stage, .drop, .result, .cp-form, .t-verdict, .gm, .cp-stage, .t-modes, .subnav, .live) { border-radius: 8px; box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 9%, transparent); }
 :root[data-theme="light"] :is(.card, .cp-panel, .stage, .result, .cp-form, .gm, .cp-stage, .t-modes) { border-color: color-mix(in srgb, var(--line-strong) 45%, var(--line)); }
 :root[data-theme="light"] :is(.btn, .cp-go, .cp-ghost, .theme-toggle) { border-radius: 6px; }
 :root[data-theme="light"] :is(.btn, .cp-ghost) { border-color: color-mix(in srgb, var(--line-strong) 60%, var(--line)); }
@@ -593,3 +596,13 @@ header.top nav a:hover { transform: translateY(-1px); }
 ::view-transition-new(root) { animation: next-room 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
 @keyframes next-room { from { clip-path: circle(0 at var(--tx, 100%) var(--ty, 0)); } to { clip-path: circle(150vmax at var(--tx, 100%) var(--ty, 0)); } }
 @media (prefers-reduced-motion: reduce) { header.top nav a, .brand .mark, .theme-toggle svg { transition: none; } header.top nav a:hover, .brand:hover .mark, .theme-toggle:hover svg { transform: none; } }
+
+/* the pages under Proof share one sub-menu, styled like the Try page's two modes */
+.subnav { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; padding: 5px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); max-width: 100%; }
+.subnav a { display: grid; gap: 2px; border-radius: 10px; padding: 8px 16px; color: var(--muted); text-decoration: none; transition: background 0.15s; }
+.subnav a b { font-size: 15px; color: var(--ink); }
+.subnav a small { font-size: 12.5px; }
+.subnav a:hover { background: var(--well); }
+.subnav a[aria-current="page"] { background: color-mix(in srgb, var(--cyan) 16%, var(--surface)); box-shadow: inset 0 0 0 1px var(--cyan); }
+.subnav + .eyebrow, .subnav + .page-title { margin-top: 26px; }
+@media (max-width: 640px) { .subnav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .subnav a { padding: 8px 10px; } }
