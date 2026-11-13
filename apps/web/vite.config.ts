@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import { renderEscaped, renderFingerprints, renderHonesty, renderMeta, renderRows, renderScore, scopeOf, scopeSentence, usd, type Run } from "./src/arena-data";
-import { mark, siteFooter, siteHeader } from "./src/shell";
+import { mark, siteFooter, siteHeader, THEME_HEAD } from "./src/shell";
 import { renderCaseFiles, renderScoreStrip, renderStageFallback, renderTally } from "./src/stage/static";
 import { buildDeck } from "./src/game-data";
 import { buildStoryboard } from "./src/storyboard";
@@ -94,7 +94,7 @@ function staticContent(): Plugin {
         const s = scopeOf(lazy);
         parts["stat:lazy"] = `If the owner approves everything without reading, ${s.inScope - s.lanes.sealed.stoppedIn} of the ${s.inScope} get through (${usd(s.lanes.sealed.lostIn)}).`;
       }
-      return html.replace(/<!--([a-z-]+(?::[a-z0-9-]+)?)-->/g, (m, key: string) => parts[key] ?? m);
+      return html.replace("</head>", `${THEME_HEAD}</head>`).replace(/<!--([a-z-]+(?::[a-z0-9-]+)?)-->/g, (m, key: string) => parts[key] ?? m);
     },
   };
 }

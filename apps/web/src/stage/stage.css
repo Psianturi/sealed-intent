@@ -1,11 +1,28 @@
-/* The Arena stage: always dark, like a screen inside the page. Colour only marks a result. */
-.vr {
+/* The Arena stage. Dark: a control room screen. Light: a drafting table, ink on paper. Colour only marks a result. */
+:root {
   --stage-bg: #05070c; --stage-floor: #0a0f1a; --grid: #111a2a; --rail: #1e2a3d;
-  --s-ink: #eef2f8; --s-ink-2: #9aa6b8; --seal: #6e8bff; --mint: #3ee6a8; --ember: #ff5a4e; --amber: #ffb547; --haze: #f5c76b; --violet: #a78bfa;
-  background: var(--stage-bg); color: var(--s-ink); max-width: 1440px; margin: 18px auto 8px; border-radius: 22px; padding: 18px 22px 14px;
-  box-shadow: 0 30px 80px -40px #000; outline: none; position: relative;
+  --s-ink: #eef2f8; --s-ink-2: #9aa6b8; --seal: #6e8bff; --mint: #3ee6a8; --ember: #ff5a4e; --amber: #ffb547; --haze: #f5c76b; --violet: #ff4fb0;
+  --s-panel: #0f1728; --s-panel-2: #0a101c; --s-chip: #121c30; --s-disc: #101a2c; --s-bed: #0d1626; --s-bed-line: #15223a; --s-gridline: #182540;
+  --s-line: #2a3a5a; --s-line-2: #22314f; --s-line-3: #33435f; --s-metal: #4a5d80; --s-metal-2: #3a4a66; --s-metal-3: #8fa0bd; --s-icon: #c9d2e3; --s-col: #93a3bf;
+  --s-base: #24324d; --s-sealed-rail: #26365a; --s-switch: #1c3a5a; --mint-soft: #0b2a22; --mint-deep: #0b1f1a; --ember-soft: #2a1113; --ember-deep: #220f10; --ember-face: #120708;
+  --ember-ink: #ff9a90; --amber-soft: #2e2410; --haze-soft: #1f1808; --seal-soft: #182447; --s-pill-ink: #fff; --s-on-seal: #fff; --s-on-bright: #04140e;
+  --s-play-a: #2ee6f2; --s-play-b: #6e8bff; --s-play-ink: #05070c; --s-beam-a: #7fe9f2; --s-beam-b: #e3fbff; --s-hazard: #1a0b0a;
 }
-.vr:focus-visible { box-shadow: 0 0 0 3px var(--seal), 0 30px 80px -40px #000; }
+/* ink on paper: surfaces turn to paper, lines to pencil, results to stamp inks */
+:root[data-theme="light"] {
+  --stage-bg: #f6f1e7; --stage-floor: #efe8da; --grid: #cfd8ea; --rail: #b9ae98;
+  --s-ink: #1d2330; --s-ink-2: #474e5f; --seal: #2b48b0; --mint: #256b4a; --ember: #b0321c; --amber: #8a5608; --haze: #8a5608; --violet: #6a3d9a;
+  --s-panel: #fbf8f2; --s-panel-2: #f2ecdf; --s-chip: #fbf8f2; --s-disc: #fbf8f2; --s-bed: #efe8da; --s-bed-line: #d8cebb; --s-gridline: #ccd6ea;
+  --s-line: #b5a98f; --s-line-2: #cfc5b0; --s-line-3: #8e8266; --s-metal: #5a6072; --s-metal-2: #7a8093; --s-metal-3: #3b4254; --s-icon: #2a3142; --s-col: #5a6072;
+  --s-base: #b5a98f; --s-sealed-rail: #9aa7cf; --s-switch: #bfd0ee; --mint-soft: #dcebdc; --mint-deep: #e4efe2; --ember-soft: #f6ddd4; --ember-deep: #f6e1da; --ember-face: #f0cfc4;
+  --ember-ink: #b0321c; --amber-soft: #f6e7c4; --haze-soft: #f6e7c4; --seal-soft: #e1e6f6; --s-pill-ink: #1d2330; --s-on-seal: #fff; --s-on-bright: #fbf8f2;
+  --s-play-a: #2b48b0; --s-play-b: #2b48b0; --s-play-ink: #fff; --s-beam-a: #f3de9a; --s-beam-b: #e6c85a; --s-hazard: #f6ddd4;
+}
+.vr {
+  background: var(--stage-bg); color: var(--s-ink); max-width: 1440px; margin: 18px auto 8px; border-radius: 22px; padding: 18px 22px 14px;
+  box-shadow: 0 30px 80px -40px var(--shade); outline: none; position: relative;
+}
+.vr:focus-visible { box-shadow: 0 0 0 3px var(--seal), 0 30px 80px -40px var(--shade); }
 .vr-head { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
 .vr-title { min-height: 74px; }
 .vr-case { margin: 0; font: 600 12px/1.4 "JetBrains Mono", monospace; letter-spacing: 0.08em; color: var(--s-ink-2); }
@@ -20,17 +37,17 @@
 .vr-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .vr-switch-ui { width: 38px; height: 22px; border-radius: 999px; background: var(--rail); position: relative; transition: background 0.2s; }
 .vr-switch-ui::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--s-ink-2); transition: transform 0.2s, background 0.2s; }
-.vr-switch input:checked + .vr-switch-ui { background: #1c3a5a; }
+.vr-switch input:checked + .vr-switch-ui { background: var(--s-switch); }
 .vr-switch input:checked + .vr-switch-ui::after { transform: translateX(16px); background: var(--mint); }
 .vr-switch input:focus-visible + .vr-switch-ui { box-shadow: 0 0 0 2px var(--seal); }
 
 /* three zones stacked: the message strip, the lanes, the dock. Nothing is drawn over a lane. */
 .vr-screen { margin: 6px auto 0; width: min(100%, max(820px, calc((100vh - 520px) * 2.82))); display: flex; flex-direction: column; gap: 10px; }
 .vr-lanes { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 1440 / 510; background: var(--stage-floor); }
-.vr-screen.oos .vr-lanes { box-shadow: inset 0 0 120px rgba(245, 199, 107, 0.08); }
+.vr-screen.oos .vr-lanes { box-shadow: inset 0 0 120px color-mix(in srgb, var(--haze) 8%, transparent); }
 .vr-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; font-family: "Instrument Sans", sans-serif; --u: 1.36; }
 .vr-floor { fill: var(--stage-floor); }
-.vr-gridline { stroke: #182540; stroke-width: 1; }
+.vr-gridline { stroke: var(--s-gridline); stroke-width: 1; }
 .vr-grid { animation: vr-drift 40s linear infinite; }
 @keyframes vr-drift { from { transform: translateY(0); } to { transform: translateY(18px); } }
 .vr-world, .vr-lane, .vr-capsule, .vr-gate-inner, .vr-vault-door, .vr-dest-pulse, .vr-check, .vr-door, .vr-hidden-key { transform-box: fill-box; }
@@ -38,26 +55,26 @@
 .vr-vault-door, .vr-dest-pulse, .vr-check, .vr-hidden-key { transform-origin: center; }
 .vr-door.left { transform-origin: left center; transform: scaleX(0); }
 .vr-door.right { transform-origin: right center; transform: scaleX(0); }
-.vr-lane-bed { fill: #0d1626; stroke: #15223a; }
+.vr-lane-bed { fill: var(--s-bed); stroke: var(--s-bed-line); }
 .vr-lane-label { fill: var(--s-ink); font: 700 15px "Instrument Sans", sans-serif; letter-spacing: 0.06em; }
 .vr-lane-label.small { font-size: 10px; fill: var(--s-ink-2); }
 .vr-lane.sealed .vr-lane-label { fill: var(--seal); }
 .vr-lane-sub { fill: var(--s-ink); font-size: 13px; opacity: 0.85; }
 .vr-rail { stroke: var(--rail); stroke-width: 3; stroke-linecap: round; }
-.vr-lane.sealed .vr-rail { stroke: #26365a; stroke-width: 4; }
+.vr-lane.sealed .vr-rail { stroke: var(--s-sealed-rail); stroke-width: 4; }
 .vr-trail { fill: var(--seal); opacity: 0.7; transform-origin: left center; transform-box: fill-box; transform: scaleX(0); }
 .vr-trail.bad { fill: var(--ember); opacity: 0; }
 .vr-lane .vr-trail.bad { opacity: 0.5; }
-.vr-vault-ring { fill: none; stroke: #3a4a66; stroke-width: 2.5; }
-.vr-vault-face { fill: #101a2c; stroke: #4a5d80; stroke-width: 1.5; }
-.vr-vault-spoke { stroke: #8fa0bd; stroke-width: 2.5; stroke-linecap: round; }
-.vr-vault-hub { fill: #8fa0bd; }
-.vr-vault-dial { fill: none; stroke: #4a5d80; stroke-width: 1.5; }
-.vr-vault-bolt { fill: #4a5d80; }
-.vr-vault-hinge { fill: #2a3a5a; }
-.vr-wallet rect, .vr-wallet path { fill: none; stroke: #c9d2e3; stroke-width: 1.75; stroke-linejoin: round; }
-.vr-wallet .vr-wallet-clasp { fill: #220f10; }
-.vr-dest.legit .vr-wallet .vr-wallet-clasp { fill: #0b1f1a; }
+.vr-vault-ring { fill: none; stroke: var(--s-metal-2); stroke-width: 2.5; }
+.vr-vault-face { fill: var(--s-disc); stroke: var(--s-metal); stroke-width: 1.5; }
+.vr-vault-spoke { stroke: var(--s-metal-3); stroke-width: 2.5; stroke-linecap: round; }
+.vr-vault-hub { fill: var(--s-metal-3); }
+.vr-vault-dial { fill: none; stroke: var(--s-metal); stroke-width: 1.5; }
+.vr-vault-bolt { fill: var(--s-metal); }
+.vr-vault-hinge { fill: var(--s-line); }
+.vr-wallet rect, .vr-wallet path { fill: none; stroke: var(--s-icon); stroke-width: 1.75; stroke-linejoin: round; }
+.vr-wallet .vr-wallet-clasp { fill: var(--ember-deep); }
+.vr-dest.legit .vr-wallet .vr-wallet-clasp { fill: var(--mint-deep); }
 .vr-wallet-mark { font: 700 9px "JetBrains Mono", monospace; text-anchor: middle; fill: var(--ember); }
 .vr-dest.legit .vr-wallet-mark { fill: var(--mint); }
 .vr-note { opacity: 0; }
@@ -69,61 +86,61 @@
 .vr-dest-ring { fill: none; stroke-width: 2.5; }
 .vr-dest.attacker .vr-dest-ring { stroke: var(--ember); }
 .vr-dest.legit .vr-dest-ring { stroke: var(--mint); }
-.vr-dest-face { fill: #220f10; }
-.vr-dest.legit .vr-dest-face { fill: #0b1f1a; }
+.vr-dest-face { fill: var(--ember-deep); }
+.vr-dest.legit .vr-dest-face { fill: var(--mint-deep); }
 .vr-dest-pulse { fill: none; stroke: var(--ember); stroke-width: 3; opacity: 0; }
 .vr-dest.legit .vr-dest-pulse { stroke: var(--mint); }
 .vr-dest-name { fill: var(--s-ink-2); font-size: 13px; text-anchor: middle; }
-.vr-dest.attacker .vr-dest-name { fill: #ff9a90; font-weight: 600; }
-.vr-bubble-plate { fill: #0f1728; stroke: #2a3a5a; }
+.vr-dest.attacker .vr-dest-name { fill: var(--ember-ink); font-weight: 600; }
+.vr-bubble-plate { fill: var(--s-panel); stroke: var(--s-line); }
 /* what each part of the picture is */
-.vr-col { fill: #93a3bf; font: 600 11px "JetBrains Mono", monospace; letter-spacing: 0.1em; }
+.vr-col { fill: var(--s-col); font: 600 11px "JetBrains Mono", monospace; letter-spacing: 0.1em; }
 /* a check: a round sign over the rail, its icon inside, a barrier across the rail when it says no */
-.vr-gate-disc { fill: #101a2c; stroke: #33435f; stroke-width: 2.5; }
-.vr-gate-stem { stroke: #33435f; stroke-width: 2.5; }
-.vr-gate-node { fill: #33435f; }
-.vr-gate-pass .vr-gate-disc { fill: #0b2a22; stroke: var(--mint); }
+.vr-gate-disc { fill: var(--s-disc); stroke: var(--s-line-3); stroke-width: 2.5; }
+.vr-gate-stem { stroke: var(--s-line-3); stroke-width: 2.5; }
+.vr-gate-node { fill: var(--s-line-3); }
+.vr-gate-pass .vr-gate-disc { fill: var(--mint-soft); stroke: var(--mint); }
 .vr-gate-pass .vr-gate-stem { stroke: var(--mint); }
 .vr-gate-pass .vr-gate-node { fill: var(--mint); }
-.vr-gate-fail .vr-gate-disc { fill: #2a1113; stroke: var(--ember); }
+.vr-gate-fail .vr-gate-disc { fill: var(--ember-soft); stroke: var(--ember); }
 .vr-gate-fail .vr-gate-stem { stroke: var(--ember); }
 .vr-gate-fail .vr-gate-node { fill: var(--ember); }
-.vr-gate-warn .vr-gate-disc { fill: #2e2410; stroke: var(--amber); }
+.vr-gate-warn .vr-gate-disc { fill: var(--amber-soft); stroke: var(--amber); }
 .vr-gate-warn .vr-gate-stem { stroke: var(--amber); }
 .vr-gate-warn .vr-gate-node { fill: var(--amber); }
 .vr-badge-x circle { fill: var(--ember); }
-.vr-badge-x path { fill: none; stroke: #1a0605; stroke-width: 2.2; stroke-linecap: round; }
+.vr-badge-x path { fill: none; stroke: var(--s-on-bright); stroke-width: 2.2; stroke-linecap: round; }
 .vr-badge-q circle { fill: var(--amber); }
-.vr-badge-q text { fill: #1f1503; font: 800 12px "Instrument Sans", sans-serif; text-anchor: middle; }
+.vr-badge-q text { fill: var(--s-on-bright); font: 800 12px "Instrument Sans", sans-serif; text-anchor: middle; }
 /* the wallet flashes when money leaves it, or when it is kept */
 .vr-flash { fill: none; stroke-width: 4; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .vr-flash.bad { stroke: var(--ember); }
 .vr-flash.good { stroke: var(--mint); }
 .vr-count.bad { fill: var(--ember); }
 /* an attacker's account is a hooded figure, not a neutral wallet */
-.vr-hood-out { fill: #2a1113; stroke: var(--ember); stroke-width: 1.6; stroke-linejoin: round; }
-.vr-hood-face { fill: #120708; }
+.vr-hood-out { fill: var(--ember-soft); stroke: var(--ember); stroke-width: 1.6; stroke-linejoin: round; }
+.vr-hood-face { fill: var(--ember-face); }
 .vr-hood-eyes { fill: none; stroke: var(--ember); stroke-width: 1.5; stroke-linecap: round; }
-.vr-agent { fill: #121c30; stroke: #2a3a5a; }
+.vr-agent { fill: var(--s-chip); stroke: var(--s-line); }
 .vr-agent-text { fill: var(--s-ink-2); font: 600 12px "JetBrains Mono", monospace; text-anchor: middle; }
 .vr-bubble-text { fill: var(--s-ink); font: 500 14px "JetBrains Mono", monospace; }
 .vr-bubble { opacity: 0; }
-.vr-gate-base { fill: #24324d; }
+.vr-gate-base { fill: var(--s-base); }
 .vr-gate-pass { fill: var(--mint); opacity: 0; }
 .vr-gate-fail { fill: var(--ember); opacity: 0; }
 .vr-gate-warn { fill: var(--amber); opacity: 0; }
 .vr-gate.look-dashed .vr-gate-base .vr-gate-disc { fill: none; stroke: var(--haze); stroke-dasharray: 4 3; }
-.vr-gate-icon path { fill: none; stroke: #c9d2e3; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.vr-gate-icon path { fill: none; stroke: var(--s-icon); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .vr-gate-label { fill: var(--s-ink-2); font: 600 12px "Instrument Sans", sans-serif; letter-spacing: 0.06em; text-anchor: middle; }
 .vr-scan { opacity: 0; }
 .vr-check { opacity: 0; }
 .vr-check circle { fill: var(--mint); }
-.vr-check path { fill: none; stroke: #04140e; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.vr-check path { fill: none; stroke: var(--s-on-bright); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .vr-capsule { opacity: 0; }
-.vr-pill { fill: #182447; stroke: var(--seal); stroke-width: 1.5; }
-.vr-pill-text { fill: #fff; font: 700 15px "JetBrains Mono", monospace; text-anchor: middle; }
+.vr-pill { fill: var(--seal-soft); stroke: var(--seal); stroke-width: 1.5; }
+.vr-pill-text { fill: var(--s-pill-ink); font: 700 15px "JetBrains Mono", monospace; text-anchor: middle; }
 .vr-pill-text.small { font-size: 9px; }
-.vr-pill-icon path, .vr-hidden-key path { fill: none; stroke: #fff; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.vr-pill-icon path, .vr-hidden-key path { fill: none; stroke: var(--s-pill-ink); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .vr-hidden-key { opacity: 0; }
 .vr-hidden-key path { stroke: var(--ember); }
 .vr-result-main { fill: var(--s-ink); font: 700 20px "Instrument Sans", sans-serif; transform-box: fill-box; transform-origin: left center; }
@@ -149,14 +166,14 @@
 /* the strip above the lanes: the message, and the detail that gives the trick away */
 .vr-strip { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; height: 90px; }
 .vr-message, .vr-owner, .vr-ledger, .vr-receipt, .vr-banner, .vr-lens, .vr-gauge, .vr-gap { opacity: 0; }
-.vr-message { background: #0f1728; border: 1px solid #22314f; border-radius: 14px; padding: 7px 14px; overflow: hidden; }
+.vr-message { background: var(--s-panel); border: 1px solid var(--s-line-2); border-radius: 14px; padding: 7px 14px; overflow: hidden; }
 .vr-from { margin: 0; font: 600 12px "JetBrains Mono", monospace; color: var(--s-ink-2); }
 .vr-msg-text { margin: 2px 0 0; font-size: 14.5px; line-height: 1.38; color: var(--s-ink); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .vr-message mark { background: none; color: inherit; transition: color 0.2s, box-shadow 0.2s; }
 .vr-message.lit mark { color: var(--amber); box-shadow: inset 0 -2px 0 var(--amber); }
 .vr-moment { position: relative; width: 400px; }
 .vr-moment:empty { display: none; }
-.vr-lens, .vr-gauge, .vr-gap { position: absolute; inset: 0; display: grid; align-content: center; background: #0a101c; border: 1px solid #2a3a5a; border-radius: 14px; padding: 8px 14px; }
+.vr-lens, .vr-gauge, .vr-gap { position: absolute; inset: 0; display: grid; align-content: center; background: var(--s-panel-2); border: 1px solid var(--s-line); border-radius: 14px; padding: 8px 14px; }
 .vr-lens { font: 600 18px/1.3 "JetBrains Mono", monospace; text-align: center; }
 .vr-lens p { margin: 0; }
 .vr-lens .real { color: var(--mint); }
@@ -174,7 +191,7 @@
 /* the dock below the lanes: the owner, the referee and the receipt take turns in one fixed space */
 .vr-dock { position: relative; height: 112px; overflow: hidden; border-radius: 16px; }
 .vr-dock > * { position: absolute; inset: 0; margin: 0; pointer-events: none; }
-.vr-idle { display: grid; place-items: center; text-align: center; padding: 0 20px; border: 1px dashed #1e2a3d; border-radius: 16px; color: var(--s-ink-2); font-size: 14.5px; }
+.vr-idle { display: grid; place-items: center; text-align: center; padding: 0 20px; border: 1px dashed var(--rail); border-radius: 16px; color: var(--s-ink-2); font-size: 14.5px; }
 .vr-owner { display: flex; align-items: center; gap: 18px; background: #f7f8fb; color: #141a21; border-radius: 16px; padding: 12px 20px; }
 .vr-owner-text { flex: 1; min-width: 0; }
 .vr-owner-title { margin: 0; font-weight: 700; }
@@ -185,7 +202,7 @@
 .vr-btn.approve { background: #e2f3e8; color: #1e7a45; }
 .vr-btn.reject { background: #fce4e2; color: #b42318; }
 .vr-owner.pressed-reject .vr-btn.reject, .vr-owner.pressed-approve .vr-btn.approve { transform: scale(0.94); box-shadow: 0 0 0 3px currentColor; }
-.vr-ledger { display: flex; align-items: center; gap: 22px; background: #0a101c; border: 1px solid #22314f; border-radius: 16px; padding: 10px 20px; }
+.vr-ledger { display: flex; align-items: center; gap: 22px; background: var(--s-panel-2); border: 1px solid var(--s-line-2); border-radius: 16px; padding: 10px 20px; }
 .vr-ledger-head { margin: 0; width: 190px; font: 600 12px/1.5 "JetBrains Mono", monospace; letter-spacing: 0.06em; color: var(--s-ink-2); text-transform: uppercase; }
 .vr-ledger-cols { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .vr-ledger-cols span { display: block; font-size: 13.5px; color: var(--s-ink-2); }
@@ -202,27 +219,27 @@
 .vr-receipt-rows em { font-style: normal; }
 .vr-seal { display: inline-block; width: 110px; height: 12px; border-radius: 3px; background: repeating-linear-gradient(45deg, #2a2a2a 0 4px, #4a4a4a 4px 8px); }
 .vr-stamp { border: 3px solid #b42318; color: #b42318; font: 800 20px "Instrument Sans", sans-serif; letter-spacing: 0.12em; padding: 2px 10px; border-radius: 6px; opacity: 0; }
-.vr-verify { display: flex; align-items: center; text-align: center; background: var(--seal); color: #fff; border-radius: 10px; padding: 9px 16px; font-weight: 600; text-decoration: none; pointer-events: auto; white-space: nowrap; }
-.vr-banner { display: grid; align-content: center; text-align: center; border: 1px dashed var(--haze); color: var(--haze); background: #1f1808; border-radius: 16px; padding: 8px 20px; font-size: 14.5px; }
+.vr-verify { display: flex; align-items: center; text-align: center; background: var(--seal); color: var(--s-on-seal); border-radius: 10px; padding: 9px 16px; font-weight: 600; text-decoration: none; pointer-events: auto; white-space: nowrap; }
+.vr-banner { display: grid; align-content: center; text-align: center; border: 1px dashed var(--haze); color: var(--haze); background: var(--haze-soft); border-radius: 16px; padding: 8px 20px; font-size: 14.5px; }
 .vr-banner b { display: block; font-size: 16px; }
 .vr-nextcase { font-size: 13px; color: var(--s-ink-2); white-space: nowrap; }
 .vr-skip-short { display: none; }
 
 /* before the first play: a question over the stage */
 .vr-stagewrap { position: relative; }
-.vr-poster { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 14px; padding: 20px; border: 0; border-radius: 16px; background: radial-gradient(closest-side, rgba(5, 7, 12, 0.72), rgba(5, 7, 12, 0.9)); color: var(--s-ink); cursor: pointer; text-align: center; font: inherit; }
+.vr-poster { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; justify-items: center; gap: 14px; padding: 20px; border: 0; border-radius: 16px; background: radial-gradient(closest-side, color-mix(in srgb, var(--stage-bg) 72%, transparent), color-mix(in srgb, var(--stage-bg) 90%, transparent)); color: var(--s-ink); cursor: pointer; text-align: center; font: inherit; }
 .vr-poster[hidden] { display: none; }
 .vr-poster-q { font: 700 clamp(24px, 3.4vw, 44px)/1.12 "Instrument Sans", sans-serif; letter-spacing: -0.02em; max-width: 780px; }
 .vr-poster-q em { font-style: normal; color: var(--mint); }
-.vr-poster-play { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #3ee6d0, #6e8bff); box-shadow: 0 16px 40px -14px #6e8bff; transition: transform 0.15s; }
+.vr-poster-play { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--s-play-a), var(--s-play-b)); box-shadow: 0 16px 40px -14px var(--s-play-b); transition: transform 0.15s; }
 .vr-poster:hover .vr-poster-play { transform: scale(1.08); }
-.vr-poster-play svg { width: 30px; height: 30px; fill: #05070c; margin-left: 4px; }
+.vr-poster-play svg { width: 30px; height: 30px; fill: var(--s-play-ink); margin-left: 4px; }
 .vr-poster-sub { font-size: 14.5px; color: var(--s-ink-2); }
 .vr-poster:focus-visible { outline: 3px solid var(--seal); outline-offset: -3px; }
 
 .vr-caption { min-height: 2.7em; margin: 8px auto 4px; max-width: 900px; text-align: center; font: 500 clamp(17px, 1.6vw, 22px)/1.35 "Instrument Sans", sans-serif; color: var(--s-ink); }
 .vr-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.vr-ctl, .vr-speed select { min-height: 44px; min-width: 44px; background: #121c30; color: var(--s-ink); border: 1px solid #2a3a5a; border-radius: 10px; font: 600 14px "Instrument Sans", sans-serif; cursor: pointer; padding: 0 12px; }
+.vr-ctl, .vr-speed select { min-height: 44px; min-width: 44px; background: var(--s-chip); color: var(--s-ink); border: 1px solid var(--s-line); border-radius: 10px; font: 600 14px "Instrument Sans", sans-serif; cursor: pointer; padding: 0 12px; }
 .vr-ctl svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; }
 .vr-ctl:hover { border-color: var(--seal); }
 .vr-ctl:focus-visible, .vr-speed select:focus-visible, .vr-chapters button:focus-visible, #vr-scrub:focus-visible { outline: 2px solid var(--seal); outline-offset: 2px; }
@@ -241,7 +258,7 @@
 .case-card { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; transition: border-color 0.15s; }
 .case-card[hidden] { display: none; }
 .case-card:hover { border-color: color-mix(in srgb, var(--glow) 50%, transparent); }
-.case-card.oos { border-style: dashed; border-color: #c9a24b99; }
+.case-card.oos { border-style: dashed; border-color: color-mix(in srgb, var(--warn) 60%, transparent); }
 .case-play { all: unset; display: flex; flex-direction: column; padding: 14px 16px 12px; cursor: pointer; border-radius: 14px; width: 100%; box-sizing: border-box; }
 .case-play:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
 .case-tag { font: 600 11px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); }
@@ -356,7 +373,7 @@
 
 /* presentation mode: only the stage */
 body.present header.top, body.present .arena-intro, body.present .ar-tabs, body.present .ar-panel, body.present main:not(.arena-intro), body.present footer { display: none; }
-body.present { background: #05070c; }
+body.present { background: var(--bg); }
 body.present .vr { width: auto; margin: 0 auto; min-height: 100vh; border-radius: 0; max-width: none; }
 body.present .vr-caption { font-size: 28px; }
 
@@ -372,7 +389,7 @@ body.present .vr-caption { font-size: 28px; }
 .iw-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
 .iw-row { display: flex; flex-direction: column; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px 12px; }
 .iw-row[hidden] { display: none; }
-.iw-row.oos { border-style: dashed; border-color: #c9a24b99; }
+.iw-row.oos { border-style: dashed; border-color: color-mix(in srgb, var(--warn) 60%, transparent); }
 .iw-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0; font: 600 11px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cyan); }
 .iw-meta span { color: var(--muted); }
 .iw-row h4 { margin: 6px 0 2px; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
@@ -381,10 +398,15 @@ body.present .vr-caption { font-size: 28px; }
 .iw-loss { font: 600 13px "JetBrains Mono", monospace; color: var(--ink); }
 .iw-loss.unknown { color: var(--muted); font-weight: 500; }
 .iw-check { font-size: 11.5px; padding: 1px 7px; background: color-mix(in srgb, var(--glow) 14%, transparent); color: var(--ink); white-space: normal; }
-.iw-row.oos .iw-check { background: #c9a24b2e; color: var(--warn); }
+.iw-row.oos .iw-check { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
 .iw-src { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
 .iw-src a { color: var(--glow); }
 .iw-src a + a::before { content: " · "; color: var(--muted); }
 .iw-more { margin-top: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 8px 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .iw-more:hover { border-color: var(--glow); }
 .iw-more:focus-visible, .iw-src a:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+
+:root[data-theme="light"] .vr rect[fill="url(#vr-vignette)"] { display: none; }
+:root[data-theme="light"] .vr .vr-cap-glow { opacity: 0.35; }
+:root[data-theme="light"] .vr { border: 1px solid var(--s-line); box-shadow: var(--shadow); }
+:root[data-theme="light"] :is(.vr-owner, .vr-receipt-paper) { background: #fffdf8; border: 1px solid var(--s-line); }

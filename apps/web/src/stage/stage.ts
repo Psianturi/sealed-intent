@@ -85,12 +85,12 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   watcher.observe(svg);
   const defs = s("defs", {}, svg);
   defs.innerHTML = `
-    <radialGradient id="vr-glow"><stop offset="0" stop-color="#6E8BFF" stop-opacity=".9"/><stop offset=".45" stop-color="#6E8BFF" stop-opacity=".35"/><stop offset="1" stop-color="#6E8BFF" stop-opacity="0"/></radialGradient>
-    <radialGradient id="vr-glow-mint"><stop offset="0" stop-color="#3EE6A8" stop-opacity=".5"/><stop offset="1" stop-color="#3EE6A8" stop-opacity="0"/></radialGradient>
-    <radialGradient id="vr-glow-ember"><stop offset="0" stop-color="#FF5A4E" stop-opacity=".5"/><stop offset="1" stop-color="#FF5A4E" stop-opacity="0"/></radialGradient>
-    <radialGradient id="vr-vignette" cx=".5" cy=".55" r=".75"><stop offset=".55" stop-color="#05070C" stop-opacity="0"/><stop offset="1" stop-color="#05070C" stop-opacity=".9"/></radialGradient>
-    <pattern id="vr-hazard" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#FF5A4E"/><rect width="5" height="10" fill="#1a0b0a"/></pattern>
-    <linearGradient id="vr-beam" x1="0" x2="1"><stop offset="0" stop-color="#9fb2ff" stop-opacity="0"/><stop offset=".5" stop-color="#dfe6ff" stop-opacity="1"/><stop offset="1" stop-color="#9fb2ff" stop-opacity="0"/></linearGradient>`;
+    <radialGradient id="vr-glow"><stop offset="0" style="stop-color:var(--seal)" stop-opacity=".9"/><stop offset=".45" style="stop-color:var(--seal)" stop-opacity=".35"/><stop offset="1" style="stop-color:var(--seal)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vr-glow-mint"><stop offset="0" style="stop-color:var(--mint)" stop-opacity=".5"/><stop offset="1" style="stop-color:var(--mint)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vr-glow-ember"><stop offset="0" style="stop-color:var(--ember)" stop-opacity=".5"/><stop offset="1" style="stop-color:var(--ember)" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vr-vignette" cx=".5" cy=".55" r=".75"><stop offset=".55" style="stop-color:var(--stage-bg)" stop-opacity="0"/><stop offset="1" style="stop-color:var(--stage-bg)" stop-opacity=".9"/></radialGradient>
+    <pattern id="vr-hazard" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" style="fill:var(--ember)"/><rect width="5" height="10" style="fill:var(--s-hazard)"/></pattern>
+    <linearGradient id="vr-beam" x1="0" x2="1"><stop offset="0" style="stop-color:var(--s-beam-a)" stop-opacity="0"/><stop offset=".5" style="stop-color:var(--s-beam-b)" stop-opacity="1"/><stop offset="1" style="stop-color:var(--s-beam-a)" stop-opacity="0"/></linearGradient>`;
 
   // floor with a perspective grid
   s("rect", { y: g.top, width: g.w, height: g.h, class: "vr-floor" }, svg);

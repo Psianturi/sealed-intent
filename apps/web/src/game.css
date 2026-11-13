@@ -13,7 +13,7 @@
   .arena-page .gm, .arena-page .vr { border-radius: 16px; }
 }
 
-.gm { margin-top: 12px; margin-bottom: 8px; border-radius: 22px; padding: 18px 22px 22px; background: radial-gradient(900px 420px at 70% 0%, #13204a 0%, transparent 60%), #05070c; border: 1px solid var(--line); box-shadow: 0 30px 80px -40px #000; min-height: min(640px, calc(100vh - 220px)); display: grid; grid-template-rows: auto 1fr; }
+.gm { margin-top: 12px; margin-bottom: 8px; border-radius: 22px; padding: 18px 22px 22px; background: radial-gradient(900px 420px at 70% 0%, var(--haze-a) 0%, transparent 60%), var(--surface); border: 1px solid var(--line); box-shadow: 0 30px 80px -40px var(--shade); min-height: min(640px, calc(100vh - 220px)); display: grid; grid-template-rows: auto 1fr; }
 .gm-hud { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font: 12.5px "JetBrains Mono", monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
 .gm-hud b { color: var(--ink); font-size: 15px; margin-left: 6px; letter-spacing: 0; }
 .gm-screen { display: grid; align-items: center; padding-top: 18px; }
@@ -27,15 +27,15 @@ kbd { display: inline-block; min-width: 1.6em; padding: 0 5px; margin: 0 6px; bo
 .gm-start { margin-top: 10px; padding: 14px 28px; font-size: 17px; }
 
 .gm-round { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; align-items: center; }
-.gm-msg { position: relative; padding: 16px 18px; border-radius: 16px; background: #0b1324; border: 1px solid color-mix(in srgb, var(--glow) 35%, var(--line)); font-size: 18px; margin-bottom: 18px; animation: gm-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.gm-msg { position: relative; padding: 16px 18px; border-radius: 16px; background: var(--well); border: 1px solid color-mix(in srgb, var(--glow) 35%, var(--line)); font-size: 18px; margin-bottom: 18px; animation: gm-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 .gm-msg p { margin: 4px 0 0; overflow-wrap: anywhere; }
 .gm-from { font: 12.5px "JetBrains Mono", monospace; color: var(--accent-ink); }
 .gm-ask { margin: 0; padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--line); font: 600 17px "JetBrains Mono", monospace; overflow-wrap: anywhere; animation: gm-in 0.5s 0.2s both; }
 @keyframes gm-in { from { opacity: 0; transform: translateX(-24px); } }
 
 .gm-side { display: grid; justify-items: center; gap: 18px; }
-.gm-timer { --p: 1; width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(closest-side, #05070c 78%, transparent 80% 100%), conic-gradient(var(--cyan) calc(var(--p) * 360deg), var(--line) 0); font: 700 34px "JetBrains Mono", monospace; transition: filter 0.2s; }
-.gm-timer.late { background: radial-gradient(closest-side, #05070c 78%, transparent 80% 100%), conic-gradient(var(--block) calc(var(--p) * 360deg), var(--line) 0); color: var(--block); animation: cp-blink 0.8s infinite; }
+.gm-timer { --p: 1; width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(closest-side, var(--surface) 78%, transparent 80% 100%), conic-gradient(var(--cyan) calc(var(--p) * 360deg), var(--line) 0); font: 700 34px "JetBrains Mono", monospace; transition: filter 0.2s; }
+.gm-timer.late { background: radial-gradient(closest-side, var(--surface) 78%, transparent 80% 100%), conic-gradient(var(--block) calc(var(--p) * 360deg), var(--line) 0); color: var(--block); animation: cp-blink 0.8s infinite; }
 .gm-pads { display: grid; gap: 10px; width: 100%; max-width: 360px; }
 .gm-pad { display: flex; align-items: center; justify-content: center; padding: 15px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s; }
 .gm-pad:hover { transform: translateY(-2px); }
@@ -55,7 +55,7 @@ kbd { display: inline-block; min-width: 1.6em; padding: 0 5px; margin: 0 6px; bo
 .gm-you { margin: 0; font: 12.5px "JetBrains Mono", monospace; color: var(--muted); }
 .gm-gates { margin-bottom: 10px; }
 .gm-lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
-.gm-lane { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: #070b14; display: grid; gap: 2px; font-size: 13px; color: var(--muted); }
+.gm-lane { padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--well); display: grid; gap: 2px; font-size: 13px; color: var(--muted); }
 .gm-lane b { font: 700 18px "JetBrains Mono", monospace; color: var(--allow); }
 .gm-lane.lost b { color: var(--block); animation: gm-drain 0.8s both; }
 .gm-lane.sein { border-color: color-mix(in srgb, var(--glow) 45%, var(--line)); }
@@ -89,11 +89,11 @@ kbd { display: inline-block; min-width: 1.6em; padding: 0 5px; margin: 0 6px; bo
 body.present .ar-strip { display: none; }
 
 /* what the player is given: the facts SeIn can look up, and what is at stake */
-.gm-notes { grid-column: 1; margin-top: 2px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: #0b1324; }
+.gm-notes { grid-column: 1; margin-top: 2px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--well); }
 .gm-notes ul { margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.55; color: var(--ink); }
 .gm-notes .gm-label { margin-bottom: 4px; }
 .gm-stake { margin: -8px 0 0; font-size: 14px; color: var(--muted); }
 .gm-stake b { color: var(--ink); font: 700 16px "JetBrains Mono", monospace; }
-.gm-bonus { align-self: flex-start; margin: 0 0 10px; padding: 3px 10px; border-radius: 999px; border: 1px dashed #c9a24b; color: #f5c76b; font: 600 12px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+.gm-bonus { align-self: flex-start; margin: 0 0 10px; padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--warn); color: var(--warn); font: 600 12px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; }
 .gm-round .gm-side { grid-row: 1 / span 2; grid-column: 2; }
 @media (max-width: 900px) { .gm-round .gm-side { grid-row: auto; grid-column: 1; } }
