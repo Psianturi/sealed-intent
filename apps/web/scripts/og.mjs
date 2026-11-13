@@ -17,7 +17,7 @@ const lane = (l) => {
   const hit = (o) => o.lanes[l].verdict.stolenCents > 0 || o.lanes[l].verdict.foreignKeys.length > 0;
   return { stopped: inScope.filter((o) => !hit(o)).length, lost: inScope.reduce((n, o) => n + o.lanes[l].verdict.stolenCents, 0) };
 };
-const MARK = `<svg width="64" height="64" viewBox="0 0 64 64"><defs><linearGradient id="sein-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ee6d0"/><stop offset="1" stop-color="#6e8bff"/></linearGradient></defs><path d="M32 5 55 12.5V30C55 44.5 45.5 54.5 32 59.5 18.5 54.5 9 44.5 9 30V12.5Z" fill="url(#sein-g)" stroke="url(#sein-g)" stroke-width="4" stroke-linejoin="round"/><path d="M40.5 24C39.3 19.6 35.8 17.5 31.6 17.5 26.6 17.5 23 20.4 23 24.6 23 33.4 41 29.4 41 38.8 41 43.4 37.2 46.5 32 46.5 27.4 46.5 24 44.4 22.6 40.6" fill="none" stroke="#06101f" stroke-width="6.2" stroke-linecap="round"/></svg>`;
+const MARK = `<svg width="64" height="64" viewBox="0 0 64 64"><g fill="#3b3f91" stroke="#3b3f91"><circle cx="32" cy="32" r="24.5" fill="none" stroke-width="10" stroke-dasharray="0 12.828" stroke-linecap="round"/><circle cx="32" cy="32" r="25" stroke="none"/></g><circle cx="32" cy="32" r="19" fill="none" stroke="#f4efe6" stroke-width="1.6" opacity=".6"/><circle cx="24.6" cy="32" r="4.7" fill="#f4efe6"/><rect x="33.6" y="20.5" width="5.8" height="23" rx="2.9" fill="#f4efe6"/></svg>`;
 const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&text=I&display=swap" rel="stylesheet">`;
 const BASE = `*{box-sizing:border-box}html,body{margin:0;font-family:"IBM Plex Sans","Instrument Sans",system-ui,sans-serif}`;
 
@@ -38,8 +38,8 @@ h1{font-size:58px;line-height:1.05;letter-spacing:-.025em;margin:26px 0 30px}
 <div class="g">${card("No guard", "no-guard")}${card("Limits only", "caps-only")}${card("SeIn", "sealed", true)}</div>
 <p class="f">Three identical agents, the same attacks, a referee that reads only on-chain state. Test tokens in a recorded simulation.</p>`;
 const logo = `<!doctype html><meta charset="utf-8">${FONTS}<style>${BASE}
-body{width:370px;height:150px;background:transparent}.b{width:370px;height:150px;background:#fff;border-radius:24px;display:flex;align-items:center;gap:22px;padding:0 34px}
-.w{font-size:64px;font-weight:700;letter-spacing:-.02em;line-height:1;color:#141a21}.w span{color:#1f3aa3}.t{font-size:17px;font-weight:600;letter-spacing:.14em;color:#55606d;margin-top:6px}svg{width:96px;height:96px}</style>
+body{width:370px;height:150px;background:transparent}.b{width:370px;height:150px;background:#fbf8f2;border-radius:24px;display:flex;align-items:center;gap:22px;padding:0 34px}
+.w{font-size:64px;font-weight:700;letter-spacing:-.02em;line-height:1;color:#1d2330}.w span{color:#2b48b0}.t{font-size:17px;font-weight:600;letter-spacing:.14em;color:#55606d;margin-top:6px}svg{width:96px;height:96px}</style>
 <div class="b">${MARK}<div><div class="w">Se<span>In</span></div><div class="t">SEALED INTENT</div></div></div>`;
 
 const dir = mkdtempSync(join(tmpdir(), "sein-og-"));

@@ -559,3 +559,38 @@ h1, h2, h3, .t-title, .page-title, .vr-title h3, .gm h2, .gm h3 { font-family: v
 
 :root[data-theme="dark"] :is(.btn.primary, .cp-go) { background: var(--cyan); }
 :root[data-theme="light"] :is(.cp-grid article, .cp-how article, .t-field input, .t-field textarea, .t-field select, .tabs, .vr, .cp-outlook) { border-radius: 8px; }
+
+/* the mark takes its ink from the theme */
+.mark-seal { fill: var(--stamp); stroke: var(--stamp); }
+.mark-cut { fill: var(--bg); }
+.mark-ring { fill: none; stroke: var(--bg); stroke-width: 1.6; opacity: 0.6; }
+
+/* header: the tabs answer the pointer */
+header.top nav { gap: 4px; }
+header.top nav a { position: relative; padding: 7px 13px; border-radius: 6px; transition: color 0.2s, background 0.2s, transform 0.2s; }
+header.top nav a:hover { transform: translateY(-1px); }
+.brand .mark { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.brand:hover .mark { transform: rotate(30deg) scale(1.08); }
+.theme-toggle { transition: transform 0.15s, color 0.2s, border-color 0.2s; }
+.theme-toggle svg { transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.theme-toggle:hover svg { transform: rotate(35deg); }
+.theme-toggle:active { transform: scale(0.9); }
+/* Ledger: an ink line is drawn under the tab; the open page is a paper index tab */
+:root[data-theme="light"] header.top { border-bottom-color: var(--line-strong); box-shadow: 0 2px 0 var(--bg), 0 3px 0 var(--line); }
+:root[data-theme="light"] header.top nav a::after { content: ""; position: absolute; left: 13px; right: 13px; bottom: 3px; height: 2px; border-radius: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1); }
+:root[data-theme="light"] header.top nav a:hover::after { transform: scaleX(1); }
+:root[data-theme="light"] header.top nav a[aria-current="page"] { background: var(--surface); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-strong) 55%, var(--line)), 2px 2px 0 color-mix(in srgb, var(--ink) 10%, transparent); }
+/* Night Shift: brackets close in on the tab; the open page keeps them */
+:root[data-theme="dark"] header.top { border-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyan) 55%, transparent), transparent) 1; }
+:root[data-theme="dark"] header.top nav a::before, :root[data-theme="dark"] header.top nav a::after { position: absolute; top: 50%; font: 600 15px/1 "JetBrains Mono", monospace; color: var(--cyan); opacity: 0; transition: opacity 0.2s, transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+:root[data-theme="dark"] header.top nav a::before { content: "["; left: 2px; transform: translate(8px, -54%); }
+:root[data-theme="dark"] header.top nav a::after { content: "]"; right: 2px; transform: translate(-8px, -54%); }
+:root[data-theme="dark"] header.top nav a:is(:hover, [aria-current="page"])::before, :root[data-theme="dark"] header.top nav a:is(:hover, [aria-current="page"])::after { opacity: 1; transform: translate(0, -54%); }
+:root[data-theme="dark"] header.top nav a:hover { color: var(--cyan); text-shadow: 0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent); }
+@media (max-width: 640px) { header.top nav { gap: 0; } header.top nav a { padding: 6px 9px; } }
+
+/* changing the theme opens from the switch outward, like stepping into the next room */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: next-room 0.6s cubic-bezier(0.4, 0, 0.2, 1) both; }
+@keyframes next-room { from { clip-path: circle(0 at var(--tx, 100%) var(--ty, 0)); } to { clip-path: circle(150vmax at var(--tx, 100%) var(--ty, 0)); } }
+@media (prefers-reduced-motion: reduce) { header.top nav a, .brand .mark, .theme-toggle svg { transition: none; } header.top nav a:hover, .brand:hover .mark, .theme-toggle:hover svg { transform: none; } }
