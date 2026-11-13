@@ -25,3 +25,4 @@ export * from "./tee-tls";
 export * from "./watch";
 export * from "./x402";
 export * from "./lookalike";
+export * from "./paycheck";
