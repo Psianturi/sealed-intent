@@ -2,6 +2,7 @@
 import { esc } from "./arena-data";
 import { reason } from "./copy";
 import { GATE_NAMES, sealedGates } from "./storyboard";
+import { startPayCheck } from "./paycheck";
 import { formatAmount } from "./verify-chain";
 import { matchesSeal, verifyReceipt } from "./verify-core";
 
@@ -121,7 +122,23 @@ function pick(name: string) {
   $("t-expect").textContent = s.expect;
 }
 
+function mode(name: string) {
+  const check = name === "check";
+  $("mode-demo").hidden = check;
+  $("mode-check").hidden = !check;
+  $("tab-demo").setAttribute("aria-selected", String(!check));
+  $("tab-check").setAttribute("aria-selected", String(check));
+}
+
 async function main() {
+  for (const t of document.querySelectorAll<HTMLButtonElement>("[data-mode]"))
+    t.addEventListener("click", () => {
+      history.replaceState(null, "", t.dataset.mode === "check" ? "#check" : location.pathname + location.search);
+      mode(t.dataset.mode!);
+    });
+  addEventListener("hashchange", () => mode(location.hash.slice(1)));
+  mode(location.hash.slice(1));
+  if (API) startPayCheck(API);
   $("t-gates").innerHTML = gatesHtml("idle");
   for (const b of document.querySelectorAll<HTMLButtonElement>("[data-scenario]")) b.addEventListener("click", () => pick(b.dataset.scenario!));
   pick("routine");

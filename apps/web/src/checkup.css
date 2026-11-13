@@ -97,6 +97,33 @@ body.no-webgl .cp-stage { background: radial-gradient(closest-side, #1a2a5a 0%, 
 @media (prefers-reduced-motion: reduce) { .cp-live, .cp-log li.run::after { animation: none; } }
 
 /* try the firewall */
+.t-modes { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-top: 22px; padding: 5px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.t-modes button { display: grid; gap: 2px; text-align: left; border: 0; border-radius: 10px; padding: 8px 16px; background: transparent; color: var(--muted); font: inherit; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.t-modes button b { font-size: 15px; color: var(--ink); }
+.t-modes button small { font-size: 12.5px; }
+.t-modes button:hover { background: var(--well); }
+.t-modes button[aria-selected="true"] { background: color-mix(in srgb, var(--cyan) 16%, var(--surface)); box-shadow: inset 0 0 0 1px var(--cyan); }
+.t-modes button:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.t-modes + div .t-hero { margin-top: 20px; }
+.t-field select { background: var(--well); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); padding: 10px 12px; font: 14.5px "JetBrains Mono", monospace; outline: none; }
+.t-field select:focus { border-color: var(--glow); }
+.pc-looks { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
+.pc-looks li { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--well); font-size: 14px; color: var(--muted); }
+.pc-looks b { display: block; color: var(--ink); font-size: 14.5px; margin-bottom: 2px; }
+.pc-risk { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; margin: 10px 0 12px; font: 600 13px "JetBrains Mono", monospace; color: var(--muted); }
+.pc-risk b { color: var(--ink); }
+.pc-bar { height: 8px; border-radius: 999px; background: var(--well); border: 1px solid var(--line); overflow: hidden; }
+.pc-bar i { display: block; height: 100%; border-radius: 999px; background: var(--allow); transition: width 0.5s; }
+.t-verdict.warn .pc-bar i { background: var(--warn); }
+.t-verdict.block .pc-bar i { background: var(--block); }
+.pc-find { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 8px; }
+.pc-find li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 14.5px; overflow-wrap: anywhere; }
+.pc-ico { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 12px "JetBrains Mono", monospace; color: var(--muted); border: 1.5px solid currentColor; }
+.pc-find .block .pc-ico { color: var(--block); }
+.pc-find .warn .pc-ico { color: var(--warn); }
+.pc-find .ok .pc-ico { color: var(--allow); }
+.pc-find .ok, .pc-find .info { color: var(--muted); }
+@media (max-width: 560px) { .t-modes { display: grid; } }
 .t-hero { margin-top: 28px; max-width: 760px; }
 .t-title { font-size: clamp(34px, 4.4vw, 54px); line-height: 1.04; letter-spacing: -0.03em; margin-bottom: 14px; background: linear-gradient(180deg, var(--title-a) 30%, var(--title-b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .t-offline { padding: 10px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--warn) 40%, var(--line)); background: var(--warn-soft); color: var(--ink); font-size: 14.5px; }

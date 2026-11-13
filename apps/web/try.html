@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Try the firewall | SeIn</title>
+  <title>Try the firewall, or check a real payment | SeIn</title>
   <meta name="description" content="Play an AI agent and ask SeIn to pay. The real checks answer: a NEAR AI Cloud enclave, secret rules and an OutLayer custody wallet on NEAR testnet." />
   <meta property="og:title" content="Try SeIn: be the agent, try to get paid" />
   <meta property="og:description" content="Real checks on NEAR testnet. Routine payments go through, tricks are refused, strangers wait for the owner." />
@@ -22,6 +22,12 @@
 <body class="room" data-state="idle">
   <!--header:try-->
   <main class="cp">
+    <div class="t-modes" role="tablist" aria-label="Two ways to use the firewall">
+      <button type="button" role="tab" id="tab-demo" aria-controls="mode-demo" aria-selected="true" data-mode="demo"><b>Live demo</b><small>Play the agent, with test money</small></button>
+      <button type="button" role="tab" id="tab-check" aria-controls="mode-check" aria-selected="false" data-mode="check"><b>Check a real payment</b><small>Your own payment, nothing is sent</small></button>
+    </div>
+
+    <div id="mode-demo" role="tabpanel" aria-labelledby="tab-demo">
     <section class="t-hero">
       <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>Live demo: the payment firewall</p>
       <h1 class="t-title">Be the agent. Try to get paid.</h1>
@@ -66,8 +72,62 @@
         <article><h3>The money</h3><p>An allowed payment is sent by a real OutLayer custody wallet on NEAR testnet, with test tokens.</p></article>
         <article><h3>The receipt</h3><p>Every answer is signed. Your browser checks the signature; amount and receiver stay sealed.</p></article>
       </div>
-      <p class="cp-note">The owner here is SeIn's test account, so a request that needs the owner stops at "waiting". To run SeIn for your own agent, see <a href="/start">Get started</a>.</p>
+      <p class="cp-note">The owner here is SeIn's test account, so a request that needs the owner stops at "waiting". To run SeIn for your own agent, see <a href="/start">Protect your own agent</a>.</p>
     </section>
+    </div>
+
+    <div id="mode-check" role="tabpanel" aria-labelledby="tab-check" hidden>
+      <section class="t-hero">
+        <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>Live · real chain data · nothing is sent</p>
+        <h1 class="t-title">Check a payment before you send it.</h1>
+        <p class="cp-lead">About to pay someone on NEAR, or is your agent? Describe the payment. SeIn looks the receiver up on chain, compares it with the paying account's own history, and has a model inside a NEAR AI Cloud enclave read the message that asked for it. No wallet connection, no key, and nothing is kept.</p>
+      </section>
+
+      <section class="t-grid">
+        <form class="cp-panel t-form" id="pc-form" autocomplete="off">
+          <h2>The payment</h2>
+          <div class="t-scenarios" role="group" aria-label="Your payment or an example">
+            <button type="button" data-example="own">My own payment</button>
+            <button type="button" data-example="usual">Example: a usual vendor</button>
+            <button type="button" data-example="like">Example: a look-alike name</button>
+            <button type="button" data-example="rush">Example: a stranger in a hurry</button>
+          </div>
+          <p class="t-expect" id="pc-expect"></p>
+          <label class="t-field">Paying account<input id="pc-from" spellcheck="false" placeholder="you.near" /></label>
+          <label class="t-field">Pay to<input id="pc-to" spellcheck="false" placeholder="receiver.near" required /></label>
+          <label class="t-field">Amount in NEAR<input id="pc-amount" inputmode="decimal" placeholder="optional" /></label>
+          <label class="t-field">The message that asked for this payment<textarea id="pc-task" rows="3" placeholder="Optional. Paste the email, chat message or prompt."></textarea></label>
+          <label class="t-field">Network<select id="pc-net"><option value="mainnet">NEAR mainnet</option><option value="testnet">NEAR testnet</option></select></label>
+          <button class="cp-go t-send" id="pc-send" type="submit">Check this payment</button>
+          <p class="t-quota" id="pc-quota"></p>
+        </form>
+
+        <div class="t-side">
+          <div class="cp-panel" id="pc-idle">
+            <h2>What SeIn looks at</h2>
+            <ul class="pc-looks">
+              <li><b>The receiver</b>Does the account exist? How old is it? Is it a contract?</li>
+              <li><b>The paying account's history</b>Has it paid this receiver before? Does the name pass for one it has paid?</li>
+              <li><b>The amount</b>Is it unusual for this account, or most of its balance?</li>
+              <li><b>The message</b>Does it use pressure, secrecy or an order to ignore rules?</li>
+            </ul>
+            <p class="t-note">A pass needs a receiver the paying account has paid before. Anything SeIn cannot confirm is a warning, never a pass.</p>
+          </div>
+          <div class="t-verdict" id="pc-verdict" hidden aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="cp-how">
+        <h2>What this is, and what it is not</h2>
+        <div class="cp-grid">
+          <article><h3>Real data</h3><p>Every fact is read live from NEAR: the account, its age, the paying account's recent payments and its balance.</p></article>
+          <article><h3>Private</h3><p>No wallet connection and no key. The message is read inside an enclave, and nothing about the check is kept.</p></article>
+          <article><h3>Advice, not a lock</h3><p>Here SeIn cannot stop a payment; you decide. In front of an agent's wallet the same checks are a hard stop.</p></article>
+          <article><h3>For agents too</h3><p>An agent can ask the same question over HTTP before it pays. The README shows the request.</p></article>
+        </div>
+        <p class="cp-note">A clean answer is not a guarantee: an account you have paid before can still be the wrong one today. NEAR payments only, for now.</p>
+      </section>
+    </div>
     <!--footer:try-->
   </main>
   <script type="module" src="/src/try.ts"></script>
