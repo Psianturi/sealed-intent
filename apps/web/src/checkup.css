@@ -214,3 +214,4 @@ body.no-webgl .cp-stage { background: radial-gradient(closest-side, var(--tint) 
 .how3 li { counter-increment: how; display: flex; align-items: center; gap: 8px; }
 .how3 li::before { content: counter(how); width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 700 12px "JetBrains Mono", monospace; color: var(--on-accent); background: linear-gradient(135deg, var(--cyan), var(--glow)); }
 .how3 + .t-offline { margin-top: 14px; }
+#cp-heal-go:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }

@@ -190,6 +190,16 @@ function renderHeal(r: ScanResult) {
   $("cp-heal-list").innerHTML = heal.map((f) => `<li><label><input type="checkbox" value="${esc(f.key!)}" data-id="key:${esc(f.key!)}"${f.severity === "danger" ? " checked" : ""} /> <span>${esc(f.target ?? "")}</span> <span class="cp-tag ${f.severity}">${f.severity === "danger" ? "urgent" : "check"}</span></label></li>`).join("");
   $("cp-heal-status").textContent = "";
   $("cp-confirm").hidden = true;
+  healCount();
+}
+
+/** The button says what it will do, and waits until there is something to do. */
+function healCount() {
+  const n = document.querySelectorAll("#cp-heal-list input:checked").length;
+  const go = $<HTMLButtonElement>("cp-heal-go");
+  go.disabled = n === 0;
+  go.textContent = n ? `Cut ${n} connection${n === 1 ? "" : "s"} with my wallet` : "Tick a connection to cut";
+  $("cp-confirm").hidden = true;
 }
 
 async function run(account: string, network: Network) {
@@ -219,7 +229,7 @@ async function run(account: string, network: Network) {
 async function heal(preview: boolean) {
   if (!current) return;
   const boxes = [...document.querySelectorAll<HTMLInputElement>("#cp-heal-list input:checked")];
-  if (!boxes.length) return void ($("cp-heal-status").textContent = "Pick at least one connection.");
+  if (!boxes.length) return void ($("cp-heal-status").textContent = "Tick at least one connection in the list above.");
   const ids = boxes.map((b) => b.dataset.id!);
   const cut = boxes.map((b) => b.value);
   const after = scan({ ...current.input, keys: current.input.keys.filter((k) => !cut.includes(k.public_key)) }).score;
@@ -240,6 +250,9 @@ async function heal(preview: boolean) {
       <p>What happens: ${boxes.length === 1 ? "that app forgets" : "those apps forget"} your login; you can log in again any time. No NEAR, token or NFT moves. Your full-access keys are not touched. The network fee is a fraction of a cent.</p>
       <div class="cp-actions"><button type="button" class="cp-go" id="cp-confirm-go">Confirm and open my wallet</button><button type="button" class="cp-ghost" id="cp-confirm-cancel">Cancel</button></div>`;
     confirm.hidden = false;
+    status.textContent = "";
+    confirm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    $("cp-confirm-go").focus({ preventScroll: true });
     $("cp-confirm-go").onclick = () => void heal(false);
     $("cp-confirm-cancel").onclick = () => {
       confirm.hidden = true;
@@ -298,6 +311,7 @@ async function main() {
     });
   }
   $("cp-heal-go").addEventListener("click", () => void heal(false));
+  $("cp-heal-list").addEventListener("change", healCount);
   $("cp-heal-preview").addEventListener("click", () => void heal(true));
   const q = new URLSearchParams(location.search);
   const account = q.get("account");
