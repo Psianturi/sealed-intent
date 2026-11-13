@@ -14,7 +14,6 @@ let base = params.get("run") === "official-sandbox" ? "official-sandbox" : "offi
 let ownerReads = true;
 let index = 0;
 let mounted: Mounted | undefined;
-let autoplayed = false;
 // before the first Play the stage shows the finished frame, like a poster
 let poster = false;
 
@@ -60,17 +59,21 @@ function mount(i: number, play = false) {
     if (present) setTimeout(() => mount(index + 1, true), 1600);
   };
   tl.onTick(0);
-  if (play) tl.play();
+  if (play) (hidePoster(), tl.play());
   else {
-    const verdict = mounted.acts.find(([n]) => n === "Verdict")?.[1] ?? 0;
-    tl.seek(verdict + 1.2);
+    // the opening frame: the message has arrived and nothing has moved yet, so the question is still open
+    const decision = mounted.acts.find(([n]) => n === "Decision")?.[1] ?? 0;
+    tl.seek(Math.max(decision - 0.2, 0));
     poster = true;
   }
 }
 
+const hidePoster = () => ($("vr-poster").hidden = true);
+
 function start() {
   const tl = mounted?.timeline;
   if (!tl) return;
+  hidePoster();
   if (poster) {
     poster = false;
     tl.seek(0);
@@ -86,12 +89,13 @@ function wire() {
   $("vr-skip").addEventListener("click", () => {
     const tl = mounted?.timeline;
     const at = mounted?.acts.find(([n]) => n === "Verdict")?.[1];
-    if (tl && at !== undefined) (poster = false, tl.pause(), tl.seek(at), tl.play());
+    if (tl && at !== undefined) (poster = false, hidePoster(), tl.pause(), tl.seek(at), tl.play());
   });
   $<HTMLInputElement>("vr-scrub").addEventListener("input", (e) => {
     const tl = mounted?.timeline;
     if (!tl) return;
     poster = false;
+    hidePoster();
     tl.pause();
     tl.seek((Number((e.target as HTMLInputElement).value) / 1000) * tl.duration);
   });
@@ -126,15 +130,8 @@ function wire() {
     mount(index);
   });
   narrow.addEventListener("change", () => mount(index));
-  // play the featured case once, when the stage first comes into view
-  new IntersectionObserver(
-    (entries) => {
-      if (autoplayed || !entries.some((x) => x.isIntersecting) || document.hidden) return;
-      autoplayed = true;
-      start();
-    },
-    { threshold: 0.5 },
-  ).observe(stage);
+  // nothing plays until the visitor asks: the stage waits behind a question
+  $("vr-poster").addEventListener("click", start);
   $<HTMLSelectElement>("chainpick").value = base;
   $<HTMLSelectElement>("chainpick").addEventListener("change", async (e) => {
     base = (e.target as HTMLSelectElement).value;
@@ -168,6 +165,7 @@ async function main() {
   wire();
   const first = present ? 0 : Math.max(order().indexOf(params.get("case") ?? "S-MORSE"), 0);
   mount(first);
+  $("vr-poster").hidden = present;
   if (present) start();
   if (base !== "official") renderTallies();
 }

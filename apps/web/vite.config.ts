@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { defineConfig, type Plugin } from "vite";
 import { renderEscaped, renderFingerprints, renderHonesty, renderMeta, renderRows, renderScore, scopeOf, scopeSentence, usd, type Run } from "./src/arena-data";
 import { mark, siteFooter, siteHeader } from "./src/shell";
-import { renderCaseFiles, renderStageFallback, renderTally } from "./src/stage/static";
+import { renderCaseFiles, renderScoreStrip, renderStageFallback, renderTally } from "./src/stage/static";
 import { buildDeck } from "./src/game-data";
 import { buildStoryboard } from "./src/storyboard";
 
@@ -72,6 +72,7 @@ function staticContent(): Plugin {
         Object.assign(parts, {
           "case-files": renderCaseFiles(sb),
           tally: renderTally(sb),
+          scorestrip: renderScoreStrip(sb),
           "stage-fallback": renderStageFallback(sb),
           score: renderScore(run),
           "score-sentence": scopeSentence(run),

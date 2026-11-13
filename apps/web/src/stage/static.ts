@@ -62,6 +62,13 @@ export function renderTally(sb: Storyboard): string {
   </dl>`;
 }
 
+/** The result in one line, above the tabs: the reader sees the score first and wonders how. */
+export function renderScoreStrip(sb: Storyboard): string {
+  const money = (cents: number) => `$${Math.round(cents / 100).toLocaleString("en-US")}`;
+  const t = sb.totals;
+  return `<p class="ar-strip"><span><b>${t.sealed.inScope}</b> attacks</span><span class="lost">No guard lost <b>${money(t["no-guard"].lostIn)}</b></span><span class="lost">Limits only lost <b>${money(t["caps-only"].lostIn)}</b></span><span class="kept">SeIn lost <b>${money(t.sealed.lostIn)}</b></span><a href="#results">How it was counted</a></p>`;
+}
+
 /** For readers and crawlers without JavaScript: the featured case, told in words. */
 export function renderStageFallback(sb: Storyboard): string {
   const c = sb.cases.find((x) => x.id === "S-MORSE") ?? sb.cases[0]!;

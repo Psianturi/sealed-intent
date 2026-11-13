@@ -32,14 +32,15 @@
     <p class="lead">Attacks modelled on real incidents, replayed against an AI agent on NEAR with test tokens. Play the guard yourself, watch three identical agents face them, or browse the cases and the final score.</p>
   </main>
 
+  <!--scorestrip-->
   <div class="ar-tabs" role="tablist" aria-label="Arena">
-    <button type="button" role="tab" id="tab-play" data-tab="play" aria-controls="game" aria-selected="true">Play<small>be the guard</small></button>
-    <button type="button" role="tab" id="tab-watch" data-tab="watch" aria-controls="stage" aria-selected="false">Watch<small>the recorded run</small></button>
+    <button type="button" role="tab" id="tab-watch" data-tab="watch" aria-controls="stage" aria-selected="true">Watch<small>the recorded run</small></button>
+    <button type="button" role="tab" id="tab-play" data-tab="play" aria-controls="game" aria-selected="false">Play<small>be the guard</small></button>
     <button type="button" role="tab" id="tab-cases" data-tab="cases" aria-controls="panel-cases" aria-selected="false">Cases<small>every attack</small></button>
     <button type="button" role="tab" id="tab-results" data-tab="results" aria-controls="panel-results" aria-selected="false">Results<small>the final tally</small></button>
   </div>
 
-  <section class="gm" id="game" role="tabpanel" aria-labelledby="tab-play">
+  <section class="gm" id="game" role="tabpanel" aria-labelledby="tab-play" hidden>
     <div class="gm-hud"><span>Request <b id="gm-round">1/10</b></span><span>Score <b id="gm-score">0</b></span><span>Stolen on your watch <b id="gm-stolen">$0</b></span><span>Honest payments blocked <b id="gm-blocked">0</b></span></div>
     <div class="gm-screen" id="gm-screen" aria-live="polite"></div>
   </section>
@@ -52,14 +53,17 @@
         <label class="vr-switch"><input type="checkbox" id="owner-reads" checked /><span class="vr-switch-ui" aria-hidden="true"></span><span>Owner reads before approving</span></label>
       </div>
     </div>
-    <div class="vr-screen" id="vr-screen"><!--stage-fallback--></div>
+    <div class="vr-stagewrap">
+      <div class="vr-screen" id="vr-screen"><!--stage-fallback--></div>
+      <button type="button" class="vr-poster" id="vr-poster" hidden><span class="vr-poster-q">One message. Three identical AI agents. <em>Who keeps the money?</em></span><span class="vr-poster-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></span><span class="vr-poster-sub">Play the recorded run, about 25 seconds a case. Or switch to Play and be the guard yourself.</span></button>
+    </div>
     <p class="vr-caption" id="vr-caption" aria-live="polite"></p>
     <div class="vr-controls">
       <button type="button" class="vr-ctl" id="vr-prev" aria-label="Previous case"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
       <button type="button" class="vr-ctl wide" id="vr-play" aria-label="Play">Play</button>
       <input type="range" id="vr-scrub" min="0" max="1000" value="0" aria-label="Timeline" />
       <span class="vr-time" id="vr-time">0:00 / 0:00</span>
-      <button type="button" class="vr-ctl wide" id="vr-skip">Skip to result</button>
+      <button type="button" class="vr-ctl wide" id="vr-skip" aria-label="Skip to the result"><span class="vr-skip-long">Skip to result</span><span class="vr-skip-short">Skip</span></button>
       <span class="vr-nextcase" id="vr-nextcase" aria-live="polite"></span>
       <label class="vr-speed"><span class="sr-only">Speed</span><select id="vr-speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></label>
       <button type="button" class="vr-ctl" id="vr-next" aria-label="Next case"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
