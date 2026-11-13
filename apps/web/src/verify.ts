@@ -1,5 +1,6 @@
 import { esc } from "./arena-data";
 import { reason } from "./copy";
+import { receiptFromLink } from "./receipt-link";
 import { chainChecks, formatAmount, type ChainInput, type Opened } from "./verify-chain";
 import { matchesSeal, verifyExecution, verifyReceipt, type Check } from "./verify-core";
 
@@ -157,6 +158,25 @@ drop.addEventListener("drop", async (e) => {
   const f = (e as DragEvent).dataTransfer?.files?.[0];
   if (f) load(await f.text());
 });
+
+// a receipt link, a receipt ID or the JSON itself
+async function open(text: string) {
+  const t = text.trim();
+  const carried = await receiptFromLink(t).catch(() => undefined);
+  if (carried) return load(carried, false, "This receipt arrived inside its link. Nothing was sent to a server.");
+  if (t.startsWith("{")) return load(t);
+  const id = t.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)?.[0];
+  const res = id ? await fetch(`/receipts/${id}.json`).catch(() => undefined) : undefined;
+  if (res?.ok && res.headers.get("content-type")?.includes("json")) return load(await res.text());
+  $("try-more").hidden = true;
+  $("out").innerHTML = `<article class="result bad"><p class="result-head"><span class="result-icon" aria-hidden="true">✕</span>No receipt found</p><p>That is not a receipt link, and this site has no published receipt with that ID. A transaction link alone cannot find a receipt: receipts stay off chain so the amount and the receiver stay private. Use the link or the file SeIn gave with the decision.</p></article>`;
+}
+$("link-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  void open($<HTMLInputElement>("link").value);
+});
+if (location.hash.includes("receipt=")) void open(location.href);
+addEventListener("hashchange", () => location.hash.includes("receipt=") && void open(location.href));
 
 // a link to one receipt: /r/<id>
 const query = new URLSearchParams(location.search);

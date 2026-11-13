@@ -3,6 +3,7 @@ import { esc } from "./arena-data";
 import { reason } from "./copy";
 import { GATE_NAMES, sealedGates } from "./storyboard";
 import { startPayCheck } from "./paycheck";
+import { receiptLink } from "./receipt-link";
 import { formatAmount } from "./verify-chain";
 import { matchesSeal, verifyReceipt } from "./verify-core";
 
@@ -79,7 +80,15 @@ function render(a: Answer) {
     ${a.execution?.refusedByCustody ? `<p class="t-note">The custody wallet refused it too: its own policy is the second lock.</p>` : ""}
     <div class="t-receipt"><span class="${v.valid ? "ok" : "bad"}">${v.valid ? "✓" : "✕"}</span> Signed receipt ${esc(a.decisionId.slice(0, 8))}… ${v.valid ? "checked in your browser: genuine and unchanged. Amount and receiver stay sealed." : "did not verify."}</div>
     ${privacyHtml(a)}
-    <div class="cp-actions">${tx}<a class="cp-ghost" href="${blob}" download="sein-receipt-${esc(a.decisionId)}.json">Download the receipt</a><a class="cp-ghost" href="/verify.html">Open the verifier</a></div>`;
+    <div class="cp-actions">${tx}<a class="cp-ghost" id="t-check" href="/verify.html">Check this receipt</a><button class="cp-ghost" id="t-copy" type="button">Copy a link to it</button><a class="cp-ghost" href="${blob}" download="sein-receipt-${esc(a.decisionId)}.json">Download the file</a></div>
+    <p class="t-note">The link carries the sealed receipt itself, so anyone you send it to can check the decision. It does not carry the amount or the receiver.</p>`;
+  // the receipt rides in the link, after the #, so opening it sends nothing to a server
+  void receiptLink(a.receipt, location.origin).then((link) => {
+    $<HTMLAnchorElement>("t-check").href = link;
+    $("t-copy").addEventListener("click", () => {
+      void navigator.clipboard?.writeText(link).then(() => ($("t-copy").textContent = "Link copied"));
+    });
+  });
   if (a.quota) $("t-quota").textContent = `${a.quota.requestsLeft} checks and ${a.quota.paymentsLeft} real payments left today.`;
 }
 

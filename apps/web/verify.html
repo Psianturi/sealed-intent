@@ -23,13 +23,14 @@
   <!--header:verify-->
   <main>
     <h1 class="page-title">Check a receipt yourself</h1>
-    <p class="lead">A receipt proves what SeIn decided and that nobody changed it since. The amount and the receiver stay sealed. Everything runs in this browser, and nothing is uploaded.</p>
+    <p class="lead">A receipt proves what SeIn decided and that nobody changed it since. The amount and the receiver stay sealed. Everything runs in this browser, and nothing is uploaded. Coming from the Try page? One click brings the receipt here inside its link.</p>
     <div class="drop" id="drop">
       <p class="drop-title">Drop a receipt here</p>
       <div class="btns">
         <button class="btn primary big" id="sample">Try a real receipt</button>
         <label class="btn big">Choose a file<input type="file" id="file" accept="application/json" class="sr-only" /></label>
       </div>
+      <form class="drop-link" id="link-form"><input type="text" id="link" class="mono" spellcheck="false" placeholder="or paste a receipt link or a receipt ID" aria-label="Receipt link or receipt ID" /><button class="btn" type="submit">Check</button></form>
       <p class="note">The sample is a real payment on NEAR testnet, checked by a real enclave. Test tokens only.</p>
     </div>
     <div id="out" aria-live="polite"></div>
