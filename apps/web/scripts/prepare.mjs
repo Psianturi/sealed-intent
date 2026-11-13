@@ -32,6 +32,11 @@ if (existsSync(join(evidence, "receipts"))) {
   const chain = JSON.parse(readFileSync(join(evidence, "chain.json"), "utf8"));
   writeFileSync(join(pub, "receipts", "index.json"), JSON.stringify({ ...chain, receipts }, null, 2));
   const flow = JSON.parse(readFileSync(join(evidence, "s4-flow.json"), "utf8"));
+  mkdirSync(join(pub, "evidence"), { recursive: true });
+  cpSync(join(evidence, "s4-flow.json"), join(pub, "evidence", "custody-flow.json"));
+  // the one mainnet run: its two receipts open at /r/<id> like the testnet ones
+  const mainnet = join(root, "evidence", "custody-mainnet");
+  for (const f of ["allow-receipt.json", "block-receipt.json"]) if (existsSync(join(mainnet, f))) cpSync(join(mainnet, f), join(pub, "receipts", JSON.parse(readFileSync(join(mainnet, f), "utf8")).receiptId + ".json"));
   const sample = flow.steps.find((s) => s.txHash && s.chainMatchesIntent);
   if (sample) {
     cpSync(join(evidence, "receipts", sample.decisionId + ".json"), join(samples, "receipt.json"));

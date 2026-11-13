@@ -15,13 +15,12 @@ interface Data {
 }
 /** demo rows show a forgery on purpose and info rows only explain; neither changes the summary */
 type Row = Check & { linkText?: string; demo?: boolean; info?: boolean };
-type Part = "contract" | "custody" | "enclave" | "intents" | "approval";
+type Part = "contract" | "custody" | "enclave" | "intents" | "approval" | "mainnet";
 
 const $ = (id: string) => document.getElementById(id)!;
 // named accounts stay whole; hex accounts, hashes and signatures are cut down
 const short = (s: string) => (s.length > 44 || /^(0x)?[0-9a-f]{40,}$/i.test(s) ? `${s.slice(0, 10)}…${s.slice(-6)}` : s);
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const SOURCE = "https://github.com/Psianturi/sealed-intent/blob/main";
 const custodyContract = (network: string) => (network === "testnet" ? "outlayer.testnet" : "outlayer.near");
 const explorerAccount = (network: string, id: string) => `https://${network === "testnet" ? "testnet." : ""}nearblocks.io/address/${id}`;
 
@@ -84,7 +83,7 @@ async function contract(d: Data) {
   const rows: Row[] = [];
   const acct = await rpc<{ code_hash: string }>(d.network, "query", { request_type: "view_account", finality: "final", account_id: d.registry }).catch(() => undefined);
   rows.push(acct ? { name: `The contract lives at ${d.registry}`, ok: acct.code_hash !== "11111111111111111111111111111111", detail: `code hash ${acct.code_hash}`, link: explorerAccount(d.network, d.registry) } : { name: `The contract lives at ${d.registry}`, ok: false, detail: "could not read the account" });
-  if (acct && d.codeHash) rows.push({ name: "The code on chain is exactly the build in the repository", ok: acct.code_hash === d.codeHash, detail: acct.code_hash === d.codeHash ? "the sha256 of sein_registry.wasm matches the chain" : `the repository build is ${d.codeHash}`, link: `${SOURCE}/contracts/sein-registry/src/lib.rs`, linkText: "Read the contract" });
+  if (acct && d.codeHash) rows.push({ name: "The code on chain is exactly the build in the repository", ok: acct.code_hash === d.codeHash, detail: acct.code_hash === d.codeHash ? "the sha256 of sein_registry.wasm matches the chain" : `the repository build is ${d.codeHash}`, });
   const [agents, keys, anchors] = await Promise.all([view<number>(d.network, d.registry, "agent_count", {}), view<string[]>(d.network, d.registry, "issuer_keys", {}), view<number>(d.network, d.registry, "anchor_count", {})].map((p) => p.catch(() => undefined)));
   const batches = await Promise.all(Array.from({ length: Number(anchors ?? 0) }, (_, i) => view<{ count: number }>(d.network, d.registry, "get_anchor", { index: i }).catch(() => undefined)));
   const anchored = batches.reduce((s, b) => s + (b?.count ?? 0), 0);
@@ -105,7 +104,7 @@ async function custody(d: Data) {
   rows.push({ name: "The custody wallet exists on NEAR", ok: !!acct, detail: acct ? `${short(d.wallet)}, balance ${balance}` : "could not read the account", link: explorerAccount(d.network, d.wallet) });
   for (const t of d.setup.filter((x) => x.part === "custody")) rows.push(await callRow(d, t, t.signer!, { receiver: custodyContract(d.network), method: "store_wallet_policy" }));
   for (const p of d.payments) rows.push(await paymentRow(d, p.label, p.hash));
-  if (d.refusedByCustody) rows.push({ name: `${d.refusedByCustody} payment the owner approved by mistake was refused by custody itself`, ok: "unchecked", info: true, detail: "nothing was signed, so there is no transaction to show; it is in the evidence file", link: `${SOURCE}/evidence/custody-testnet/s4-flow.json`, linkText: "Evidence file" });
+  if (d.refusedByCustody) rows.push({ name: `${d.refusedByCustody} payment the owner approved by mistake was refused by custody itself`, ok: "unchecked", info: true, detail: "nothing was signed, so there is no transaction to show; it is in the evidence file", link: "/evidence/custody-flow.json", linkText: "Evidence file" });
   rows.push({ ...(await paymentRow(d, "A payment sent around SeIn, straight to custody", d.bypass.hash)), linkText: "See it on NearBlocks" });
   if (d.bypass.freezeTx) rows.push(await callRow(d, { label: `SeIn noticed it after ${d.bypass.detectedSeconds} s and froze the wallet on chain after ${d.bypass.frozenSeconds} s`, hash: d.bypass.freezeTx }, d.owner, { receiver: custodyContract(d.network), method: "freeze_wallet" }));
   render("custody", rows);
@@ -197,13 +196,27 @@ async function approval(d: Data) {
   settle("approval", rows, "Signature valid on chain");
 }
 
+/** The one run on NEAR mainnet, read back from mainnet by this browser. */
+const MAINNET = {"wallet":"019524dce6417ea37a76c81245268d7c43d86237b4dccfc94bec5f452f2ce1ff","controller":"1e7f14ff1d363689ce9f0fae2ee965a91e54074d3813d4d3b6b144a484083185","policyTx":"65PTyS53uu7J2qPEkg6siK3vzHcxzwHWQS9kKDwczGYq","fundTx":"5KiGr5gvUGyRnD5Yq4mEkCcBbCvLQgH7bh5VQE8kSHgo","payTx":"4GYCHxrbFFVPawDt5ugdeyWFjud2ehvpa17yegjZyPav","allow":"bf9f09a5-4e5d-417d-a72e-21be3f9e4b38","block":"b343df46-2b17-4b3d-ae3a-ce7479c07403"};
+async function mainnet(d: Data) {
+  const m = { ...d, network: "mainnet", wallet: MAINNET.wallet };
+  const rows: Row[] = [
+    await callRow(m, { label: "A controller account stored the custody policy, before any money arrived", hash: MAINNET.policyTx }, MAINNET.controller, { receiver: "outlayer.near", method: "store_wallet_policy" }),
+    await callRow(m, { label: "Then it funded the custody wallet", hash: MAINNET.fundTx }, MAINNET.controller, { receiver: MAINNET.wallet, method: "transfer" }),
+    { name: "A request with pressure, secrecy and an unknown receiver was refused", ok: "unchecked", info: true, detail: "BLOCK: nothing was signed, so there is no transaction; the signed receipt is the record", link: `/r/${MAINNET.block}`, linkText: "Open the receipt" },
+    await paymentRow(m, "An ordinary invoice to a listed receiver was allowed and paid", MAINNET.payTx),
+    { name: "Its receipt, signed by the operator, with the enclave's signed opinion", ok: "unchecked", info: true, detail: "not anchored: the registry lives on testnet", link: `/r/${MAINNET.allow}`, linkText: "Open the receipt" },
+  ];
+  render("mainnet", rows);
+}
+
 async function runAll(d: Data) {
   for (const li of document.querySelectorAll<HTMLElement>("#board li")) {
     li.dataset.state = "checking";
     li.querySelector(".board-state")!.textContent = "Checking…";
   }
   $("checked-at").textContent = "Your browser is checking…";
-  await Promise.all([contract(d), custody(d), enclave(d), Promise.resolve(intents(d)), approval(d)].map((p) => p.catch(() => undefined)));
+  await Promise.all([contract(d), custody(d), enclave(d), Promise.resolve(intents(d)), approval(d), mainnet(d)].map((p) => p.catch(() => undefined)));
   $("checked-at").textContent = `Checked by this browser at ${new Date().toLocaleTimeString()}. Every line links to where you can see it yourself.`;
 }
 

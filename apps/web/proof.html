@@ -21,6 +21,7 @@
 <body>
   <!--header:proof-->
   <main>
+    <!--subnav:proof-->
     <p class="eyebrow">Live evidence: check it yourself</p>
     <h1 class="page-title">Proof</h1>
     <p class="lead">Every claim on this site, checked right now by your browser against NEAR, NEAR AI Cloud and NEAR Intents. Nothing passes through a SeIn server, so there is nothing of ours to trust.</p>
@@ -68,10 +69,16 @@
       <ul class="check-list chain staged" id="approval-checks"></ul>
     </section>
 
+    <section id="mainnet">
+      <h2>Once on NEAR mainnet, with real NEAR</h2>
+      <p class="lead small">The same path, run once with a small amount of real NEAR on 13 November 2026: a separate controller account locked a new OutLayer custody wallet with a policy, then SeIn refused a trick and let an ordinary invoice through. Your browser reads each transaction from mainnet.</p>
+      <ul class="check-list chain staged" id="mainnet-checks"></ul>
+    </section>
+
     <section id="limits">
       <h2>What this page does not prove</h2>
       <ul class="limits-list no">
-        <li>Everything here runs on NEAR testnet with test tokens. A mainnet payment and a mainnet swap are not done yet.</li>
+        <li>Everything above the mainnet section runs on NEAR testnet with test tokens. The mainnet run is one payment and one refusal, not a measurement, and no swap or token payment was made on mainnet.</li>
         <li>NEAR Intents has no testnet, so SeIn reads real mainnet quotes but makes no swaps.</li>
         <li>The enclave's hardware evidence was checked by SeIn when it asked. Your browser checks the enclave's signature and today's published key, not the hardware report itself.</li>
         <li>The Arena's chain is simulated or a set of local NEAR nodes. Its results are recordings, not testnet transactions.</li>
