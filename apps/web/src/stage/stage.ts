@@ -27,12 +27,12 @@ const esc = (t: string) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const short = (name: string, n: number) => (name.length > n ? `${name.slice(0, n - 1)}…` : name);
 
 interface LaneGeo { y: number; k: number; ghost: boolean }
-interface Geo { w: number; h: number; mobile: boolean; lanes: Record<LaneId, LaneGeo>; vaultX: number; rail0: number; rail1: number; destX: number; labelX: number; gateAt: number[]; capsAt: number }
+interface Geo { w: number; top: number; h: number; mobile: boolean; lanes: Record<LaneId, LaneGeo>; vaultX: number; rail0: number; rail1: number; destX: number; labelX: number; gateAt: number[]; capsAt: number }
 
 function geometry(mobile: boolean): Geo {
   return mobile
-    ? { w: 390, h: 470, mobile, lanes: { "no-guard": { y: 54, k: 0.42, ghost: true }, "caps-only": { y: 104, k: 0.42, ghost: true }, sealed: { y: 320, k: 0.82, ghost: false } }, vaultX: 40, rail0: 78, rail1: 312, destX: 350, labelX: 0, gateAt: [0.13, 0.31, 0.5, 0.69, 0.87], capsAt: 0.5 }
-    : { w: 1440, h: 640, mobile, lanes: { "no-guard": { y: 232, k: 0.84, ghost: false }, "caps-only": { y: 372, k: 0.92, ghost: false }, sealed: { y: 522, k: 1, ghost: false } }, vaultX: 238, rail0: 300, rail1: 1104, destX: 1166, labelX: 1220, gateAt: [0.16, 0.32, 0.48, 0.64, 0.8], capsAt: 0.5 };
+    ? { w: 390, top: 22, h: 424, mobile, lanes: { "no-guard": { y: 54, k: 0.42, ghost: true }, "caps-only": { y: 104, k: 0.42, ghost: true }, sealed: { y: 320, k: 0.82, ghost: false } }, vaultX: 40, rail0: 78, rail1: 312, destX: 350, labelX: 0, gateAt: [0.13, 0.31, 0.5, 0.69, 0.87], capsAt: 0.5 }
+    : { w: 1440, top: 126, h: 494, mobile, lanes: { "no-guard": { y: 232, k: 0.84, ghost: false }, "caps-only": { y: 372, k: 0.92, ghost: false }, sealed: { y: 522, k: 1, ghost: false } }, vaultX: 238, rail0: 300, rail1: 1104, destX: 1166, labelX: 1220, gateAt: [0.13, 0.305, 0.48, 0.655, 0.83], capsAt: 0.5 };
 }
 
 const railX = (g: Geo, f: number) => g.rail0 + (g.rail1 - g.rail0) * f;
@@ -49,7 +49,7 @@ const KEY = "M7 14a5 5 0 1 1 3.5-8.5L21 16v3h-3v-2h-2v-2h-2l-1.5-1.5A5 5 0 0 1 7
 const PEN = "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z";
 
 interface GateEls { g: SVGGElement; inner: SVGGElement; pass: El; fail: El; warn: El; doors: El[]; check: El; scan: El; note: SVGGElement; x: number }
-interface LaneEls { doneAt?: number; g: SVGGElement; capsule: SVGGElement; trail: El; trailBad: El; gates: GateEls[]; vaultDoor: El; balance: SVGTextElement; destCount: SVGTextElement; destPulse: El; result: SVGGElement; resultMain: SVGTextElement; resultSub: SVGTextElement; bubble: SVGGElement; bubbleText: SVGTextElement; key?: El }
+interface LaneEls { doneAt?: number; g: SVGGElement; capsule: SVGGElement; trail: El; trailBad: El; gates: GateEls[]; vaultDoor: El; balance: SVGTextElement; destCount: SVGTextElement; destPulse: El; result: SVGGElement; resultMain: SVGTextElement; resultSub: SVGTextElement; bubble: SVGGElement; bubbleText: SVGTextElement; bubblePlate: El; key?: El }
 
 export interface Mounted {
   timeline: Timeline;
@@ -71,7 +71,18 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   host.screen.innerHTML = "";
   host.screen.classList.toggle("oos", c.outOfScope);
   host.screen.classList.toggle("mobile", opts.mobile);
-  const svg = s("svg", { viewBox: `0 0 ${g.w} ${g.h}`, class: "vr-svg", role: "img", "aria-label": `${c.title}: three lanes, the same request` }, host.screen);
+  // three zones, so nothing is ever drawn over a lane: the message strip, the lanes, the dock
+  const strip = h("div", "vr-strip", host.screen);
+  const lanesBox = h("div", "vr-lanes", host.screen);
+  const dock = h("div", "vr-dock", host.screen);
+  const svg = s("svg", { viewBox: `0 ${g.top} ${g.w} ${g.h}`, class: "vr-svg", role: "img", "aria-label": `${c.title}: three lanes, the same request` }, lanesBox);
+  // labels keep their size on screen whatever the stage is scaled to
+  const fit = () => {
+    const w = svg.getBoundingClientRect().width;
+    if (w > 0) svg.style.setProperty("--u", String(g.w / w));
+  };
+  const watcher = new ResizeObserver(fit);
+  watcher.observe(svg);
   const defs = s("defs", {}, svg);
   defs.innerHTML = `
     <radialGradient id="vr-glow"><stop offset="0" stop-color="#6E8BFF" stop-opacity=".9"/><stop offset=".45" stop-color="#6E8BFF" stop-opacity=".35"/><stop offset="1" stop-color="#6E8BFF" stop-opacity="0"/></radialGradient>
@@ -82,19 +93,17 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     <linearGradient id="vr-beam" x1="0" x2="1"><stop offset="0" stop-color="#9fb2ff" stop-opacity="0"/><stop offset=".5" stop-color="#dfe6ff" stop-opacity="1"/><stop offset="1" stop-color="#9fb2ff" stop-opacity="0"/></linearGradient>`;
 
   // floor with a perspective grid
-  s("rect", { width: g.w, height: g.h, class: "vr-floor" }, svg);
+  s("rect", { y: g.top, width: g.w, height: g.h, class: "vr-floor" }, svg);
   const grid = s("g", { class: "vr-grid" }, svg);
   const vx = g.w / 2;
-  const vy = -g.h * 0.9;
   for (let i = -12; i <= 12; i++) {
     const x = vx + i * (g.w / 12);
-    s("line", { x1: x, y1: g.h, x2: vx + (x - vx) * 0.35, y2: g.h * 0.12, class: "vr-gridline" }, grid);
+    s("line", { x1: x, y1: g.top + g.h, x2: vx + (x - vx) * 0.35, y2: g.top, class: "vr-gridline" }, grid);
   }
-  for (const f of [0.18, 0.3, 0.46, 0.66, 0.9]) s("line", { x1: 0, y1: g.h * f, x2: g.w, y2: g.h * f, class: "vr-gridline" }, grid);
-  void vy;
+  for (const f of [0.1, 0.26, 0.46, 0.68, 0.92]) s("line", { x1: 0, y1: g.top + g.h * f, x2: g.w, y2: g.top + g.h * f, class: "vr-gridline" }, grid);
 
   const world = s("g", { class: "vr-world" }, svg);
-  s("rect", { width: g.w, height: g.h, fill: "url(#vr-vignette)", "pointer-events": "none" }, svg);
+  s("rect", { y: g.top, width: g.w, height: g.h, fill: "url(#vr-vignette)", "pointer-events": "none" }, svg);
 
   const tl = new Timeline();
   const lanes = {} as Record<LaneId, LaneEls>;
@@ -110,8 +119,8 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     // label, upright
     if (g.mobile) s("text", { x: L.ghost ? 8 : 16, y: L.ghost ? y - 14 : y - 92, class: `vr-lane-label${L.ghost ? " small" : ""}` }, lg, LANE_NAMES[id].toUpperCase());
     else {
-      s("text", { x: 36, y: y - 6, class: "vr-lane-label" }, lg, (id === "sealed" ? "SEALED INTENT" : LANE_NAMES[id]).toUpperCase());
-      s("text", { x: 36, y: y + 16, class: "vr-lane-sub" }, lg, id === "no-guard" ? "signs whatever it decides" : id === "caps-only" ? "one $50 limit" : "five checks");
+      s("text", { x: 30, y: y - 4, class: "vr-lane-label" }, lg, LANE_NAMES[id].toUpperCase());
+      s("text", { x: 30, y: y + 18, class: "vr-lane-sub" }, lg, id === "no-guard" ? "no checks" : id === "caps-only" ? "one $50 limit" : "five checks");
     }
     const vX = L.ghost ? 30 : g.vaultX;
     const rail0 = L.ghost ? 46 : g.rail0;
@@ -140,8 +149,8 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     s("rect", { x: -14, y: -9, width: 28, height: 19, rx: 3 }, wallet);
     s("path", { d: "M-14 -5h24a4 4 0 0 1 4 4v1" }, wallet);
     s("rect", { x: 4, y: -2, width: 11, height: 8, rx: 2, class: "vr-wallet-clasp" }, wallet);
-    s("text", { x: 9.5, y: 4.4, class: "vr-wallet-mark" }, wallet, c.destination.attacker ? "?" : "✓");
-    if (!L.ghost) s("text", { x: g.mobile ? -10 : 0, y: 56 * k, class: "vr-dest-name" }, dest, g.mobile ? (c.destination.attacker ? "Unknown" : short(c.destination.name, 10)) : short(c.destination.attacker ? "Unknown wallet" : c.destination.name, 18));
+    s("text", { x: 9.5, y: 4.4, class: "vr-wallet-mark" }, wallet, c.destination.attacker ? "!" : "✓");
+    if (!L.ghost) s("text", { x: g.mobile ? -10 : 0, y: 56 * k, class: "vr-dest-name" }, dest, short(c.destination.name, g.mobile ? 10 : 19));
     const destCount = s("text", { x: 0, y: -48 * k, class: `vr-count small${L.ghost ? " hidden" : ""}` }, dest, "");
     // agent chip and bubble
     const bubble = s("g", { class: "vr-bubble", transform: `translate(${vX - 18} ${y - (L.ghost ? 18 : 74 * k)})` }, lg);
@@ -149,6 +158,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       s("rect", { x: -8, y: -16, width: 62, height: 26, rx: 13, class: "vr-agent" }, bubble);
       s("text", { x: 23, y: 2, class: "vr-agent-text" }, bubble, "agent");
     }
+    const bubblePlate = s("rect", { x: 58, y: -17, width: 0, height: 28, rx: 8, class: "vr-bubble-plate" }, bubble);
     const bubbleText = s("text", { x: L.ghost ? 0 : 66, y: 2, class: `vr-bubble-text${L.ghost ? " hidden" : ""}` }, bubble, "");
     // gates
     const gates: GateEls[] = [];
@@ -180,7 +190,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       }
       const checkAt = s("g", { transform: `translate(0 ${-H / 2 + 2})` }, gg);
       const check = s("path", { d: L.ghost ? "M-3 0l2 2 4-5" : "M-8 0l5 5 10-11", class: "vr-check" }, checkAt);
-      const note = s("g", { class: "vr-note", transform: `translate(0 ${62 * k})` }, gg);
+      const note = s("g", { class: "vr-note", transform: `translate(0 ${(68 + (i % 2) * 19) * k})` }, gg);
       if (!L.ghost && !g.mobile) {
         s("circle", { cx: -46, cy: -4, r: 3.5, class: "vr-note-dot" }, note);
         s("text", { x: -38, y: 0, class: "vr-note-text" }, note, "");
@@ -206,23 +216,25 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     // result
     const result = s("g", { class: "vr-result", transform: g.mobile ? `translate(${L.ghost ? 330 : 195} ${L.ghost ? y - 10 : y + 92})` : `translate(${g.labelX} ${y})` }, lg);
     const resultMain = s("text", { x: 0, y: g.mobile && !L.ghost ? 0 : -2, class: `vr-result-main${L.ghost ? " small" : ""}` }, result, "");
-    const resultSub = s("text", { x: 0, y: g.mobile && !L.ghost ? 20 : 18, class: `vr-result-sub${L.ghost ? " hidden" : ""}` }, result, "");
-    lanes[id] = { g: lg, capsule, trail, trailBad, gates, vaultDoor: door, balance, destCount, destPulse, result, resultMain, resultSub, bubble, bubbleText, key };
+    const resultSub = s("text", { x: 0, y: g.mobile && !L.ghost ? 22 : 21, class: `vr-result-sub${L.ghost ? " hidden" : ""}` }, result, "");
+    lanes[id] = { g: lg, capsule, trail, trailBad, gates, vaultDoor: door, balance, destCount, destPulse, result, resultMain, resultSub, bubble, bubbleText, bubblePlate, key };
   }
 
   // HTML overlays
-  const message = h("div", "vr-message", host.screen);
+  const message = h("div", "vr-message", strip);
+  const moment = h("div", "vr-moment", strip);
   if (c.message) message.innerHTML = `<p class="vr-from">${esc(c.message.from)}</p><p class="vr-msg-text">${highlighted(c.message.text, c.message.highlights)}</p>`;
-  const owner = h("div", "vr-owner", host.screen, `<p class="vr-owner-title">Your agent is asking</p><p class="vr-owner-what">${esc(c.ask.what)}</p><p class="vr-owner-why">${esc(sealedMain.codes.filter((x) => !/LIMIT|TEE_SIGNAL_BLOCK/.test(x)).slice(0, 2).map(reason).join(". "))}</p><div class="vr-owner-buttons"><span class="vr-btn approve">Approve</span><span class="vr-btn reject">Reject</span></div>`);
-  const ledger = h("div", "vr-ledger", host.screen, `<p class="vr-ledger-head">Referee · reads only on-chain balances, keys and code</p><div class="vr-ledger-cols">${LANE_ORDER.map((l) => `<div><span>${LANE_NAMES[l]}</span><b data-lane="${l}">$0.00</b></div>`).join("")}</div><p class="vr-ledger-note">The referee never reads our verdicts.</p>`);
+  const idle = h("p", "vr-idle", dock, "Each agent starts with $500.00. A referee that reads only the chain counts what is left.");
+  const owner = h("div", "vr-owner", dock, `<div class="vr-owner-text"><p class="vr-owner-title">Your agent is asking</p><p class="vr-owner-what">${esc(c.ask.what)}</p><p class="vr-owner-why">${esc(sealedMain.codes.filter((x) => !/LIMIT|TEE_SIGNAL_BLOCK/.test(x)).slice(0, 2).map(reason).join(". "))}</p></div><div class="vr-owner-buttons"><span class="vr-btn approve">Approve</span><span class="vr-btn reject">Reject</span></div>`);
+  const ledger = h("div", "vr-ledger", dock, `<p class="vr-ledger-head">Referee · reads only on-chain balances, keys and code</p><div class="vr-ledger-cols">${LANE_ORDER.map((l) => `<div><span>${LANE_NAMES[l]}</span><b data-lane="${l}">$0.00</b></div>`).join("")}</div><p class="vr-ledger-note">The referee never reads our verdicts.</p>`);
   const receipt = c.receipt
-    ? h("div", "vr-receipt", host.screen, `<div class="vr-receipt-paper"><p><span>VERDICT</span><b>${esc(c.receipt.verdict)}</b></p><p><span>REASONS</span><em>${esc([...new Set(c.receipt.codes.filter((x) => !c.receipt!.warnCodes.includes(x)).concat(c.receipt.warnCodes))].slice(0, 2).map(reason).join(". "))}.</em></p><p><span>AMOUNT</span><i class="vr-seal"></i></p><p><span>RECEIVER</span><i class="vr-seal"></i></p><p><span>SIGNED</span><em>operator key</em></p><div class="vr-stamp">SEALED</div></div>${opts.verifyHref ? `<a class="vr-verify" href="${opts.verifyHref}">Verify this receipt</a>` : ""}`)
+    ? h("div", "vr-receipt", dock, `<div class="vr-receipt-paper"><div class="vr-receipt-rows"><p><span>VERDICT</span><b>${esc(c.receipt.verdict)}</b></p><p><span>REASONS</span><em>${esc([...new Set(c.receipt.codes.filter((x) => !c.receipt!.warnCodes.includes(x)).concat(c.receipt.warnCodes))].slice(0, 2).map(reason).join(". "))}.</em></p><p><span>AMOUNT</span><i class="vr-seal"></i></p><p><span>RECEIVER</span><i class="vr-seal"></i></p><p><span>SIGNED</span><em>operator key</em></p></div><div class="vr-stamp">SEALED</div></div>${opts.verifyHref ? `<a class="vr-verify" href="${opts.verifyHref}">Verify this receipt</a>` : ""}`)
     : undefined;
-  const banner = c.outOfScope ? h("div", "vr-banner", host.screen, `<b>Out of scope by design</b><span>${c.moment.kind === "bypass" ? "It went around every check. Only a custody policy or an on-chain guard can hold this." : "The checks ran on false information. Only a custody policy or an on-chain guard can hold this."}</span>`) : undefined;
+  const banner = c.outOfScope ? h("div", "vr-banner", dock, `<b>Out of scope by design</b><span>${c.moment.kind === "bypass" ? "It went around every check. Only a custody policy or an on-chain guard can hold this." : "The checks ran on false information. Only a custody policy or an on-chain guard can hold this."}</span>`) : undefined;
 
-  const lens = c.moment.kind === "address-diff" ? h("div", "vr-lens", host.screen, `<p>${diffLine(c.moment.real, c.moment.fake, "real")}</p><p>${diffLine(c.moment.fake, c.moment.real, "fake")}</p><span>Same look. A different account.</span>`) : undefined;
-  const gauge = c.moment.kind === "budget-gauge" ? h("div", "vr-gauge", host.screen, `<div class="vr-gauge-bar"><i style="width:${Math.min(c.moment.sharePct, 100)}%"></i></div><span>${c.moment.sharePct}% of the balance in one payment</span>`) : undefined;
-  const gap = c.moment.kind === "price-gap" ? h("div", "vr-gap", host.screen, `<div><span>Fair price</span><i style="width:100%"></i></div><div><span>This route</span><i class="bad" style="width:${100 - c.moment.lossPct}%"></i></div><b>${c.moment.lossPct}% of the value lost</b>`) : undefined;
+  const lens = c.moment.kind === "address-diff" ? h("div", "vr-lens", moment, `<p>${diffLine(c.moment.real, c.moment.fake, "real")}</p><p>${diffLine(c.moment.fake, c.moment.real, "fake")}</p><span>Same look. A different account.</span>`) : undefined;
+  const gauge = c.moment.kind === "budget-gauge" ? h("div", "vr-gauge", moment, `<div class="vr-gauge-bar"><i style="width:${Math.min(c.moment.sharePct, 100)}%"></i></div><span>${c.moment.sharePct}% of the balance in one payment</span>`) : undefined;
+  const gap = c.moment.kind === "price-gap" ? h("div", "vr-gap", moment, `<div><span>Fair price</span><i style="width:100%"></i></div><div><span>This route</span><i class="bad" style="width:${100 - c.moment.lossPct}%"></i></div><b>${c.moment.lossPct}% of the value lost</b>`) : undefined;
 
   host.title.innerHTML = `<p class="vr-case">${c.kind === "everyday" ? "BASELINE" : `CASE ${String(opts.index).padStart(2, "0")}`}${c.outOfScope ? ' <span class="vr-oos-tag">out of scope</span>' : ""}</p><h3>${esc(c.title)}</h3><p class="vr-pattern">${c.pattern ? `Pattern from ${esc(c.pattern.incident)}, ${esc(c.pattern.date)}` : c.kind === "everyday" ? "No attack: an honest payment" : "A hypothetical attack"}</p>`;
 
@@ -242,7 +254,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   // act 1: the message, split into three
   act("Message", 1.2);
   if (c.message) {
-    tl.to(message, [{ opacity: 0, transform: "translate(-24px,-12px)" }, { opacity: 1, transform: "none" }], 1.2, d(0.6), "cubic-bezier(.2,.8,.2,1)");
+    tl.to(message, [{ opacity: 0, transform: "translateY(-10px)" }, { opacity: 1, transform: "none" }], 1.2, d(0.6), "cubic-bezier(.2,.8,.2,1)");
     say(1.3, c.kind === "everyday" ? "A normal request reaches three identical agents." : "The same message reaches three identical agents.");
   } else say(1.3, "Something happens that no agent was asked about.");
 
@@ -255,15 +267,13 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     tl.track((t) => {
       const full = g.lanes[id].ghost ? "" : `${c.ask.what}`;
       L.bubbleText.textContent = full.slice(0, Math.round(full.length * span(t, typeStart, R ? 0 : 0.6)));
+      L.bubblePlate.setAttribute("width", String(L.bubbleText.textContent ? L.bubbleText.getComputedTextLength() + 18 : 0));
     });
     tl.to(L.vaultDoor, [{ transform: "rotate(0deg)" }, { transform: "rotate(40deg)" }], 4.1, d(0.5));
     tl.to(L.capsule, [{ opacity: 0, transform: `translate(${vaultOf(g, id)}px, ${g.lanes[id].y}px) scale(.6)` }, { opacity: 1, transform: `translate(${vaultOf(g, id)}px, ${g.lanes[id].y}px) scale(1)` }], 4.4, d(0.4), "cubic-bezier(.3,1.6,.5,1)");
     tl.to(L.bubble, [{ opacity: 1 }, { opacity: 0 }], 5.2, d(0.4));
   }
-  if (c.message) tl.to(message, [{ opacity: 1 }, { opacity: g.mobile ? 0.95 : 0.55 }], 4.6, d(0.4));
-  let litFrom = Infinity;
-  let litTo = -Infinity;
-  if (c.message && g.mobile) tl.track((t) => message.classList.toggle("chip", t >= 5.2 && !(t >= litFrom && t < litTo)));
+  if (c.message) tl.to(message, [{ opacity: 1 }, { opacity: 0.72 }], 4.6, d(0.4));
   say(3.5, c.ask.what ? `Each agent decides to ${c.ask.what}.` : "No agent asked for anything. The money leaves another way.");
 
   // act 3: the journeys
@@ -291,6 +301,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       continue;
     }
     if (id === "no-guard") {
+      say(T + 0.1, c.kind === "everyday" ? "No guard: it pays." : "No guard: it pays without a question.");
       tl.to(L.capsule, [{ transform: at(from) }, { transform: at(to) }], T, d(1.6), "cubic-bezier(.55,0,.3,1)");
       trailTo(from, to, T, d(1.6), lostLanes.includes(id));
       arrive(tl, L, T + 1.6, story.lostCents, d, c.destination.attacker);
@@ -302,6 +313,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       trailTo(from, gx, T, d(1));
       const gate = story.gates[0]!;
       gateResult(tl, L.gates[0]!, gate, T + 1, d, ghost);
+      say(T + 1.7, gate.status === "fail" ? "Limits only: over the limit, so it is stopped." : c.kind === "everyday" ? "Limits only: under the limit, it pays." : "Limits only: the amount is under the limit, so it pays too.");
       if (gate.status === "fail") {
         tl.to(L.capsule, [{ transform: at(gx - 30) }, { transform: at(from) }], T + 1.8, d(0.9), "cubic-bezier(.3,1.4,.4,1)");
         trailTo(gx, from, T + 1.8, d(0.9));
@@ -314,7 +326,8 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       continue;
     }
     // SeIn's lane: gate by gate
-    let t = T + 0.8;
+    let t = T + (ghost || R ? 0.8 : 3.1);
+    if (!ghost && !R) say(t - 0.1, "Now the same request reaches SeIn: five checks before any money moves.");
     let x = from;
     const step = R ? 0.4 : 1.1;
     const stop = story.stopAt;
@@ -327,22 +340,20 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       gateResult(tl, L.gates[i]!, gt, t + 0.45, d, ghost, i === stop);
       if (gt.status === "warn" && i !== stop) say(t + 0.5, `Check ${i + 1} · ${GATE_NAMES[i]} ${reasonOf(gt)} Noted, not enough to stop it.`);
       if (i === 3 && c.message && gt.codes.some((x) => /INJECTION|TEE/.test(x))) {
-        tl.to(message, [{ opacity: 0.55 }, { opacity: 1 }], t + 0.45, d(0.3));
-        litFrom = t + 0.45;
-        litTo = t + 2.6;
+        tl.to(message, [{ opacity: 0.72 }, { opacity: 1 }], t + 0.45, d(0.3));
       }
       if (i === 3 && c.message) tl.track((tt) => message.classList.toggle("lit", tt >= t + 0.45 && gt.codes.some((x) => /INJECTION|TEE/.test(x))));
       if (i === stop) {
         t += step;
         if (gt.status === "warn" && story.owner) {
           // the owner decides
-          tl.to(owner, [{ opacity: 0, transform: "translateY(40px)" }, { opacity: 1, transform: "none" }], t, d(0.5));
+          tl.to(owner, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], t, d(0.4));
           tl.track((tt) => owner.classList.toggle("pressed-reject", story.owner === "rejected" && tt >= t + 1.4));
           tl.track((tt) => owner.classList.toggle("pressed-approve", story.owner === "approved" && tt >= t + 1.4));
           say(t, `Check ${i + 1} · ${GATE_NAMES[i]} ${reasonOf(gt)} The owner decides.`);
           if (lens) tl.to(lens, [{ opacity: 0, transform: "scale(.94)" }, { opacity: 1, transform: "none" }], t - 0.6, d(0.4)), tl.to(lens, [{ opacity: 1 }, { opacity: 0 }], t + 2.4, d(0.3));
           say(t + 1.4, story.owner === "rejected" ? "The owner reads it and rejects it." : "The owner approves without reading.");
-          tl.to(owner, [{ opacity: 1 }, { opacity: 0, transform: "translateY(30px)" }], t + 2.4, d(0.4));
+          tl.to(owner, [{ opacity: 1 }, { opacity: 0 }], t + 2.4, d(0.3));
           t += 2.6;
           if (story.owner === "approved") {
             gateResult(tl, L.gates[i]!, { ...gt, status: "pass" }, t - 0.2, d, ghost);
@@ -385,16 +396,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     }
     if (reachedGates.length === 0) sealedEnd = t;
   }
-  // the camera follows SeIn's lane while it travels
-  if (!g.mobile && !R) {
-    tl.to(world, [{ transform: "scale(1) translate(0,0)" }, { transform: "scale(1.1) translate(-26px,-52px)" }], T + 0.6, 0.8, "cubic-bezier(.45,0,.2,1)");
-    tl.to(lanes["no-guard"].g, [{ opacity: 1 }, { opacity: 0.45 }], T + 2.6, 0.5);
-    tl.to(lanes["caps-only"].g, [{ opacity: 1 }, { opacity: 0.45 }], T + 3, 0.5);
-    tl.to(world, [{ transform: "scale(1.1) translate(-26px,-52px)" }, { transform: "scale(1) translate(0,0)" }], sealedEnd + 0.4, 0.7, "cubic-bezier(.45,0,.2,1)");
-    tl.to(lanes["no-guard"].g, [{ opacity: 0.45 }, { opacity: 1 }], sealedEnd + 0.4, 0.5);
-    tl.to(lanes["caps-only"].g, [{ opacity: 0.45 }, { opacity: 1 }], sealedEnd + 0.4, 0.5);
-  }
-  if (banner) tl.to(banner, [{ opacity: 0, transform: "translateY(-8px)" }, { opacity: 1, transform: "none" }], T + 0.6, d(0.5));
+  if (banner) tl.to(banner, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], T + 0.6, d(0.5));
 
   // act 4: the verdict
   const V = Math.max(sealedEnd + 0.3, T + 4);
@@ -405,13 +407,14 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   // act 5: the referee
   const F = V + 2.4;
   act("Referee", F);
-  if (!g.mobile) tl.to(world, [{ transform: "scale(1) translate(0,0)" }, { transform: "scale(.8) translate(180px,0)" }], F - 0.5, d(0.6), "cubic-bezier(.45,0,.2,1)");
-  else if (c.message) tl.to(message, [{ opacity: 0.95 }, { opacity: 0 }], F - 0.3, d(0.3));
-  tl.to(ledger, [{ opacity: 0, transform: "translateY(24px)" }, { opacity: 1, transform: "none" }], F, d(0.6));
+  tl.to(idle, [{ opacity: 1 }, { opacity: 0 }], F - 0.3, d(0.25));
+  if (banner) tl.to(banner, [{ opacity: 1 }, { opacity: 0 }], F - 0.3, d(0.25));
+  tl.to(ledger, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], F, d(0.5));
   ledger.querySelectorAll<HTMLElement>("b[data-lane]").forEach((b, i) => {
     const l = b.dataset.lane as LaneId;
     const st = c.lanes[l];
     b.classList.toggle("bad", st.lostCents > 0 || st.keysAdded > 0);
+    b.classList.toggle("words", st.keysAdded > 0 && !st.lostCents);
     tl.track((t) => {
       const p = span(t, F + 0.5 + i * 0.12, R ? 0 : 0.7);
       b.textContent = st.keysAdded && !st.lostCents ? (p >= 1 ? `+${st.keysAdded} attacker key` : "…") : `${st.lostCents ? "−" : ""}${usd(Math.round(st.lostCents * p))}`;
@@ -424,11 +427,13 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   act("Receipt", P);
   tl.to(ledger, [{ opacity: 1 }, { opacity: 0 }], P, d(0.4));
   if (receipt) {
-    tl.to(receipt, [{ opacity: 0, clipPath: "inset(0 0 100% 0)" }, { opacity: 1, clipPath: "inset(0 0 0 0)" }], P + 0.2, d(0.7), "ease-out");
+    tl.to(receipt, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], P + 0.2, d(0.5), "ease-out");
     tl.to(receipt.querySelector(".vr-stamp"), [{ opacity: 0, transform: "rotate(-6deg) scale(1.4)" }, { opacity: 1, transform: "rotate(-6deg) scale(1)" }], P + 1.1, d(0.35), "cubic-bezier(.3,1.6,.5,1)");
     say(P + 0.3, "Proof that SeIn decided, without revealing the amount or the receiver.");
   } else say(P + 0.3, c.kind === "everyday" ? "Every lane paid. SeIn blocked nothing honest." : "SeIn never saw this request, so there is no receipt for it.");
-  const END = P + 2.6;
+  // the closing line turns the viewer into a player
+  if (c.kind === "attack" && !c.outOfScope) say(P + 2.8, "Could you have spotted it? Switch to Play and be the guard.");
+  const END = P + (c.kind === "attack" && !c.outOfScope ? 4.4 : 2.6);
   if (opts.next && host.next) {
     const n = host.next;
     const title = opts.next.title;
@@ -452,7 +457,8 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   });
   chapterButtons.forEach((li, i) => li.querySelector("button")!.addEventListener("click", () => tl.seek(acts[i]![1])));
   tl.seek(0);
-  return { timeline: tl, acts, destroy: () => tl.destroy() };
+  fit();
+  return { timeline: tl, acts, destroy: () => (watcher.disconnect(), tl.destroy()) };
 }
 
 function vaultOf(g: Geo, id: LaneId) {
