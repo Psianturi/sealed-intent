@@ -17,17 +17,18 @@ Built at NEAR HACKATHON, November 2026. Tracks: `security`, `privacy`, `agents`.
 | 1 | Open https://sein-near.vercel.app/try and press **Ask SeIn to pay** with "Routine invoice" selected | `ALLOW` in 10 to 20 seconds, a link to a real NEAR testnet transaction, the receipt checked in your browser, and a "Who sees what" table: the public receipt holds only seals |
 | 2 | Same page, choose **The "CFO" in a hurry**, press the button | `BLOCK`, prompt injection suspected, nothing sent |
 | 3 | Same page, choose **New supplier** | `WARN`: a new receiver waits for the owner |
-| 4 | Open https://sein-near.vercel.app/proof | Five tiles turn green. Your browser reads the registry contract, the custody payments, the NEAR AI enclave key, a fresh NEAR Intents quote and a NEP-413 owner signature from NEAR, NEAR AI Cloud and 1Click directly; nothing passes through a SeIn server |
-| 5 | Open https://sein-near.vercel.app/verify.html, press **Try a real receipt**, then **Change the verdict and check again** | Valid, then invalid |
-| 6 | Open https://sein-near.vercel.app/arena.html | Play ten requests as the guard, watch the recorded run, browse 15 cases and the incident list |
-| 7 | Open https://sein-near.vercel.app/checkup and type any NEAR account | A risk outlook read from its last 50 transactions (being steered to a look-alike receiver, keys that can act without the owner, who it pays), then its keys, the apps connected to it, look-alike and reported contacts, and keys registered inside NEAR Intents |
+| 4 | Same page, switch to **Check a real payment**, choose **Example: a look-alike name**, press **Check this payment** | `BLOCK` in about two seconds: the name passes for an account the paying wallet has paid, read live from chain. **My own payment** does the same for any NEAR mainnet account, with no wallet connection |
+| 5 | Open https://sein-near.vercel.app/proof | Five tiles turn green. Your browser reads the registry contract, the custody payments, the NEAR AI enclave key, a fresh NEAR Intents quote and a NEP-413 owner signature from NEAR, NEAR AI Cloud and 1Click directly; nothing passes through a SeIn server |
+| 6 | Open https://sein-near.vercel.app/verify.html, press **Try a real receipt**, then **Change the verdict and check again** | Valid, then invalid |
+| 7 | Open https://sein-near.vercel.app/arena.html | Play ten requests as the guard, watch the recorded run, browse 15 cases and the incident list |
+| 8 | Open https://sein-near.vercel.app/checkup and type any NEAR account | A risk outlook read from its last 50 transactions (being steered to a look-alike receiver, keys that can act without the owner, who it pays), then its keys, the apps connected to it, look-alike and reported contacts, and keys registered inside NEAR Intents |
 
 **On your machine, no keys and no funds** (Node.js 22.13+ and pnpm through `corepack enable`):
 
 ```bash
 pnpm install
 pnpm demo        # the whole story, offline
-pnpm test        # about 250 tests, including an 8-process race on the budget and a scan of every byte written to disk
+pnpm test        # about 270 tests, including an 8-process race on the budget and a scan of every byte written to disk
 pnpm redteam     # 20 attack scenarios -> out/redteam-report.md
 pnpm verify out/receipts
 pnpm arena:verify official   # re-checks the recorded Arena run
@@ -55,6 +56,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | Payments through OutLayer custody, so the agent holds no key | Built, live on testnet |
 | Owner approval with a NEAR wallet signature (NEP-413), from the browser | Built, live on testnet |
 | A hosted SeIn on Google Cloud Run, behind the Try it page | Built. A shared testnet demo wallet with small limits, not a service for your own agent |
+| Check a real payment: an opinion on one payment before it is sent, from live chain facts and the enclave | Built, live for NEAR mainnet and testnet, for people (the Try it page) and agents (`POST /v1/check`). Advice only: it holds no key and cannot stop a payment |
 | MCP server, REST API, and a check for x402 payment requests | Built. x402 is covered by tests and reads the payees a service publishes |
 | Checkpoint: scan and heal any NEAR account, with a risk outlook from its history | Built, runs in the browser against NEAR mainnet or testnet. The outlook is explainable rules over public data, a forecast and not a guarantee |
 | The Arena run | Recorded with test tokens on an in-memory ledger and again on three local NEAR nodes. Quotes, the enclave opinion and custody are stand-ins there |
@@ -75,7 +77,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | Custody tested on its own, 16 attempts, including three it signed and should not have | [`evidence/custody-testnet`](evidence/custody-testnet) |
 | A real enclave check with everything needed to re-check it | [`evidence/tee`](evidence/tee); `pnpm tee:live` repeats it with your own NEAR AI key |
 | A signed NEAR Intents quote | [`evidence/intents`](evidence/intents); the Proof page fetches a fresh one |
-| The hosted SeIn | `GET https://sein-103701492599.asia-southeast2.run.app/v1/try` returns today's remaining demo quota |
+| The hosted SeIn | `GET https://sein-103701492599.asia-southeast2.run.app/v1/try` returns today's remaining demo quota; `POST /v1/check` there answers about a real payment |
 | The incident dataset | https://sein-near.vercel.app/threats/incidents.json (CC BY 4.0) |
 
 ## One number, with its baseline
@@ -375,6 +377,18 @@ pnpm sein connect my-agent # in a second window: writes ready settings for the a
 Day to day: `pnpm sein pending`, `freeze`, `unfreeze`, and `pnpm sein learn <lesson.json>` to load a lesson downloaded from the Checkpoint (its accounts are blocked at once). Keep each network in its own folder: `pnpm sein setup --dir my-sein-mainnet`, and the same `--dir` on every command.
 
 **Paying another agent over x402** (for example on NEAR Agent Market): before the agent's wallet signs a 402 answer, `POST /v1/x402/check` with `{ resourceUrl, accept, taskText }`. SeIn reads the payees the service itself publishes at `/.well-known/x402` on the same origin; a payee it does not publish, another network or a bad amount is refused at once, and a sound request still goes through the five checks and the owner's limits, with a receipt.
+
+**Asking before paying, with no account at SeIn**: `POST /v1/check` on the hosted SeIn with `{ to, from, amount, taskText, network }` (only `to` is required; amounts in NEAR; `network` is `mainnet` or `testnet`). The answer is `{ verdict, risk, findings[], facts }`, read live from chain:
+
+| Finding | Verdict |
+|---|---|
+| The receiver does not exist, or its name passes for an account `from` has paid (address poisoning) | `BLOCK` |
+| The instruction screen flags `taskText` and the enclave model agrees | `BLOCK` |
+| `from` never paid the receiver, the receiver is days old, the amount is far above the account's usual payment or most of its balance, or one of the two message checks objects | `WARN` |
+| Something could not be read (no `from`, a source down) | `WARN`, and the finding says what was not seen |
+| The receiver exists, `from` has paid it before, the amount is usual and the message is plain | `ALLOW` |
+
+It is advice from public data: no key, no custody, nothing stored, and a small daily quota. History comes from two public sources, so one being down does not stop the answer.
 
 Plain HTTP, for agents that do not speak MCP: `POST /v1/preflight` with `{ intent }`, then `POST /v1/execute` with `{ decisionId }` after ALLOW or the owner's approval. Send `Authorization: Bearer <agent token>`, an `Idempotency-Key`, and, when the agent has a key, `X-SeIn-Timestamp` and `X-SeIn-Signature` (ed25519 over `timestamp.METHOD.path.sha256hex(body)`).
 
