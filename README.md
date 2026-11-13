@@ -61,7 +61,8 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | Checkpoint: scan and heal any NEAR account, with a risk outlook from its history | Built, runs in the browser against NEAR mainnet or testnet. The outlook is explainable rules over public data, a forecast and not a guarantee |
 | The Arena run | Recorded with test tokens on an in-memory ledger and again on three local NEAR nodes. Quotes, the enclave opinion and custody are stand-ins there |
 | Incident watch: 29 real incidents with sources | A dataset mapped to SeIn's checks by pattern. Not tested against SeIn |
-| A mainnet payment or swap, a live confidential route | Not done |
+| A payment on NEAR mainnet through SeIn and OutLayer custody | Done once, on 13 Nov 2026, with 0.005 NEAR: an ordinary invoice was allowed and paid, a trick was refused. Receipts are signed but not anchored; the registry is on testnet |
+| A mainnet swap, a token payment on mainnet, a live confidential route | Not done |
 | A hosted SeIn for your own agent, a vault contract that enforces the verdict on chain, an audit | Not built |
 
 ## Evidence
@@ -74,6 +75,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | A new receiver, paid only after the owner signed | [`jHfPVh1W…`](https://testnet.nearblocks.io/txns/jHfPVh1W5oC5TxFHcAwfLDTLcMNXwQM3MXB2Ggcwrci) |
 | Receipt batch anchored | [`CjmAwijP…`](https://testnet.nearblocks.io/txns/CjmAwijPato9is1Kv7HD4Y2ey9HULJA778SXVB8DAhqb) |
 | A payment sent around SeIn, found in 62 seconds, wallet frozen on chain in 64 | payment [`3JERjb5v…`](https://testnet.nearblocks.io/txns/3JERjb5v8jd9ZGg6qEwmW2GnYsUzATzBjHVVmuYPnZyy), freeze [`7Hb2tPHB…`](https://testnet.nearblocks.io/txns/7Hb2tPHBUuU3MQ1eLTWegjorc26Kv5rcBZ2fpfFhD62S) |
+| NEAR mainnet: a payment SeIn allowed and custody paid, and a trick it refused | payment [`4GYCHxrb…`](https://nearblocks.io/txns/4GYCHxrbFFVPawDt5ugdeyWFjud2ehvpa17yegjZyPav), receipts and the policy in [`evidence/custody-mainnet`](evidence/custody-mainnet) |
 | Custody tested on its own, 16 attempts, including three it signed and should not have | [`evidence/custody-testnet`](evidence/custody-testnet) |
 | A real enclave check with everything needed to re-check it | [`evidence/tee`](evidence/tee); `pnpm tee:live` repeats it with your own NEAR AI key |
 | A signed NEAR Intents quote | [`evidence/intents`](evidence/intents); the Proof page fetches a fresh one |
