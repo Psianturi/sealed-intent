@@ -13,11 +13,12 @@ function distance(a: string, b: string): number {
 
 const HEX = /^[0-9a-f]{64}$/;
 
-/** The trusted account this one imitates, if any. A trusted account and its own sub-accounts never count. */
+/** The trusted account this one imitates, if any. A trusted account never imitates itself, and its sub-accounts never imitate it. */
 export function imitates(account: string, trusted: string[]): string | undefined {
-  if (trusted.some((t) => t === account || account.endsWith(`.${t}`))) return undefined;
+  if (trusted.includes(account)) return undefined;
   const s = skeleton(account);
   for (const t of trusted) {
+    if (account.endsWith(`.${t}`)) continue;
     // implicit accounts are compared the way people read them: the first and last characters
     if (HEX.test(account) && HEX.test(t)) {
       if (account.slice(0, 4) === t.slice(0, 4) && account.slice(-4) === t.slice(-4)) return t;

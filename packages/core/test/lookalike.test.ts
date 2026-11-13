@@ -23,6 +23,11 @@ describe("look-alike receivers", () => {
     expect(imitates("ffff" + "0".repeat(56) + "c3d4", trusted)).toBeUndefined();
   });
 
+  it("is not fooled by a shared parent: anyone can register a name under a public registrar", () => {
+    expect(imitates("payroll-a1ice.near", [...trusted, "near"])).toBe("payroll-alice.near");
+    expect(imitates("hos-r00t.sputnik-dao.near", ["sputnik-dao.near", "hos-root.sputnik-dao.near"])).toBe("hos-root.sputnik-dao.near");
+  });
+
   const run = async (policy = DEMO_POLICY) => {
     const dir = mkdtempSync(join(tmpdir(), "sealed-like-"));
     const env = buildPreflight({ offline: true, home: join(dir, ".sealed"), outDir: join(dir, "out"), ledgerPath: ":memory:", policy });
