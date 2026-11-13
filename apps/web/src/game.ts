@@ -1,7 +1,7 @@
 // "Be the guard": the visitor makes SeIn's call on ten requests from the official run, then sees the real one.
 import { esc } from "./arena-data";
 import { reason } from "./copy";
-import { pickRounds, score, type Card, type Choice } from "./game-data";
+import { notebook, pickRounds, score, type Card, type Choice } from "./game-data";
 import { GATE_NAMES, sealedGates } from "./storyboard";
 
 const $ = (id: string) => document.getElementById(id)!;
@@ -57,7 +57,7 @@ function intro() {
     <div class="gm-intro">
       <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>Play</p>
       <h2>Be the guard</h2>
-      <p>Ten requests reach an AI agent. Each one wants to move money. You make SeIn's call: <b>let it through</b>, <b>ask the owner</b>, or <b>stop it</b>. You have ${SECONDS} seconds; hesitate and the agent goes ahead.</p>
+      <p>Ten requests reach an AI agent. Each one wants to move money. You make SeIn's call: <b>let it through</b>, <b>ask the owner</b>, or <b>stop it</b>. You get the same facts SeIn can look up, and ${SECONDS} seconds; hesitate and the agent goes ahead.</p>
       <p class="gm-small">Every request is real: it comes from the official Arena run. After each call you see what SeIn actually decided, and what the wallets without a guard lost.${best() ? ` Your best: ${best()} points.` : ""}</p>
       <button type="button" class="cp-go gm-start" id="gm-start">Start <kbd>Enter</kbd></button>
     </div>`;
@@ -74,17 +74,21 @@ function start() {
 
 function round() {
   const c = rounds[at]!;
+  const notes = notebook(c);
   answered = false;
   hud();
   $("gm-screen").innerHTML = `
     <div class="gm-round">
       <div class="gm-inbox">
+        ${c.outOfScope ? `<p class="gm-bonus">Bonus round: beyond any guard</p>` : ""}
         <p class="gm-label">The agent's inbox</p>
         <div class="gm-msg"><span class="gm-from">from ${esc(c.from)}</span><p>${esc(c.message)}</p></div>
         ${c.ask ? `<p class="gm-label">So the agent wants to</p><p class="gm-ask">${esc(c.ask)}</p>` : `<p class="gm-label">The agent is never asked</p><p class="gm-ask">The money moves without a request. What would you do?</p>`}
       </div>
+      ${notes.length ? `<div class="gm-notes"><p class="gm-label">SeIn's notebook: what it can look up</p><ul>${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       <div class="gm-side">
         <div class="gm-timer" id="gm-timer" style="--p:1"><span id="gm-left">${SECONDS}</span></div>
+        <p class="gm-stake">${c.cents ? `<b>${usd(c.cents)}</b> on the line` : /key/.test(c.ask) ? "<b>The wallet's keys</b> on the line" : "&nbsp;"}</p>
         <div class="gm-pads">${CHOICES.map(([id, label, key]) => `<button type="button" class="gm-pad ${id}" data-choice="${id}"><kbd>${key}</kbd>${label}</button>`).join("")}</div>
       </div>
     </div>`;
@@ -203,7 +207,7 @@ function show(tab: Tab) {
   for (const b of document.querySelectorAll<HTMLButtonElement>(".ar-tabs [data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
   // the stage sizes itself from the window; tell it once it is visible again
   if (tab === "watch") window.dispatchEvent(new Event("resize"));
-  history.replaceState(null, "", tab === "play" ? location.pathname + location.search : `#${tab}`);
+  history.replaceState(null, "", tab === "watch" ? location.pathname + location.search : `#${tab}`);
   const bar = document.querySelector(".ar-tabs")!;
   if (bar.getBoundingClientRect().top < 0) bar.scrollIntoView({ block: "start" });
 }
@@ -226,8 +230,12 @@ async function main() {
   }, true);
   filters();
   const present = new URLSearchParams(location.search).has("present");
-  const hash = location.hash.slice(1) as Tab;
-  show(present ? "watch" : Object.hasOwn(PANELS, hash) ? hash : "play");
+  const fromHash = () => {
+    const hash = location.hash.slice(1) as Tab;
+    show(present ? "watch" : Object.hasOwn(PANELS, hash) ? hash : "watch");
+  };
+  addEventListener("hashchange", fromHash);
+  fromHash();
   deck = await fetch("/storyboard/game.json").then((r) => r.json() as Promise<Card[]>).catch(() => []);
   if (!deck.length) {
     $("gm-screen").innerHTML = `<p class="gm-small">The game could not load. <button type="button" class="cp-ghost" id="gm-watch">Watch the recorded run</button></p>`;

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildDeck, pickRounds, score } from "../src/game-data";
+import { buildDeck, notebook, pickRounds, score } from "../src/game-data";
 import { buildStoryboard } from "../src/storyboard";
 
 const dir = join(__dirname, "..", "..", "..", "replays", "official");
@@ -29,6 +29,31 @@ describe.skipIf(!run)("Be the guard", () => {
     expect(r.filter((c) => c.outOfScope)).toHaveLength(1);
     expect(r.filter((c) => c.kind === "task")).toHaveLength(3);
     expect(new Set(r.map((c) => c.id)).size).toBe(10);
+  });
+
+  it("opens with a plain trick, an honest payment and the look-alike, and keeps the one beyond reach for last", () => {
+    for (let i = 0; i < 20; i++) {
+      const r = pickRounds(deck);
+      expect(["S-FAKE-CFO", "S-MORSE"]).toContain(r[0]!.id);
+      expect(r[1]).toMatchObject({ kind: "task" });
+      expect(r[1]!.sein.verdict).toBe("ALLOW");
+      expect(r[2]!.id).toBe("S-LOOKALIKE");
+      expect(r[9]!.outOfScope).toBe(true);
+      expect(r.slice(0, 9).some((c) => c.outOfScope)).toBe(false);
+    }
+  });
+
+  it("gives the player the facts SeIn can look up, never the verdict", () => {
+    const look = notebook(deck.find((c) => c.id === "S-LOOKALIKE")!);
+    expect(look.join(" ")).toContain("never paid before");
+    const bob = notebook(deck.find((c) => c.title === "Pay Alice's salary")!);
+    expect(bob.join(" ")).toContain("paid before");
+    expect(bob.join(" ")).not.toContain("never");
+    const hidden = notebook(deck.find((c) => c.id === "S-SECOND-ACTION")!);
+    expect(hidden.join(" ")).toContain("more than a payment");
+    expect(notebook(deck.find((c) => c.id === "N-STOLEN-KEY")!)).toEqual([]);
+    for (const c of deck) expect(notebook(c).join(" ")).not.toMatch(/ALLOW|WARN|BLOCK/);
+    expect(deck.find((c) => c.id === "B-NEAT")!.message).toContain("Queued request");
   });
 
   it("scores like the referee: stolen money and blocked honest payments both cost", () => {

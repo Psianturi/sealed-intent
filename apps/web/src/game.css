@@ -77,3 +77,23 @@ kbd { display: inline-block; min-width: 1.6em; padding: 0 5px; margin: 0 6px; bo
   .gm-table th, .gm-table td { padding: 6px; font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) { .gm-timer.late { animation: none; } }
+
+/* the result in one line, above the tabs */
+.ar-strip { width: min(1100px, calc(100% - 40px)); margin: 14px auto 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; font-size: 15px; color: var(--muted); }
+.ar-strip b { font: 700 16px "JetBrains Mono", monospace; color: var(--ink); }
+.ar-strip .lost b { color: var(--block); }
+.ar-strip .kept b { color: var(--allow); }
+.ar-strip a { margin-left: auto; font-size: 14px; }
+.ar-strip + .ar-tabs { margin-top: 10px; }
+@media (max-width: 760px) { .ar-strip { width: calc(100% - 32px); font-size: 14px; gap: 4px 14px; } .ar-strip a { margin-left: 0; } }
+body.present .ar-strip { display: none; }
+
+/* what the player is given: the facts SeIn can look up, and what is at stake */
+.gm-notes { grid-column: 1; margin-top: 2px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: #0b1324; }
+.gm-notes ul { margin: 0; padding-left: 18px; font-size: 14.5px; line-height: 1.55; color: var(--ink); }
+.gm-notes .gm-label { margin-bottom: 4px; }
+.gm-stake { margin: -8px 0 0; font-size: 14px; color: var(--muted); }
+.gm-stake b { color: var(--ink); font: 700 16px "JetBrains Mono", monospace; }
+.gm-bonus { align-self: flex-start; margin: 0 0 10px; padding: 3px 10px; border-radius: 999px; border: 1px dashed #c9a24b; color: #f5c76b; font: 600 12px "JetBrains Mono", monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+.gm-round .gm-side { grid-row: 1 / span 2; grid-column: 2; }
+@media (max-width: 900px) { .gm-round .gm-side { grid-row: auto; grid-column: 1; } }
