@@ -58,6 +58,9 @@ async function applyPolicy(file: string) {
   const cost = await near.view<string>(CONTRACT, "estimate_wallet_policy_cost", { wallet_pubkey: pub, encrypted_data: enc.encrypted_base64 });
   const tx = await near.transaction(caller).functionCall(CONTRACT, "store_wallet_policy", { wallet_pubkey: pub, encrypted_data: enc.encrypted_base64, wallet_signature: signed.signature_hex, version: signed.version, locked: signed.locked, valid_until: signed.valid_until }, { gas: "100 Tgas", attachedDeposit: `${BigInt(cost ?? "100000000000000000000000")} yocto` }).send();
   console.log("stored, tx", tx.transaction.hash);
+  // OutLayer signs a policy for a limited time; it has to be signed again before this date
+  const until = Number(signed.valid_until ?? 0);
+  if (until) console.log("valid until", new Date(until > 1e15 ? until / 1e6 : until > 1e12 ? until : until * 1000).toISOString());
   await fetch(`${OUTLAYER}/wallet/v1/invalidate-cache`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ wallet_id: walletId }) });
 }
 
