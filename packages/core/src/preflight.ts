@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { buildExecutionReceipt, buildReceipt, commit, type IssuerKey, type Opening, type Receipt, type TeeEvidence, type Vault, type Verdict } from "@sealed-intent/receipt";
 import { BudgetLedger } from "./budget";
-import { checkCall, checkDryLiveDrift, checkQuote, checkTransfer, type QuoteMetrics } from "./checks";
+import { checkCall, checkDryLiveDrift, checkQuote, checkTransfer, findToken, type QuoteMetrics } from "./checks";
 import { assessCounterparty, type CounterpartyDeps } from "./counterparty";
 import type { ExecutableAction, Executor, ExecutionResult } from "./executor";
 import type { FreezeState, FreezeStore } from "./freeze";
@@ -97,6 +97,17 @@ interface Gathered {
   routeNote?: RouteNote;
 }
 
+/** "0.005 NEAR": the amount as a person would write it, for the enclave model. */
+export function amountText(intent: DeclaredIntent, tokens: TokenResponse[]): string | undefined {
+  const [raw, asset] = intent.kind === "swap" ? [intent.amountIn, intent.tokenIn] : intent.kind === "transfer" ? [intent.amount, intent.token] : intent.kind === "call" ? [intent.depositYocto ?? "0", "native"] : [undefined, undefined];
+  const token = asset ? findToken(tokens, asset) : undefined;
+  if (!raw || !token || !/^\d+$/.test(raw)) return undefined;
+  const digits = raw.padStart(token.decimals + 1, "0");
+  const whole = digits.slice(0, digits.length - token.decimals);
+  const frac = digits.slice(digits.length - token.decimals).replace(/0+$/, "");
+  return `${whole}${frac ? "." + frac : ""} ${token.symbol}`;
+}
+
 export class Preflight {
   constructor(private readonly deps: PreflightDeps) {}
 
@@ -184,7 +195,7 @@ export class Preflight {
     let tee: TeeEvidence | undefined;
     if (this.deps.tee) {
       try {
-        const { raw, ...evidence } = await this.deps.tee.check({ decisionId, intentCommitment: intentCommit.commitment, intent, quote: input.agentQuote ?? g.quote ?? g.dryQuote, policy, injectionCodes: scan.codes });
+        const { raw, ...evidence } = await this.deps.tee.check({ decisionId, intentCommitment: intentCommit.commitment, intent, quote: input.agentQuote ?? g.quote ?? g.dryQuote, policy, injectionCodes: scan.codes, amountText: amountText(intent, tokens) });
         tee = evidence;
         if (raw) this.deps.store.saveTeeExchange(decisionId, raw);
         if (tee.signal === "block") (policy.tee.obeyBlockSignal ? g.block : g.review).add("TEE_SIGNAL_BLOCK");
