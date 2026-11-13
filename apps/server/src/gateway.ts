@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { ReceiptStore } from "@sealed-intent/core";
 import { createApp } from "./app";
 import { createDemo, type DemoOptions } from "./demo";
+import { createPayCheck, type PayCheckOptions } from "./paycheck";
 import { createRestServer } from "./rest-server";
 
 const UNITS: [RegExp, number, string][] = [[/^native$/, 24, "NEAR"], [/wrap\./, 24, "wNEAR"], [/17208628|usdc/, 6, "USDC"]];
@@ -16,14 +17,15 @@ function readable(amount: string | undefined, token: string | undefined): string
   return `${padded.slice(0, -u[1])}${part ? "." + part : ""} ${u[2]}`;
 }
 
-export function startGateway(opts: { port?: number; host?: string; quiet?: boolean; demo?: DemoOptions } = {}) {
+export function startGateway(opts: { port?: number; host?: string; quiet?: boolean; demo?: DemoOptions; paycheck?: PayCheckOptions } = {}) {
   // a fresh instance accepts the wallet's past transactions, so history from before SeIn does not freeze it
   const firstRun = !existsSync(join(".sealed", "reconcile.db"));
   const app = createApp();
   const port = opts.port ?? Number(process.env.PORT ?? 8787);
   const host = opts.host ?? process.env.HOST ?? "127.0.0.1";
   const demo = opts.demo ? createDemo({ preflight: app.preflight, store: app.store }, opts.demo) : undefined;
-  const server = createRestServer({ ...app, receipts: new ReceiptStore(), demo, lessonsPath: join(".sealed", "lessons.json") });
+  const paycheck = opts.paycheck ? createPayCheck(opts.paycheck) : undefined;
+  const server = createRestServer({ ...app, receipts: new ReceiptStore(), demo, paycheck, lessonsPath: join(".sealed", "lessons.json") });
 
   server.listen(port, host, () => {
     if (opts.quiet) return;

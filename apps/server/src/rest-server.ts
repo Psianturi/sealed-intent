@@ -5,6 +5,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import type { AccountWatcher, CustodyFreezer, Preflight, ReceiptStore, Reconciler, SharedBlocklist } from "@sealed-intent/core";
 import { bearer, type Auth } from "./auth";
 import type { Demo } from "./demo";
+import type { PayCheckService } from "./paycheck";
 
 /**
  * Every answer carries SeIn-Api-Version. Agents may send Idempotency-Key on preflight and execute: a
@@ -63,13 +64,15 @@ export interface RestDeps {
   network?: string;
   /** the public demo route, only on a hosted SeIn */
   demo?: Demo;
+  /** the public check of one real payment, for people and agents without an instance of their own */
+  paycheck?: PayCheckService;
   /** where taught lessons are kept; in memory only when absent */
   lessonsPath?: string;
   /** reads a service's published x402 payees; tests pass a stand-in */
   x402Payees?: (resourceUrl: string) => Promise<X402Recipients | undefined>;
 }
 
-const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze|try)|GET \/v1\/try|GET \/health)$/;
+const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze|try|check)|GET \/v1\/(try|check)|GET \/health)$/;
 
 async function readBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
@@ -131,6 +134,20 @@ export function createRestServer(deps: RestDeps): Server {
             return send(res, 400, { error: "send JSON" });
           }
           const out = await deps.demo.handle(visitor, input);
+          return send(res, out.status, out.body);
+        }
+      }
+      if (deps.paycheck && url.pathname === "/v1/check") {
+        if (req.method === "GET") return send(res, 200, deps.paycheck.quota());
+        if (req.method === "POST") {
+          const visitor = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "?").split(",")[0]!.trim();
+          let input: Record<string, unknown>;
+          try {
+            input = JSON.parse(await readBody(req)) as Record<string, unknown>;
+          } catch {
+            return send(res, 400, { error: "send JSON" });
+          }
+          const out = await deps.paycheck.handle(visitor, input);
           return send(res, out.status, out.body);
         }
       }

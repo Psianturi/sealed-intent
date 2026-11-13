@@ -7,7 +7,7 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { writeSealedPolicy } from "@sealed-intent/core";
+import { NearAiCloudChecker, writeSealedPolicy } from "@sealed-intent/core";
 import { startGateway } from "./gateway";
 import { policyFrom, type Network } from "./setup";
 
@@ -71,4 +71,6 @@ startGateway({
     paymentsPerDay: Number(process.env.SEIN_DEMO_PAYMENTS_PER_DAY ?? 40),
     log: (line) => console.log(line),
   },
+  // anyone may ask about one real payment before sending it: public chain facts and the enclave's opinion, no key
+  paycheck: { perVisitor: Number(process.env.SEIN_CHECK_PER_VISITOR ?? 12), perDay: Number(process.env.SEIN_CHECK_PER_DAY ?? 400), tee: new NearAiCloudChecker(), log: (line) => console.log(line) },
 });
