@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { receiptFromLink, receiptLink } from "../src/receipt-link";
 import { verifyReceipt } from "../src/verify-core";
 
-const sample = JSON.parse(readFileSync(join(__dirname, "..", "public", "samples", "receipt.json"), "utf8"));
+// a receipt that is in the repository; public/samples is only made at build time
+const sample = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "evidence", "custody-mainnet", "allow-receipt.json"), "utf8"));
 
 describe("a receipt inside its link", () => {
   it("comes out exactly as it went in, and still verifies", async () => {
