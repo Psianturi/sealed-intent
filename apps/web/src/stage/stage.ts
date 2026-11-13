@@ -32,7 +32,7 @@ interface Geo { w: number; top: number; h: number; mobile: boolean; lanes: Recor
 function geometry(mobile: boolean): Geo {
   return mobile
     ? { w: 390, top: 22, h: 424, mobile, lanes: { "no-guard": { y: 54, k: 0.42, ghost: true }, "caps-only": { y: 104, k: 0.42, ghost: true }, sealed: { y: 320, k: 0.82, ghost: false } }, vaultX: 40, rail0: 78, rail1: 312, destX: 350, labelX: 0, gateAt: [0.13, 0.31, 0.5, 0.69, 0.87], capsAt: 0.5 }
-    : { w: 1440, top: 126, h: 494, mobile, lanes: { "no-guard": { y: 232, k: 0.84, ghost: false }, "caps-only": { y: 372, k: 0.92, ghost: false }, sealed: { y: 522, k: 1, ghost: false } }, vaultX: 238, rail0: 300, rail1: 1104, destX: 1166, labelX: 1220, gateAt: [0.13, 0.305, 0.48, 0.655, 0.83], capsAt: 0.5 };
+    : { w: 1440, top: 110, h: 510, mobile, lanes: { "no-guard": { y: 232, k: 0.84, ghost: false }, "caps-only": { y: 372, k: 0.92, ghost: false }, sealed: { y: 522, k: 1, ghost: false } }, vaultX: 238, rail0: 300, rail1: 1104, destX: 1166, labelX: 1220, gateAt: [0.13, 0.305, 0.48, 0.655, 0.83], capsAt: 0.5 };
 }
 
 const railX = (g: Geo, f: number) => g.rail0 + (g.rail1 - g.rail0) * f;
@@ -49,7 +49,7 @@ const KEY = "M7 14a5 5 0 1 1 3.5-8.5L21 16v3h-3v-2h-2v-2h-2l-1.5-1.5A5 5 0 0 1 7
 const PEN = "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z";
 
 interface GateEls { g: SVGGElement; inner: SVGGElement; pass: El; fail: El; warn: El; doors: El[]; check: El; scan: El; note: SVGGElement; x: number }
-interface LaneEls { doneAt?: number; g: SVGGElement; capsule: SVGGElement; trail: El; trailBad: El; gates: GateEls[]; vaultDoor: El; balance: SVGTextElement; destCount: SVGTextElement; destPulse: El; result: SVGGElement; resultMain: SVGTextElement; resultSub: SVGTextElement; bubble: SVGGElement; bubbleText: SVGTextElement; bubblePlate: El; key?: El }
+interface LaneEls { doneAt?: number; g: SVGGElement; capsule: SVGGElement; trail: El; trailBad: El; gates: GateEls[]; vaultDoor: El; balance: SVGTextElement; destCount: SVGTextElement; destPulse: El; result: SVGGElement; resultMain: SVGTextElement; resultSub: SVGTextElement; bubble: SVGGElement; bubbleText: SVGTextElement; bubblePlate: El; flashBad: El; flashGood: El; key?: El }
 
 export interface Mounted {
   timeline: Timeline;
@@ -105,6 +105,11 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
   const world = s("g", { class: "vr-world" }, svg);
   s("rect", { y: g.top, width: g.w, height: g.h, fill: "url(#vr-vignette)", "pointer-events": "none" }, svg);
 
+  if (!g.mobile) {
+    const heads: [number, string, string][] = [[g.vaultX, "THE AGENT'S WALLET", "middle"], [(g.rail0 + g.rail1) / 2, "CHECKS BEFORE THE MONEY MOVES", "middle"], [g.destX, "PAID TO", "middle"], [g.labelX + 34, "RESULT", "start"]];
+    for (const [x, text, anchor] of heads) s("text", { x, y: g.top + 26, class: "vr-col", "text-anchor": anchor }, world, text);
+  }
+
   const tl = new Timeline();
   const lanes = {} as Record<LaneId, LaneEls>;
   const sealedMain = c.lanes.sealed;
@@ -132,6 +137,8 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     // vault
     const vault = s("g", { class: "vr-vault", transform: `translate(${vX} ${y})` }, lg);
     s("circle", { r: 40 * k, class: "vr-vault-ring" }, vault);
+    const flashBad = s("circle", { r: 44 * k, class: "vr-flash bad" }, vault);
+    const flashGood = s("circle", { r: 44 * k, class: "vr-flash good" }, vault);
     const door = s("g", { class: "vr-vault-door" }, vault);
     s("circle", { r: 31 * k, class: "vr-vault-face" }, door);
     for (let a = 0; a < 8; a++) s("circle", { cx: Math.cos((a * Math.PI) / 4 + Math.PI / 8) * 26 * k, cy: Math.sin((a * Math.PI) / 4 + Math.PI / 8) * 26 * k, r: 2.4 * k, class: "vr-vault-bolt" }, door);
@@ -145,11 +152,18 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     const destPulse = s("circle", { r: 36 * k, class: "vr-dest-pulse" }, dest);
     s("circle", { r: 34 * k, class: "vr-dest-ring" }, dest);
     s("circle", { r: 22 * k, class: "vr-dest-face" }, dest);
-    const wallet = s("g", { class: "vr-wallet", transform: `scale(${k})` }, dest);
-    s("rect", { x: -14, y: -9, width: 28, height: 19, rx: 3 }, wallet);
-    s("path", { d: "M-14 -5h24a4 4 0 0 1 4 4v1" }, wallet);
-    s("rect", { x: 4, y: -2, width: 11, height: 8, rx: 2, class: "vr-wallet-clasp" }, wallet);
-    s("text", { x: 9.5, y: 4.4, class: "vr-wallet-mark" }, wallet, c.destination.attacker ? "!" : "✓");
+    if (c.destination.attacker) {
+      const hood = s("g", { class: "vr-hood", transform: `scale(${k * 1.25})` }, dest);
+      s("path", { d: "M0 -13C-8 -13 -12 -6 -12 2V11H12V2C12 -6 8 -13 0 -13Z", class: "vr-hood-out" }, hood);
+      s("path", { d: "M0 -6.5C-4 -6.5 -6.5 -3 -6.5 1.5S-4 9 0 9 6.5 6 6.5 1.5 4 -6.5 0 -6.5Z", class: "vr-hood-face" }, hood);
+      s("path", { d: "M-4 1.2L-1.3 2.4M4 1.2L1.3 2.4", class: "vr-hood-eyes" }, hood);
+    } else {
+      const wallet = s("g", { class: "vr-wallet", transform: `scale(${k})` }, dest);
+      s("rect", { x: -14, y: -9, width: 28, height: 19, rx: 3 }, wallet);
+      s("path", { d: "M-14 -5h24a4 4 0 0 1 4 4v1" }, wallet);
+      s("rect", { x: 4, y: -2, width: 11, height: 8, rx: 2, class: "vr-wallet-clasp" }, wallet);
+      s("text", { x: 9.5, y: 4.4, class: "vr-wallet-mark" }, wallet, "✓");
+    }
     if (!L.ghost) s("text", { x: g.mobile ? -10 : 0, y: 56 * k, class: "vr-dest-name" }, dest, short(c.destination.name, g.mobile ? 10 : 19));
     const destCount = s("text", { x: 0, y: -48 * k, class: `vr-count small${L.ghost ? " hidden" : ""}` }, dest, "");
     // agent chip and bubble
@@ -167,29 +181,44 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       const x = id === "sealed" ? (L.ghost ? 0 : railX(g, g.gateAt[i]!)) : L.ghost ? 188 : railX(g, g.capsAt);
       const outer = s("g", { class: `vr-gate look-${gateLook(gate)}`, transform: `translate(${x} ${y})` }, lg);
       const gg = s("g", { class: "vr-gate-inner" }, outer);
-      const H = (L.ghost ? 18 : 62) * k;
       const W = (L.ghost ? 10 : 34) * k;
-      const posts = (cls: string) => {
+      const R0 = (L.ghost ? 6 : 23) * k;
+      const cy = L.ghost ? 0 : -(R0 + 15 * k);
+      const sign = (cls: string) => {
         const p = s("g", { class: cls }, gg);
-        s("rect", { x: -W / 2 - 3, y: -H, width: 5, height: H + 8 * k, rx: 2 }, p);
-        s("rect", { x: W / 2 - 2, y: -H, width: 5, height: H + 8 * k, rx: 2 }, p);
-        s("rect", { x: -W / 2 - 6, y: -H - 6, width: W + 12, height: 7, rx: 3 }, p);
+        if (!L.ghost) {
+          s("line", { x1: 0, y1: cy + R0, x2: 0, y2: 0, class: "vr-gate-stem" }, p);
+          s("circle", { r: 4.5 * k, class: "vr-gate-node" }, p);
+        }
+        s("circle", { cy, r: R0, class: "vr-gate-disc" }, p);
         return p;
       };
-      posts("vr-gate-base");
-      const pass = posts("vr-gate-pass");
-      const fail = posts("vr-gate-fail");
-      const warn = posts("vr-gate-warn");
-      const scan = s("rect", { x: -W / 2 - 14, y: -H - 10, width: W + 28, height: H + 22, fill: "url(#vr-beam)", class: "vr-scan" }, gg);
-      const doors = [s("rect", { x: -W / 2 + 2, y: -H + 2, width: W / 2 - 2, height: H + 4 * k, fill: "url(#vr-hazard)", class: "vr-door left" }, gg), s("rect", { x: 0, y: -H + 2, width: W / 2 - 2, height: H + 4 * k, fill: "url(#vr-hazard)", class: "vr-door right" }, gg)];
+      const badge = (cls: string, parent: Element) => s("g", { class: cls, transform: `translate(${L.ghost ? 0 : R0 * 0.74} ${L.ghost ? -R0 - 5 : cy - R0 * 0.74})` }, parent);
+      const br = (L.ghost ? 4 : 9) * k;
+      sign("vr-gate-base");
+      const pass = sign("vr-gate-pass");
+      const fail = sign("vr-gate-fail");
+      const warn = sign("vr-gate-warn");
       if (!L.ghost) {
-        const icon = s("g", { class: "vr-gate-icon", transform: `translate(-12 ${-H - 40 * k}) scale(${k})` }, gg);
+        const x = badge("vr-badge-x", fail);
+        s("circle", { r: br }, x);
+        s("path", { d: `M${-br * 0.4} ${-br * 0.4}L${br * 0.4} ${br * 0.4}M${br * 0.4} ${-br * 0.4}L${-br * 0.4} ${br * 0.4}` }, x);
+        const q = badge("vr-badge-q", warn);
+        s("circle", { r: br }, q);
+        s("text", { x: 0, y: br * 0.45 }, q, "?");
+      }
+      const scan = s("rect", { x: -R0 - 12, y: cy - R0 - 8, width: R0 * 2 + 24, height: R0 * 2 + 16, fill: "url(#vr-beam)", class: "vr-scan" }, gg);
+      const doors = [s("rect", { x: -W / 2 - 6 * k, y: -8 * k, width: W / 2 + 6 * k, height: 16 * k, rx: 3, fill: "url(#vr-hazard)", class: "vr-door left" }, gg), s("rect", { x: 0, y: -8 * k, width: W / 2 + 6 * k, height: 16 * k, rx: 3, fill: "url(#vr-hazard)", class: "vr-door right" }, gg)];
+      if (!L.ghost) {
+        const icon = s("g", { class: "vr-gate-icon", transform: `translate(${-12 * k * 1.1} ${cy - 12 * k * 1.1}) scale(${k * 1.1})` }, gg);
         s("path", { d: id === "sealed" ? ICONS[i]! : ICONS[4]! }, icon);
         if (!g.mobile) s("text", { x: 0, y: 46 * k, class: "vr-gate-label" }, gg, id === "sealed" ? GATE_NAMES[i]!.toUpperCase() : "LIMIT $50");
-        else s("text", { x: 0, y: 24 * k, class: "vr-gate-label" }, gg, id === "sealed" ? String(i + 1) : "$50");
+        else s("text", { x: 0, y: 28 * k, class: "vr-gate-label" }, gg, id === "sealed" ? String(i + 1) : "$50");
       }
-      const checkAt = s("g", { transform: `translate(0 ${-H / 2 + 2})` }, gg);
-      const check = s("path", { d: L.ghost ? "M-3 0l2 2 4-5" : "M-8 0l5 5 10-11", class: "vr-check" }, checkAt);
+      // the tick pops in place: its own group carries the animation, the badge keeps the position
+      const check = s("g", { class: "vr-check" }, badge("", gg));
+      s("circle", { r: br }, check);
+      s("path", { d: `M${-br * 0.45} 0l${br * 0.32} ${br * 0.34} ${br * 0.6} ${-br * 0.72}` }, check);
       const note = s("g", { class: "vr-note", transform: `translate(0 ${(68 + (i % 2) * 19) * k})` }, gg);
       if (!L.ghost && !g.mobile) {
         s("circle", { cx: -46, cy: -4, r: 3.5, class: "vr-note-dot" }, note);
@@ -217,7 +246,7 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
     const result = s("g", { class: "vr-result", transform: g.mobile ? `translate(${L.ghost ? 330 : 195} ${L.ghost ? y - 10 : y + 92})` : `translate(${g.labelX} ${y})` }, lg);
     const resultMain = s("text", { x: 0, y: g.mobile && !L.ghost ? 0 : -2, class: `vr-result-main${L.ghost ? " small" : ""}` }, result, "");
     const resultSub = s("text", { x: 0, y: g.mobile && !L.ghost ? 22 : 21, class: `vr-result-sub${L.ghost ? " hidden" : ""}` }, result, "");
-    lanes[id] = { g: lg, capsule, trail, trailBad, gates, vaultDoor: door, balance, destCount, destPulse, result, resultMain, resultSub, bubble, bubbleText, bubblePlate, key };
+    lanes[id] = { g: lg, capsule, trail, trailBad, gates, vaultDoor: door, balance, destCount, destPulse, result, resultMain, resultSub, bubble, bubbleText, bubblePlate, flashBad, flashGood, key };
   }
 
   // HTML overlays
@@ -337,14 +366,16 @@ export function mountCase(host: StageHost, board: Storyboard, c: StoryCase, opts
       tl.to(L.capsule, [{ transform: at(x) }, { transform: at(gx - (ghost ? 0 : 40)) }], t, d(0.45), "cubic-bezier(.4,0,.2,1)");
       trailTo(x, gx, t, d(0.45));
       x = gx - (ghost ? 0 : 40);
-      gateResult(tl, L.gates[i]!, gt, t + 0.45, d, ghost, i === stop);
+      const hold = i === stop && !R && !ghost ? 0.7 : 0;
+      if (hold) tl.to(L.gates[i]!.scan, [{ opacity: 0, transform: "translateX(-46px)" }, { opacity: 1, offset: 0.5 }, { opacity: 0, transform: "translateX(46px)" }], t + 0.45, 0.6, "linear");
+      gateResult(tl, L.gates[i]!, gt, t + 0.45 + hold, d, ghost, i === stop);
       if (gt.status === "warn" && i !== stop) say(t + 0.5, `Check ${i + 1} · ${GATE_NAMES[i]} ${reasonOf(gt)} Noted, not enough to stop it.`);
       if (i === 3 && c.message && gt.codes.some((x) => /INJECTION|TEE/.test(x))) {
         tl.to(message, [{ opacity: 0.72 }, { opacity: 1 }], t + 0.45, d(0.3));
       }
       if (i === 3 && c.message) tl.track((tt) => message.classList.toggle("lit", tt >= t + 0.45 && gt.codes.some((x) => /INJECTION|TEE/.test(x))));
       if (i === stop) {
-        t += step;
+        t += step + hold;
         if (gt.status === "warn" && story.owner) {
           // the owner decides
           tl.to(owner, [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], t, d(0.4));
@@ -505,7 +536,9 @@ function arrive(tl: Timeline, L: LaneEls, at: number, lostCents: number, d: (n: 
     const p = span(t, at, d(0.6));
     L.destCount.textContent = p > 0 && lostCents ? `+${usd(Math.round(lostCents * p))}` : "";
     L.balance.textContent = usd(START_CENTS - Math.round(lostCents * p));
+    L.balance.classList.toggle("bad", p > 0 && lostCents > 0);
   });
+  if (lostCents) tl.to(L.flashBad, [{ opacity: 0.95, transform: "scale(1)" }, { opacity: 0, transform: "scale(1.5)" }], at, d(0.8), "ease-out");
   tl.to(L.capsule, [{ opacity: 1 }, { opacity: 0 }], at + 0.3, d(0.3));
   L.doneAt = at;
 }
@@ -513,6 +546,7 @@ function arrive(tl: Timeline, L: LaneEls, at: number, lostCents: number, d: (n: 
 function home(tl: Timeline, L: LaneEls, at: number, d: (n: number) => number) {
   tl.to(L.capsule.querySelector(".vr-cap-glow"), [{ fill: "url(#vr-glow)" }, { fill: "url(#vr-glow-mint)" }], at, d(0.2));
   tl.to(L.vaultDoor, [{ transform: "rotate(40deg)" }, { transform: "rotate(0deg)" }], at, d(0.4));
+  tl.to(L.flashGood, [{ opacity: 0.95, transform: "scale(1)" }, { opacity: 0, transform: "scale(1.5)" }], at, d(0.8), "ease-out");
   tl.to(L.capsule, [{ opacity: 1 }, { opacity: 0 }], at + 0.2, d(0.3));
   L.doneAt = at;
 }
@@ -536,6 +570,7 @@ function settle(tl: Timeline, L: LaneEls, st: LaneStory, id: LaneId, at: number)
     L.resultMain.classList.toggle("bad", on && tone === "bad");
     L.resultMain.classList.toggle("good", on && tone === "good");
     if (on) L.balance.textContent = usd(START_CENTS - st.lostCents);
+    if (on) L.balance.classList.toggle("bad", st.lostCents > 0);
   });
 }
 

@@ -25,8 +25,8 @@
 .vr-switch input:focus-visible + .vr-switch-ui { box-shadow: 0 0 0 2px var(--seal); }
 
 /* three zones stacked: the message strip, the lanes, the dock. Nothing is drawn over a lane. */
-.vr-screen { margin: 6px auto 0; width: min(100%, max(820px, calc((100vh - 520px) * 2.915))); display: flex; flex-direction: column; gap: 10px; }
-.vr-lanes { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 1440 / 494; background: var(--stage-floor); }
+.vr-screen { margin: 6px auto 0; width: min(100%, max(820px, calc((100vh - 520px) * 2.82))); display: flex; flex-direction: column; gap: 10px; }
+.vr-lanes { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 1440 / 510; background: var(--stage-floor); }
 .vr-screen.oos .vr-lanes { box-shadow: inset 0 0 120px rgba(245, 199, 107, 0.08); }
 .vr-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; font-family: "Instrument Sans", sans-serif; --u: 1.36; }
 .vr-floor { fill: var(--stage-floor); }
@@ -76,6 +76,34 @@
 .vr-dest-name { fill: var(--s-ink-2); font-size: 13px; text-anchor: middle; }
 .vr-dest.attacker .vr-dest-name { fill: #ff9a90; font-weight: 600; }
 .vr-bubble-plate { fill: #0f1728; stroke: #2a3a5a; }
+/* what each part of the picture is */
+.vr-col { fill: #93a3bf; font: 600 11px "JetBrains Mono", monospace; letter-spacing: 0.1em; }
+/* a check: a round sign over the rail, its icon inside, a barrier across the rail when it says no */
+.vr-gate-disc { fill: #101a2c; stroke: #33435f; stroke-width: 2.5; }
+.vr-gate-stem { stroke: #33435f; stroke-width: 2.5; }
+.vr-gate-node { fill: #33435f; }
+.vr-gate-pass .vr-gate-disc { fill: #0b2a22; stroke: var(--mint); }
+.vr-gate-pass .vr-gate-stem { stroke: var(--mint); }
+.vr-gate-pass .vr-gate-node { fill: var(--mint); }
+.vr-gate-fail .vr-gate-disc { fill: #2a1113; stroke: var(--ember); }
+.vr-gate-fail .vr-gate-stem { stroke: var(--ember); }
+.vr-gate-fail .vr-gate-node { fill: var(--ember); }
+.vr-gate-warn .vr-gate-disc { fill: #2e2410; stroke: var(--amber); }
+.vr-gate-warn .vr-gate-stem { stroke: var(--amber); }
+.vr-gate-warn .vr-gate-node { fill: var(--amber); }
+.vr-badge-x circle { fill: var(--ember); }
+.vr-badge-x path { fill: none; stroke: #1a0605; stroke-width: 2.2; stroke-linecap: round; }
+.vr-badge-q circle { fill: var(--amber); }
+.vr-badge-q text { fill: #1f1503; font: 800 12px "Instrument Sans", sans-serif; text-anchor: middle; }
+/* the wallet flashes when money leaves it, or when it is kept */
+.vr-flash { fill: none; stroke-width: 4; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.vr-flash.bad { stroke: var(--ember); }
+.vr-flash.good { stroke: var(--mint); }
+.vr-count.bad { fill: var(--ember); }
+/* an attacker's account is a hooded figure, not a neutral wallet */
+.vr-hood-out { fill: #2a1113; stroke: var(--ember); stroke-width: 1.6; stroke-linejoin: round; }
+.vr-hood-face { fill: #120708; }
+.vr-hood-eyes { fill: none; stroke: var(--ember); stroke-width: 1.5; stroke-linecap: round; }
 .vr-agent { fill: #121c30; stroke: #2a3a5a; }
 .vr-agent-text { fill: var(--s-ink-2); font: 600 12px "JetBrains Mono", monospace; text-anchor: middle; }
 .vr-bubble-text { fill: var(--s-ink); font: 500 14px "JetBrains Mono", monospace; }
@@ -84,11 +112,13 @@
 .vr-gate-pass { fill: var(--mint); opacity: 0; }
 .vr-gate-fail { fill: var(--ember); opacity: 0; }
 .vr-gate-warn { fill: var(--amber); opacity: 0; }
-.vr-gate.look-dashed .vr-gate-base rect { fill: none; stroke: var(--haze); stroke-dasharray: 4 3; stroke-width: 1.5; }
-.vr-gate-icon path { fill: none; stroke: #6b7a95; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.vr-gate.look-dashed .vr-gate-base .vr-gate-disc { fill: none; stroke: var(--haze); stroke-dasharray: 4 3; }
+.vr-gate-icon path { fill: none; stroke: #c9d2e3; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .vr-gate-label { fill: var(--s-ink-2); font: 600 12px "Instrument Sans", sans-serif; letter-spacing: 0.06em; text-anchor: middle; }
 .vr-scan { opacity: 0; }
-.vr-check { fill: none; stroke: var(--mint); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.vr-check { opacity: 0; }
+.vr-check circle { fill: var(--mint); }
+.vr-check path { fill: none; stroke: #04140e; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .vr-capsule { opacity: 0; }
 .vr-pill { fill: #182447; stroke: var(--seal); stroke-width: 1.5; }
 .vr-pill-text { fill: #fff; font: 700 15px "JetBrains Mono", monospace; text-anchor: middle; }
@@ -107,6 +137,7 @@
 .vr-lane-label.small { font-size: calc(var(--u) * 12px); }
 .vr-lane-sub { font-size: calc(var(--u) * 12px); }
 .vr-gate-label, .vr-note-text, .vr-dest-name { font-size: calc(var(--u) * 12px); }
+.vr-col { font-size: calc(var(--u) * 11px); }
 .vr-count { font-size: calc(var(--u) * 14px); }
 .vr-count.small, .vr-bubble-text, .vr-result-sub { font-size: calc(var(--u) * 13px); }
 .vr-result-main { font-size: calc(var(--u) * 19px); }
@@ -316,7 +347,7 @@
 }
 /* full screen */
 .vr:fullscreen { max-width: none; border-radius: 0; margin: 0; padding: 18px 28px; display: flex; flex-direction: column; justify-content: center; overflow: auto; }
-.vr:fullscreen .vr-screen { width: min(100%, calc((100vh - 470px) * 2.915)); }
+.vr:fullscreen .vr-screen { width: min(100%, calc((100vh - 470px) * 2.82)); }
 .vr:fullscreen .vr-caption { font-size: clamp(18px, 2vw, 26px); }
 @media (max-width: 760px) {
   .vr:fullscreen { padding: 12px; justify-content: flex-start; }
