@@ -1,5 +1,3 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="3" y="3" width="58" height="58" rx="15" fill="#2747c4"/>
-  <path d="M30.5 21.5C28 14.5 11 14.5 11 24C11 33.5 31 30 31 40C31 49.5 13.5 50 9.5 42.5" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/>
-  <path d="M38 15.5H54M46 15.5V48.5M38 48.5H54" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round"/>
+  <defs><linearGradient id="sein-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ee6d0"/><stop offset="1" stop-color="#6e8bff"/></linearGradient></defs><path d="M32 5 55 12.5V30C55 44.5 45.5 54.5 32 59.5 18.5 54.5 9 44.5 9 30V12.5Z" fill="url(#sein-g)" stroke="url(#sein-g)" stroke-width="4" stroke-linejoin="round"/><path d="M40.5 24C39.3 19.6 35.8 17.5 31.6 17.5 26.6 17.5 23 20.4 23 24.6 23 33.4 41 29.4 41 38.8 41 43.4 37.2 46.5 32 46.5 27.4 46.5 24 44.4 22.6 40.6" fill="none" stroke="#06101f" stroke-width="6.2" stroke-linecap="round"/>
 </svg>
