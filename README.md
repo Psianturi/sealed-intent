@@ -2,15 +2,35 @@
 
 # Sealed Intent (SeIn)
 
-**Spending rules protect an AI agent's wallet only while the attacker cannot read them.** SeIn stands between an AI agent
-and its wallet on NEAR. Every payment is checked against rules the agent never sees, anything unusual waits for the
-owner's wallet signature, and each decision leaves a receipt anyone can verify without learning the amount or the receiver.
+**A guard between an AI agent and its wallet on NEAR.** The agent can ask for money; it cannot take it. Every payment
+is checked against rules the agent never sees, anything unusual waits for the owner's wallet signature, and each
+decision leaves a receipt anyone can verify without learning the amount or the receiver.
 
-Built at NEAR HACKATHON, November 2026. Tracks: `security`, `privacy`, `agents`. Live: https://sein-near.vercel.app. License: MIT.
+Live: https://sein-near.vercel.app · Built at NEAR HACKATHON, November 2026 · Tracks: `security`, `privacy`, `agents` · License: MIT
 
-## Judge path: do X, see Y
+## Who it is for
 
-**In a browser, nothing to install (about three minutes):**
+| You | What SeIn gives you |
+|---|---|
+| Run an AI agent that holds money | A payment firewall. The agent holds no key: it asks SeIn, SeIn checks, and a custody wallet pays only what was allowed |
+| Have a NEAR wallet and no agent | Two free checks, with no account: check a payment before you send it, and check up a wallet |
+
+## Features
+
+| Feature | What it does | State |
+|---|---|---|
+| Payment firewall | Five checks on every payment an agent asks for, then `ALLOW`, `WARN` (wait for the owner) or `BLOCK` | Live on NEAR testnet; run once on mainnet |
+| Secret rules | Limits and trusted receivers are encrypted. The agent only hears "refused", never which limit, so it cannot aim just under it | Live |
+| Owner approval | A payment SeIn is unsure about needs the owner's NEAR wallet signature (NEP-413). The agent cannot approve itself | Live on testnet |
+| Sealed receipts | Each decision is signed. The verdict is public; amount, receiver and instruction are sealed and can be opened one field at a time | Live |
+| Check a real payment | Anyone describes a payment; SeIn reads the chain and says whether the receiver is new, a look-alike or the message is a trick, with a forecast. Nothing is sent | Live, mainnet and testnet data |
+| Checkpoint | A check-up for any NEAR wallet: who can sign, which apps hold keys, a risk forecast from its history, and one transaction to cut risky keys | Live, mainnet and testnet |
+| Arena | The same rules as the live firewall, faced with 15 attack cases modelled on real incidents, next to a wallet with no guard and one with limits only | Recorded run, test tokens |
+| Proof | A page where the visitor's own browser checks each claim against NEAR | Live |
+
+## Try it in a browser
+
+About three minutes, nothing to install.
 
 | # | Do | See |
 |---|---|---|
@@ -23,7 +43,9 @@ Built at NEAR HACKATHON, November 2026. Tracks: `security`, `privacy`, `agents`.
 | 7 | Open https://sein-near.vercel.app/arena.html | Play ten requests as the guard, watch the recorded run, browse 15 cases and the incident list |
 | 8 | Open https://sein-near.vercel.app/checkup and type any NEAR account | A risk outlook read from its last 50 transactions (being steered to a look-alike receiver, keys that can act without the owner, who it pays), then its keys, the apps connected to it, look-alike and reported contacts, and keys registered inside NEAR Intents |
 
-**On your machine, no keys and no funds** (Node.js 22.13+ and pnpm through `corepack enable`):
+## Run it on your machine
+
+No keys and no funds needed (Node.js 22.13+ and pnpm through `corepack enable`):
 
 ```bash
 pnpm install
@@ -45,6 +67,24 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | `pnpm arena:verify official` | `manifest signature VALID, referee recomputed from balances MATCHES` |
 | `pnpm rest` then `curl -X POST localhost:8787/v1/preflight -H 'Content-Type: application/json' -d @examples/intent.json` | JSON decision (`ALLOW` / `WARN` / `BLOCK`). Approving a WARN needs the owner token printed at startup |
 | `pnpm mcp:agent` | What an agent host runs in real use: it holds one agent token, forwards to the REST service, and refuses to start if a secret reached its environment |
+
+## How it works
+
+1. The agent holds no key. It sends SeIn the payment it wants and the message that asked for it.
+2. SeIn runs five checks: is the deal real (a signed NEAR Intents quote), who gets the money, is this kind of action allowed, is the agent being tricked, is it within budget.
+3. The answer is `ALLOW`, `WARN` or `BLOCK`. Rules decide; the model inside a NEAR AI Cloud enclave only advises and can only make the answer stricter.
+4. An allowed payment is signed by an OutLayer custody wallet. A `WARN` waits for the owner's wallet signature.
+5. Every decision leaves a signed receipt, and batches of receipts are anchored in a registry contract on NEAR.
+
+## How NEAR is used
+
+| Component | Used for |
+|---|---|
+| **NEAR Intents / 1Click API** | Dry and live quotes; quote signatures verified with the official SDK `verifyQuoteSignature` (ed25519, 1Click manager key); `confidentiality` for private routes; `/v0/deposit/submit` after execution |
+| **NEAR AI Cloud** | Private policy check inside a TEE: OpenAI-compatible API, `/v1/attestation/report`, `/v1/signature/{id}` |
+| **OutLayer Agent Custody** | Keys live in a TDX enclave; the agent never holds them. OutLayer's own policy is a second layer |
+| **NEAR RPC** | `view_account` (exists, contract, code hash) and `storage_balance_of` before a deposit |
+| **Confidential Intents** | Route for sensitive purposes (payroll) |
 
 ## What is built, what is recorded, what is not
 
@@ -82,7 +122,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | The hosted SeIn | `GET https://sein-103701492599.asia-southeast2.run.app/v1/try` returns today's remaining demo quota; `POST /v1/check` there answers about a real payment |
 | The incident dataset | https://sein-near.vercel.app/threats/incidents.json (CC BY 4.0) |
 
-## One number, with its baseline
+## Results
 
 From the recorded Arena run ([`replays/official`](replays/official), re-checkable with `pnpm arena:verify official`):
 
@@ -98,7 +138,44 @@ approves everything, two get through ($85.00, [`replays/official-lazy`](replays/
 get through in every wallet and are shown on purpose. These are scripted replays with test tokens: an attacker who adapts
 to SeIn was not tested.
 
-## What stops an agent that goes around SeIn
+## Limits (read this)
+
+- **Custody does not check tokens in plain contract calls.** OutLayer refuses native NEAR to a stranger, but once a token contract is on its list it signs any `ft_transfer` to anyone, for any amount. Tested live, see [`evidence/custody-testnet`](evidence/custody-testnet). SeIn reads the transfer and refuses it, and reconciliation catches one sent around SeIn, but a stolen custody key could move the token balance within one cycle. Hold native NEAR under the hardened policy, or keep token balances small.
+- **The hosted SeIn is a demo.** The one behind Try it is a single shared testnet wallet with small limits, and it forgets its history when it sleeps. To guard your own agent, you run SeIn on your own machine; approving from the web works against that local gateway, and registering an agent is command-line only.
+- **Receipts seal, the chain does not.** A receipt hides the amount and receiver, but its transaction hash points to public data. Keep the link private if that matters, or use the confidential route.
+- **Reconciliation is after the fact.** It limits a bypass to one cycle, it does not prevent it. Its nonce check freezes the wallet on any transaction SeIn did not record, including one whose result it lost.
+- **Offline mode is a simulation.** Fixture quotes are signed with a local "manager" key and checked by the *same* SDK function used in live mode. The enclave is simulated and every receipt says `offline-simulated`.
+- **The TLS binding ends at the gateway enclave.** The prompt is readable inside the verified gateway and model enclaves. Encrypting it to the model key (NEAR AI's E2EE) is not done yet. Collateral for the Intel check comes from Phala's PCCS unless `SEALED_PCCS_URL` points at Intel. The NVIDIA token is accepted on NRAS's TLS, not validated locally.
+- **The Sealed Intent process itself is a trust point.** If the host running it is compromised, the checks are bypassed. Separate OS users stop an agent that is merely confined to its own user, not a root compromise. A second policy inside custody and a guard contract on chain are the answers; neither is in place yet.
+- **Only swaps are quoted.** Transfers and contract calls are checked against the policy and priced from the token list, with no 1Click quote.
+- **NEAR AI Cloud signatures** prove a response came from an attested signing key, not which instance produced it, since instances share keys. Confidential Intents hides the origin and route, not the amount or recipient on the destination chain.
+- **Account age** needs an indexer (FastNEAR / NearBlocks). RPC does not provide it. In live mode the signal is skipped when unavailable.
+- The heuristic injection screen (English and Indonesian patterns) is a first filter and misses paraphrases and other languages. The deterministic checks are what actually stop the money.
+- **Limits can be located by probing,** once, at the price of a frozen wallet. See "Why the policy is secret" under Technical reference.
+- **A decision takes seconds, not milliseconds:** about 6 to 12 seconds with the enclave check on. It suits payments, not high-frequency trading.
+- Live execution currently supports NEP-141 origin assets on NEAR.
+- **Blocklist reports are self-asserted.** An agent's report with "evidence" only warns until the owner confirms it; the shared list is a signal, not a verdict.
+- Not audited. Do not use with funds you cannot lose.
+
+## Built with
+
+| Part | Libraries |
+|---|---|
+| Checker and gateway | TypeScript on Node 22 with its built-in SQLite, zod, `@modelcontextprotocol/sdk` |
+| NEAR | near-kit for transactions, message signatures and the local test node; `near-sdk` 5 for the registry contract in Rust |
+| Enclave evidence | `@phala/dcap-qvl` for Intel TDX quotes, NVIDIA's attestation service for the GPUs |
+| Quotes | NEAR Intents 1Click API, `@defuse-protocol/one-click-sdk-typescript` for quote signatures |
+| Receipts | `@noble/curves` and `@noble/hashes`, the same code in Node and in the browser |
+| Website | Vite, no framework; `@hot-labs/near-connect` for wallet signatures; three.js for the Checkpoint scene |
+| Hosting | Vercel for the site; Google Cloud Run for the hosted SeIn, deployed by GitHub Actions without a stored key |
+| Tests | vitest, near-sandbox through near-kit |
+
+## Technical reference
+
+The sections below hold the detail behind the summary above. Open the ones you need.
+
+<details>
+<summary><b>What stops an agent that goes around SeIn</b></summary>
 
 1. **It has nothing to go around with.** The custody API key, the policy key and the owner token belong to another OS user; the agent holds one agent token. `scripts/isolation-check.sh` proves this with two throwaway users on every CI run.
 2. **Custody has its own lock for native NEAR.** A careless owner approved a stranger and OutLayer still refused ([`evidence/custody-testnet`](evidence/custody-testnet)).
@@ -108,9 +185,10 @@ What this does not give: SeIn's verdict is not checked by a contract. If the cus
 for up to one cycle, because OutLayer's policy does not bind token transfers. A vault contract that pays only with a SeIn
 authorization would close this; it is not built. See [Limits](#limits-read-this).
 
----
+</details>
 
-## The problem
+<details>
+<summary><b>The problem, with the incidents behind it</b></summary>
 
 AI agents now hold money. In the past year:
 
@@ -124,7 +202,10 @@ look-alike, that the route returns 30% less than a reference price, that the quo
 that a "transfer" also adds a key, or that the instruction came from an email that said *"ignore previous instructions"*.
 None of this would have stopped the incidents above as they happened to their actual victims; the patterns are what we test.
 
-## What Sealed Intent checks
+</details>
+
+<details>
+<summary><b>What Sealed Intent checks: layers, reason codes, verdicts, the secret policy, identity and the kill switch</b></summary>
 
 ```mermaid
 flowchart LR
@@ -210,9 +291,10 @@ Reconciliation compares what the custody account signed with what SeIn recorded,
 
 The checker runs as its own OS user with the custody key, the policy key and the owner token. The agent runs as another user with one agent token and `pnpm mcp:agent`. `scripts/isolation-check.sh` sets this up with two throwaway users and proves it on every CI run: the agent's environment holds no secret, it cannot read the checker's folder, database or process environment, the custody API gives it nothing without the key, its token cannot approve, freeze or read the review queue, and the MCP bridge refuses to start if a secret leaks into its environment. Live mode refuses to start the in-process MCP server, and refuses a `.env` other users can read.
 
----
+</details>
 
-## Privacy: who sees what
+<details>
+<summary><b>Privacy: who sees what</b></summary>
 
 | Data | The agent | Public and chain | Sealed Intent operator | Auditor | NEAR AI enclaves | Quote and custody services |
 |---|---|---|---|---|---|---|
@@ -240,17 +322,10 @@ Only then is the prompt sent, over that same connection. A genuine report relaye
 
 A real run is kept in [`evidence/tee`](evidence/tee), and `pnpm tee:live` repeats it. The hardware evidence takes about 5 seconds. The model's answer used to take 20 to 90 seconds because it reasoned at length before one line of JSON; it is now asked for a short answer (`NEARAI_REASONING_EFFORT`, default `low`) and takes 1 to 5 seconds.
 
----
+</details>
 
-## NEAR components used, and why
-
-| Component | Used for |
-|---|---|
-| **NEAR Intents / 1Click API** | Dry and live quotes; quote signatures verified with the official SDK `verifyQuoteSignature` (ed25519, 1Click manager key); `confidentiality` for private routes; `/v0/deposit/submit` after execution |
-| **NEAR AI Cloud** | Private policy check inside a TEE: OpenAI-compatible API, `/v1/attestation/report`, `/v1/signature/{id}` |
-| **OutLayer Agent Custody** | Keys live in a TDX enclave; the agent never holds them. OutLayer's own policy is a second layer |
-| **NEAR RPC** | `view_account` (exists, contract, code hash) and `storage_balance_of` before a deposit |
-| **Confidential Intents** | Route for sensitive purposes (payroll) |
+<details>
+<summary><b>Why custody, and what a function-call key can and cannot do</b></summary>
 
 ### Why custody, and what a function-call key can and cannot do
 
@@ -260,9 +335,10 @@ The security track suggests function-call access keys. We use them where they fi
 - Paying with a NEP-141 token needs `ft_transfer` with **1 yoctoNEAR attached**, so a function-call key cannot pay *directly*. Today the key that moves money is held in OutLayer's enclave and reachable only through Sealed Intent's ALLOW path. A guard contract that holds the tokens and checks a Sealed Intent authorization on chain would let the agent hold only a function-call key (roadmap).
 - Function-call keys *are* the right tool for zero-deposit calls such as anchoring receipt hashes on chain (roadmap).
 
----
+</details>
 
-## How this differs from what already exists
+<details>
+<summary><b>How this differs from what already exists</b></summary>
 
 | | Spending caps | Recipient allow-list | Checks quote meaning (token, value, signature, drift) | Counterparty signals | Injection + private TEE opinion | Secret policy | Verifiable private receipts |
 |---|---|---|---|---|---|---|---|
@@ -278,9 +354,10 @@ The Agent API docs note that native requests (for example `native.near.transfer`
 budget and owner approval. A pre-signing layer that every request goes through closes that gap.
 SHIELD screens quotes at the protocol level; Sealed Intent protects an agent's owner from the agent.
 
----
+</details>
 
-## Live mode (mainnet)
+<details>
+<summary><b>Live mode (mainnet)</b></summary>
 
 ```bash
 cp .env.example .env              # fill NEARAI_API_KEY, NEARAI_MODEL, OUTLAYER_API_KEY, SEALED_AGENT_TOKENS, SEALED_OWNER_TOKEN; chmod 600 .env
@@ -293,7 +370,10 @@ pnpm gateway:check                # testnet: the real gateway end to end, includ
 
 NEAR Intents has no testnet, so swaps can only be tried on mainnet. Set `SEALED_NETWORK=testnet` and the testnet OutLayer host for transfers and calls. Store the custody policy before anything else: the first account to store one becomes its controller. Use a separate dev account and tiny amounts. Live mode refuses to start without `OUTLAYER_API_KEY` (set `SEALED_ALLOW_SIMULATED_EXECUTOR=1` for a preflight-only run), and the example policy requires a verified TEE opinion.
 
-## The Arena: incident patterns replayed against three wallets
+</details>
+
+<details>
+<summary><b>The Arena: incident patterns replayed against three wallets</b></summary>
 
 Three identical scripted agents receive the same everyday tasks and the same attacks. One holds its own key
 (no guard), one has spending caps only (what most agent wallets ship), one goes through Sealed Intent. A referee
@@ -328,7 +408,10 @@ tokens, creates every account under the sandbox root, and runs each scenario fro
 and account age are simulated there; everything else is the node's own behaviour. `SEALED_SANDBOX_TESTS=1 pnpm test`
 runs a parity test that compares the referee's verdicts between ledger and sandbox.
 
-## Project layout
+</details>
+
+<details>
+<summary><b>Project layout</b></summary>
 
 ```
 packages/core       preflight engine, 1Click client, checks, counterparty, budget, TEE client, executors, SealedWallet
@@ -344,26 +427,10 @@ scripts             demo, policy sealing, owner tool, custody and registry tools
 fixtures            example policy (offline fixtures live in packages/core/src/fixtures.ts)
 ```
 
-## Limits (read this)
+</details>
 
-- **Custody does not check tokens in plain contract calls.** OutLayer refuses native NEAR to a stranger, but once a token contract is on its list it signs any `ft_transfer` to anyone, for any amount. Tested live, see [`evidence/custody-testnet`](evidence/custody-testnet). SeIn reads the transfer and refuses it, and reconciliation catches one sent around SeIn, but a stolen custody key could move the token balance within one cycle. Hold native NEAR under the hardened policy, or keep token balances small.
-- **The hosted SeIn is a demo.** The one behind Try it is a single shared testnet wallet with small limits, and it forgets its history when it sleeps. To guard your own agent, you run SeIn on your own machine; approving from the web works against that local gateway, and registering an agent is command-line only.
-- **Receipts seal, the chain does not.** A receipt hides the amount and receiver, but its transaction hash points to public data. Keep the link private if that matters, or use the confidential route.
-- **Reconciliation is after the fact.** It limits a bypass to one cycle, it does not prevent it. Its nonce check freezes the wallet on any transaction SeIn did not record, including one whose result it lost.
-- **Offline mode is a simulation.** Fixture quotes are signed with a local "manager" key and checked by the *same* SDK function used in live mode. The enclave is simulated and every receipt says `offline-simulated`.
-- **The TLS binding ends at the gateway enclave.** The prompt is readable inside the verified gateway and model enclaves. Encrypting it to the model key (NEAR AI's E2EE) is not done yet. Collateral for the Intel check comes from Phala's PCCS unless `SEALED_PCCS_URL` points at Intel. The NVIDIA token is accepted on NRAS's TLS, not validated locally.
-- **The Sealed Intent process itself is a trust point.** If the host running it is compromised, the checks are bypassed. Separate OS users stop an agent that is merely confined to its own user, not a root compromise. A second policy inside custody and a guard contract on chain are the answers; neither is in place yet.
-- **Only swaps are quoted.** Transfers and contract calls are checked against the policy and priced from the token list, with no 1Click quote.
-- **NEAR AI Cloud signatures** prove a response came from an attested signing key, not which instance produced it, since instances share keys. Confidential Intents hides the origin and route, not the amount or recipient on the destination chain.
-- **Account age** needs an indexer (FastNEAR / NearBlocks). RPC does not provide it. In live mode the signal is skipped when unavailable.
-- The heuristic injection screen (English and Indonesian patterns) is a first filter and misses paraphrases and other languages. The deterministic checks are what actually stop the money.
-- **Limits can be located by probing,** once, at the price of a frozen wallet. See [Why the policy is secret](#why-the-policy-is-secret).
-- **A decision takes seconds, not milliseconds:** about 6 to 12 seconds with the enclave check on. It suits payments, not high-frequency trading.
-- Live execution currently supports NEP-141 origin assets on NEAR.
-- **Blocklist reports are self-asserted.** An agent's report with "evidence" only warns until the owner confirms it; the shared list is a signal, not a verdict.
-- Not audited. Do not use with funds you cannot lose.
-
-## Run SeIn for your own agent
+<details>
+<summary><b>Run SeIn for your own agent</b></summary>
 
 You need Node.js 22.13+, a NEAR account of your own, and an OutLayer custody wallet. Create the wallet in the OutLayer dashboard (https://app.outlayer.ai), and store its policy with your own NEAR wallet before its API key goes anywhere: the first account to store a policy controls it.
 
@@ -394,32 +461,22 @@ It is advice from public data: no key, no custody, nothing stored, and a small d
 
 Plain HTTP, for agents that do not speak MCP: `POST /v1/preflight` with `{ intent }`, then `POST /v1/execute` with `{ decisionId }` after ALLOW or the owner's approval. Send `Authorization: Bearer <agent token>`, an `Idempotency-Key`, and, when the agent has a key, `X-SeIn-Timestamp` and `X-SeIn-Signature` (ed25519 over `timestamp.METHOD.path.sha256hex(body)`).
 
-## Built with
+</details>
 
-| Part | Libraries |
-|---|---|
-| Checker and gateway | TypeScript on Node 22 with its built-in SQLite, zod, `@modelcontextprotocol/sdk` |
-| NEAR | near-kit for transactions, message signatures and the local test node; `near-sdk` 5 for the registry contract in Rust |
-| Enclave evidence | `@phala/dcap-qvl` for Intel TDX quotes, NVIDIA's attestation service for the GPUs |
-| Quotes | NEAR Intents 1Click API, `@defuse-protocol/one-click-sdk-typescript` for quote signatures |
-| Receipts | `@noble/curves` and `@noble/hashes`, the same code in Node and in the browser |
-| Website | Vite, no framework; `@hot-labs/near-connect` for wallet signatures; three.js for the Checkpoint scene |
-| Hosting | Vercel for the site; Google Cloud Run for the hosted SeIn, deployed by GitHub Actions without a stored key |
-| Tests | vitest, near-sandbox through near-kit |
-
-## Next
+<details>
+<summary><b>Next steps and roadmap</b></summary>
 
 - A vault contract on NEAR: the agent holds only a function-call key for `pay()`, and the contract pays only with a SeIn authorization and on-chain caps. This would make the verdict binding on chain.
 - A hosted SeIn for your own agent, with wallet sign-in. Today the hosted one is a shared demo.
 - Registering an agent from the web. Today it is the command line.
 - A registry on mainnet for mainnet receipts.
 
-## Roadmap
-
 Hosted gateway with wallet sign-in · run SeIn itself inside a TEE, so the operator cannot read it either · per-agent data keys with rotation · Trezu / Sputnik DAO multisig for WARNs above a threshold ·
 Agent API executor adapter · end-to-end encryption to the model key · indexer-backed account age · shared blocklist as a signed feed between instances · pay-per-check for other agents.
 
-## Pre-hackathon code and attribution
+</details>
+
+## Code history and attribution
 
 Hackathon rules count work from the announcement on 19 Oct 2026. This repository was started on 1 Nov 2026.
 It uses the official `@defuse-protocol/one-click-sdk-typescript` (quote signature verification) and
