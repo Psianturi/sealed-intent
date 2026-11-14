@@ -132,6 +132,11 @@ function renderOutlook(o: Outlook) {
     .map((l) => `<article class="cp-lane ${l.level}"><p class="cp-lane-level"><span class="cp-meter" aria-hidden="true"><i></i><i></i><i></i></span>${LEVEL[l.level]}</p><h3>${esc(l.title)}</h3><ul>${l.reasons.map((r) => `<li>${esc(r)}</li>`).join("")}</ul><p class="cp-lane-do">${esc(l.action)}</p></article>`)
     .join("");
   $("cp-outlook").hidden = false;
+  // the forecast is the answer people came for: say it next to the score, and bring the detail into view
+  const link = $("cp-forecast");
+  link.textContent = `Forecast: ${o.headline.replace(/\.$/, "").replace(/^Most exposed to: /, "most exposed to ")} ↓`;
+  link.hidden = false;
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(() => $("cp-outlook").scrollIntoView({ behavior: "smooth", block: "start" }), 1400);
 }
 
 const ICON: Record<Finding["severity"], string> = { danger: "!", caution: "?", ok: "✓", info: "i" };
@@ -209,6 +214,7 @@ async function run(account: string, network: Network) {
   document.body.dataset.state = "scanning";
   $("cp-result").hidden = true;
   $("cp-outlook").hidden = true;
+  $("cp-forecast").hidden = true;
   scene?.scanning(true);
   const input = await gather(account, network, flagged);
   const result = scan(input);

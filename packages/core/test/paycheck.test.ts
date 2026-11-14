@@ -70,4 +70,12 @@ describe("pay check", () => {
     expect(r.verdict).toBe("ALLOW");
     expect(r.findings.map((x) => x.code)).toContain("MESSAGE_SHORT");
   });
+
+  it("forecasts the most likely outcome, and calls it a forecast", () => {
+    expect(payCheck(base).outlook).toContain("ordinary payment");
+    expect(payCheck(base).outlook).toContain("not a guarantee");
+    expect(payCheck({ ...base, to: "bob-the-bui1der.near" }).outlook).toContain("impostor");
+    expect(payCheck({ ...base, to: "dave.near" }).outlook).toContain("nothing on chain confirms");
+    expect(payCheck({ ...base, to: "dave.near", injectionCodes: ["URGENCY"] }).outlook).toContain("pushed");
+  });
 });

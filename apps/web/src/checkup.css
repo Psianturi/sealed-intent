@@ -219,3 +219,7 @@ body.no-webgl .cp-stage { background: radial-gradient(closest-side, var(--tint) 
 .pc-demos button { border: 0; padding: 0; background: none; font: inherit; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .pc-demos button[aria-pressed="true"] { font-weight: 700; text-decoration: none; }
 .pc-proof { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--allow) 40%, var(--line)); background: var(--allow-soft); font-size: 14px; color: var(--ink); }
+.cp-forecast { display: inline-block; margin-top: 8px; max-width: 300px; padding: 6px 10px; border-radius: 10px; font-size: 13.5px; font-weight: 600; line-height: 1.35; text-decoration: none; color: var(--ink); border: 1px solid var(--line-strong); background: color-mix(in srgb, var(--surface) 88%, transparent); }
+.cp-forecast:hover { border-color: var(--accent); }
+.cp-outlook { scroll-margin-top: 84px; }
+.pc-outlook { margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--well); font-size: 14.5px; }

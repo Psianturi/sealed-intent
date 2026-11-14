@@ -36,6 +36,8 @@ export interface PayCheck {
   /** 0 calm, 100 certain trouble */
   risk: number;
   findings: PayFinding[];
+  /** the most likely outcome if the payment is sent as it is: a forecast from the findings, not a certainty */
+  outlook: string;
 }
 
 const DAY = 86_400_000;
@@ -53,6 +55,18 @@ const WHY: Record<string, string> = {
   SOCIAL_ENGINEERING: "it pushes, or claims authority",
   POLICY_CONFLICT: "it asks for something the rules would not allow",
 };
+
+// what most likely happens if the payment goes out as it is; the first finding present decides
+const OUTLOOK: [string[], string][] = [
+  [["RECEIVER_REPORTED"], "The money most likely goes to an account already reported for taking payments. A transfer on NEAR cannot be undone."],
+  [["RECEIVER_LOOKALIKE"], "The money most likely goes to an impostor, not to the account you know. A transfer on NEAR cannot be undone."],
+  [["RECEIVER_MISSING"], "The transfer most likely fails, or creates an account nobody you know controls."],
+  [["INSTRUCTION_TRICK", "INSTRUCTION_SUSPICIOUS", "ENCLAVE_OBJECTS"], "You are most likely being pushed into this payment. People who are pushed this way usually lose the money."],
+  [["AMOUNT_WHOLE_BALANCE", "AMOUNT_OVER_BALANCE"], "If the receiver is wrong, this one payment takes almost everything the account holds."],
+  [["RECEIVER_UNUSED", "RECEIVER_NEW", "NEVER_PAID", "NO_HISTORY", "NO_PAYER", "HISTORY_UNREAD", "RECEIVER_UNKNOWN"], "It may be fine, but nothing on chain confirms this receiver is who you think it is. Confirm it through a second channel first."],
+  [["AMOUNT_UNUSUAL", "AMOUNT_HALF_BALANCE", "RECEIVER_YOUNG", "ENCLAVE_UNSURE"], "Probably fine, but it is not how this account usually pays. Read the points below once more."],
+];
+const USUAL = "Most likely an ordinary payment: it matches how this account has paid before. That is a forecast from public data, not a guarantee.";
 
 export function payCheck(f: PayFacts): PayCheck {
   const out: PayFinding[] = [];
@@ -117,5 +131,8 @@ export function payCheck(f: PayFacts): PayCheck {
 
   const blocked = out.some((x) => x.level === "block");
   const order = { block: 0, warn: 1, info: 2, ok: 3 } as const;
-  return { verdict: blocked ? "BLOCK" : risk >= 25 ? "WARN" : "ALLOW", risk: blocked ? 100 : Math.min(risk, 95), findings: out.sort((a, b) => order[a.level] - order[b.level]) };
+  const verdict = blocked ? "BLOCK" : risk >= 25 ? "WARN" : "ALLOW";
+  const has = new Set(out.map((x) => x.code));
+  const outlook = verdict === "ALLOW" ? USUAL : (OUTLOOK.find(([codes]) => codes.some((c) => has.has(c)))?.[1] ?? USUAL);
+  return { verdict, risk: blocked ? 100 : Math.min(risk, 95), findings: out.sort((a, b) => order[a.level] - order[b.level]), outlook };
 }

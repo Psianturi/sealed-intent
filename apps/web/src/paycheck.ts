@@ -7,6 +7,7 @@ interface Result {
   verdict: "ALLOW" | "WARN" | "BLOCK";
   risk: number;
   findings: Finding[];
+  outlook?: string;
   facts: { receiver: { exists: boolean; ageDays: number | null } | null; payer: { receiversSeen: number | null; balanceNear: number | null } | null; enclave: { signal: string; attested: boolean } | null };
   checkedAt: string;
   error?: string;
@@ -40,6 +41,7 @@ function render(r: Result) {
     <p class="t-stamp">${r.verdict}</p>
     <h2>${HEAD[r.verdict]}</h2>
     <div class="pc-risk" role="img" aria-label="Risk ${r.risk} out of 100"><span>Risk</span><div class="pc-bar"><i style="width:${Math.max(r.risk, 3)}%"></i></div><b>${r.risk} / 100</b></div>
+    ${r.outlook ? `<p class="pc-outlook"><b>Forecast.</b> ${esc(r.outlook)}</p>` : ""}
     <ul class="pc-find">${r.findings.map((x) => `<li class="${x.level}"><span class="pc-ico" aria-hidden="true">${ICON[x.level]}</span><span><b>${LABEL[x.level]}.</b> ${esc(x.text)}</span></li>`).join("")}</ul>
     <p class="t-note">Read live from NEAR ${esc(r.network)} at ${esc(r.checkedAt.slice(11, 16))} UTC: ${esc(read.join(", ") || "nothing could be read")}. Nothing was sent and nothing is kept.</p>
     <p class="t-note">This is advice: here SeIn holds no key and cannot stop you. In front of an agent's wallet the same checks are a hard stop. <a href="/start">Protect your own agent</a></p>`;
