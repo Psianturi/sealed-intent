@@ -74,6 +74,13 @@ export interface RestDeps {
 
 const BROWSER_ROUTES = /^(GET \/v1\/review\/[0-9a-f-]{36}|POST \/v1\/(approve|reject|freeze|try|check)|GET \/v1\/(try|check)|GET \/health)$/;
 
+/** Who is asking, for the rate limits. The host appends the caller's address last; anything before it the caller wrote. */
+export function visitorOf(req: IncomingMessage): string {
+  const hops = String(req.headers["x-forwarded-for"] ?? "").split(",").map((h) => h.trim()).filter(Boolean);
+  if (process.env.SEIN_TIMING === "1") console.log(`visitor: ${hops.length} forwarded hop${hops.length === 1 ? "" : "s"}`);
+  return hops.at(-1) ?? req.socket.remoteAddress ?? "?";
+}
+
 async function readBody(req: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
   let size = 0;
@@ -125,8 +132,7 @@ export function createRestServer(deps: RestDeps): Server {
       if (deps.demo && url.pathname === "/v1/try") {
         if (req.method === "GET") return send(res, 200, { network: deps.network, ...deps.demo.quota() });
         if (req.method === "POST") {
-          // behind Cloud Run the visitor's address is the first one in X-Forwarded-For
-          const visitor = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "?").split(",")[0]!.trim();
+          const visitor = visitorOf(req);
           let input: Record<string, unknown>;
           try {
             input = JSON.parse(await readBody(req)) as Record<string, unknown>;
@@ -140,7 +146,7 @@ export function createRestServer(deps: RestDeps): Server {
       if (deps.paycheck && url.pathname === "/v1/check") {
         if (req.method === "GET") return send(res, 200, deps.paycheck.quota());
         if (req.method === "POST") {
-          const visitor = String(req.headers["x-forwarded-for"] ?? req.socket.remoteAddress ?? "?").split(",")[0]!.trim();
+          const visitor = visitorOf(req);
           let input: Record<string, unknown>;
           try {
             input = JSON.parse(await readBody(req)) as Record<string, unknown>;

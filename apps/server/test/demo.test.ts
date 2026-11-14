@@ -17,7 +17,7 @@ function start(perVisitor = 5, paymentsPerDay = 5) {
   const server = createRestServer({ ...env, receipts: new ReceiptStore(join(dir, "out"), join(dir, ".sealed")), offline: true, demo, network: "mainnet", webOrigins: [SITE], auth: { agentForToken: () => undefined, ownerToken: "owner-secret", ownerTokenGenerated: false } });
   return new Promise<{ base: string; close: () => void }>((resolve) => server.listen(0, "127.0.0.1", () => resolve({ base: `http://127.0.0.1:${(server.address() as AddressInfo).port}`, close: () => server.close() })));
 }
-const tryIt = (base: string, body: unknown, ip = "1.2.3.4") => fetch(`${base}/v1/try`, { method: "POST", headers: { "Content-Type": "application/json", Origin: SITE, "X-Forwarded-For": `${ip}, 10.0.0.1` }, body: JSON.stringify(body) });
+const tryIt = (base: string, body: unknown, ip = "1.2.3.4") => fetch(`${base}/v1/try`, { method: "POST", headers: { "Content-Type": "application/json", Origin: SITE, "X-Forwarded-For": `10.0.0.1, ${ip}` }, body: JSON.stringify(body) });
 const routine = { to: DEMO_ACCOUNTS.payroll, amount: "5", token: "USDC", taskText: "Pay the October invoice, as agreed with finance." };
 
 let close: (() => void) | undefined;

@@ -58,6 +58,8 @@ export function createDemo(deps: { preflight: Preflight; store: ReceiptStore }, 
       }
       if (BigInt(amount) > 10n ** BigInt(token.decimals + 6)) return { status: 400, body: { error: "That amount is not realistic." } };
 
+      // forget only visitors whose ten minutes have passed; clearing everyone would reset every limit at once
+      if (visits.size > 5000) for (const [who, times] of visits) if (!times.some((t) => now - t < 600_000)) visits.delete(who);
       visits.set(visitor, [...recent, now]);
       requests++;
       const intent = { kind: "transfer", token: token.assetId, amount, recipient: to, taskText };

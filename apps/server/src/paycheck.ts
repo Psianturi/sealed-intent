@@ -104,7 +104,8 @@ export function createPayCheck(opts: PayCheckOptions): PayCheckService {
       } catch {
         return { status: 400, body: { error: "The amount must be a number of NEAR, like 2.5." } };
       }
-      if (visits.size > 5000) visits.clear();
+      // forget only visitors whose ten minutes have passed; clearing everyone would reset every limit at once
+      if (visits.size > 5000) for (const [who, times] of visits) if (!times.some((t) => now - t < 600_000)) visits.delete(who);
       visits.set(visitor, [...recent, now]);
       used++;
       const started = Date.now();
@@ -139,23 +140,25 @@ export function createPayCheck(opts: PayCheckOptions): PayCheckService {
         pastAmounts,
         balanceNear: balance?.result?.amount ? toNear(balance.result.amount) : undefined,
         injectionCodes,
+        // a few words name no receiver and no amount; a model asked to judge them only guesses
+        messageShort: Boolean(taskText) && injectionCodes.length === 0 && taskText.trim().split(/\s+/).length < 5,
         now,
       };
 
       // the model's opinion, from inside an enclave; not asked when the rules already refuse, and a failure only removes the opinion
       let enclave: PayFacts["enclave"];
-      if (opts.tee && taskText && payCheck(facts).verdict !== "BLOCK") {
+      if (opts.tee && taskText && !facts.messageShort && payCheck(facts).verdict !== "BLOCK") {
         const who = payer ?? "the-payer.near";
         const policy = policyFrom({ network, owner: who, wallet: who, perPaymentUsd: 1_000_000, dailyUsd: 1_000_000, receivers: known.slice(0, 40), newReceiver: "warn", tokens: ["NEAR"], enclave: true });
         const opinion = await Promise.race([
           opts.tee.check({ intent: { kind: "transfer", purpose: "general", token: "native", amount: yocto, recipient: to, taskText }, policy, injectionCodes, amountText: amount ? `${amount} NEAR` : undefined }).catch(() => undefined),
           new Promise<undefined>((r) => setTimeout(() => r(undefined), 45_000)),
         ]);
-        if (opinion) enclave = { signal: opinion.signal, attested: opinion.kind === "nearai-cloud" && opinion.attestation.quoteVerifiedLocally && opinion.attestation.signingAddressMatched };
+        if (opinion) enclave = { signal: opinion.signal, codes: opinion.signalCodes, attested: opinion.kind === "nearai-cloud" && opinion.attestation.quoteVerifiedLocally && opinion.attestation.signingAddressMatched };
       }
 
       const result = payCheck({ ...facts, enclave });
-      opts.log?.(`check: ${result.verdict} on ${network} in ${((Date.now() - started) / 1000).toFixed(1)} s${taskText && opts.tee && !enclave && result.verdict !== "BLOCK" ? " (no enclave opinion)" : ""}`);
+      opts.log?.(`check: ${result.verdict} on ${network} in ${((Date.now() - started) / 1000).toFixed(1)} s${taskText && opts.tee && !enclave && !facts.messageShort && result.verdict !== "BLOCK" ? " (no enclave opinion)" : ""}`);
       return {
         status: 200,
         body: {

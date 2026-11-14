@@ -80,8 +80,21 @@ describe("check a real payment", () => {
     expect(trick.body.verdict).toBe("BLOCK");
     expect(codes(trick.body)).toContain("INSTRUCTION_TRICK");
     expect(trick.body.facts.enclave).toEqual({ signal: "block", attested: true });
-    await ask(svc, { from: "alice.near", to: "nobody-at-all.near", amount: "2", taskText: "Pay the invoice." });
+    await ask(svc, { from: "alice.near", to: "nobody-at-all.near", amount: "2", taskText: "Pay the October invoice to the supplier, as agreed." });
     expect(seen).toHaveLength(1);
+  });
+
+  it("does not ask the model about a few words, and does not let its doubt alone flag a familiar payment", async () => {
+    const seen: string[] = [];
+    const svc = createPayCheck({ perVisitor: 9, perDay: 9, fetch: chain(), tee: tee("block", seen) });
+    const short = await ask(svc, { from: "alice.near", to: "bob-the-builder.near", amount: "2", taskText: "just send directly" });
+    expect(seen).toHaveLength(0);
+    expect(short.body.verdict).toBe("ALLOW");
+    expect(codes(short.body)).toContain("MESSAGE_SHORT");
+    const doubted = await ask(svc, { from: "alice.near", to: "bob-the-builder.near", amount: "2", taskText: "Please move the usual amount to my other account today." });
+    expect(seen).toHaveLength(1);
+    expect(doubted.body.verdict).toBe("ALLOW");
+    expect(codes(doubted.body)).toContain("ENCLAVE_NOTE");
   });
 
   it("keeps working on the second source when the first is down, and says so when both are", async () => {
@@ -110,6 +123,17 @@ describe("check a real payment", () => {
       const agent = await fetch(`${base}/v1/check`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ from: "alice.near", to: "bob-the-bui1der.near" }) });
       expect(((await agent.json()) as Json).verdict).toBe("BLOCK");
       expect(await (await fetch(`${base}/v1/check`)).json()).toEqual({ checksLeft: 7 });
+      // a caller cannot buy a fresh limit by writing its own first hop: only the last hop, set by the host, counts
+      const spoof = (n: number) => fetch(`${base}/v1/check`, { method: "POST", headers: { "Content-Type": "application/json", "X-Forwarded-For": `9.9.9.${n}, 203.0.113.7` }, body: JSON.stringify({ to: "Not A Name!" }) });
+      const many = createPayCheck({ perVisitor: 2, perDay: 50, fetch: chain() });
+      const second = createRestServer({ ...env, receipts: new ReceiptStore(join(dir, "out"), join(dir, ".sealed")), offline: true, paycheck: many, network: "mainnet", webOrigins: [site], auth: { agentForToken: () => undefined, ownerToken: "owner-secret", ownerTokenGenerated: false } });
+      const base2 = await new Promise<string>((resolve) => second.listen(0, "127.0.0.1", () => resolve(`http://127.0.0.1:${(second.address() as AddressInfo).port}`)));
+      const hit = (n: number) => fetch(`${base2}/v1/check`, { method: "POST", headers: { "Content-Type": "application/json", "X-Forwarded-For": `9.9.9.${n}, 203.0.113.7` }, body: JSON.stringify({ to: "bob-the-builder.near" }) });
+      expect((await hit(1)).status).toBe(200);
+      expect((await hit(2)).status).toBe(200);
+      expect((await hit(3)).status).toBe(429);
+      second.close();
+      void spoof;
     } finally {
       server.close();
     }
