@@ -33,6 +33,7 @@
           <a class="btn primary big" href="/try">Try the firewall</a>
           <a class="btn big" href="/checkup">Check a wallet</a>
         </div>
+        <p class="hero-note">No AI agent? You can still <a href="/try#check">check a payment before you send it</a> or <a href="/checkup">check up your own wallet</a>.</p>
         <p class="pitch">Signers check format. SeIn checks meaning.</p>
         <p class="legend-status"><span class="ls"><span class="status live">Live</span> rules, receipts, enclave check, payments on testnet</span><span class="ls"><span class="status sim">Simulated</span> the Arena's chain</span><span class="ls"><span class="status live">Once</span> a payment on NEAR mainnet</span></p>
       </div>
@@ -51,12 +52,16 @@
 
     <section id="start">
       <h2>What you can do here</h2>
-      <p class="lead">Three live tools and one recorded run. No account, nothing to install.</p>
-      <div class="cards four">
+      <p class="lead">SeIn's main job is to guard the wallet of an AI agent. Two of its checks are also open to anyone with a NEAR wallet. No account, nothing to install.</p>
+      <h3 class="ways-head">You have a NEAR wallet. No agent needed.</h3>
+      <div class="cards two">
+        <a class="card way" href="/try#check"><span class="way-tag">Live · real payments</span><h3>Check before you pay</h3><p>Describe a payment you are about to send. SeIn reads the chain and says if the receiver is new, a look-alike, or the message is a trick, with a forecast of what most likely happens. Nothing is sent.</p><span class="way-go">Check a payment</span></a>
+        <a class="card way" href="/checkup"><span class="way-tag">Live · any NEAR wallet</span><h3>Wallet check-up</h3><p>Type any NEAR account. See how it is most likely to lose money, then cut risky app connections with your own wallet.</p><span class="way-go">Open Checkpoint</span></a>
+      </div>
+      <h3 class="ways-head">You run an AI agent, or want to see the guard at work.</h3>
+      <div class="cards two">
         <a class="card way" href="/try"><span class="way-tag main">Live demo · testnet</span><h3>Payment firewall for AI agents</h3><p>Play an AI agent and ask SeIn to pay. A safe payment really goes through on NEAR testnet; a trick is stopped. Then try to trick it yourself.</p><span class="way-go">Try it</span></a>
-        <a class="card way" href="/try#check"><span class="way-tag">Live · real payments</span><h3>Check before you pay</h3><p>Describe a payment you are about to send. SeIn reads the chain and says if the receiver is new, a look-alike, or the message is a trick. Nothing is sent.</p><span class="way-go">Check a payment</span></a>
-        <a class="card way" href="/checkup"><span class="way-tag">Live · any NEAR wallet</span><h3>Wallet check-up</h3><p>Type any NEAR account, yours or an agent's. See how it is most likely to lose money, then cut risky connections with your own wallet.</p><span class="way-go">Open Checkpoint</span></a>
-        <a class="card way" href="/arena.html"><span class="way-tag">Recorded run</span><h3>Attack arena</h3><p>Real incident patterns, replayed with test tokens against three wallets: no guard, limits only, SeIn. Watch it, or be the guard yourself.</p><span class="way-go">Open the Arena</span></a>
+        <a class="card way" href="/arena.html"><span class="way-tag">Recorded run</span><h3>Attack arena</h3><p>The same rules as the live firewall, faced with real incident patterns and test tokens: no guard, limits only, SeIn. Watch it, or be the guard yourself.</p><span class="way-go">Open the Arena</span></a>
       </div>
       <p class="note">The live parts can be checked from your own browser on the <a href="/proof">Proof</a> page. The demo uses a shared test wallet; to protect your own AI agent, <a href="/start">put SeIn in front of it</a>.</p>
     </section>

@@ -23,15 +23,15 @@
   <!--header:try-->
   <main class="cp">
     <div class="t-modes" role="tablist" aria-label="Two ways to use the firewall">
-      <button type="button" role="tab" id="tab-demo" aria-controls="mode-demo" aria-selected="true" data-mode="demo"><b>Live demo</b><small>Play the agent, with test money</small></button>
-      <button type="button" role="tab" id="tab-check" aria-controls="mode-check" aria-selected="false" data-mode="check"><b>Check a real payment</b><small>Your own payment, nothing is sent</small></button>
+      <button type="button" role="tab" id="tab-demo" aria-controls="mode-demo" aria-selected="true" data-mode="demo"><b>Live demo</b><small>For AI agents: play the agent, test money</small></button>
+      <button type="button" role="tab" id="tab-check" aria-controls="mode-check" aria-selected="false" data-mode="check"><b>Check a real payment</b><small>For anyone: your own payment, nothing is sent</small></button>
     </div>
 
     <div id="mode-demo" role="tabpanel" aria-labelledby="tab-demo">
     <section class="t-hero">
       <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>Live demo: the payment firewall</p>
       <h1 class="t-title">Be the agent. Try to get paid.</h1>
-      <p class="cp-lead">You play an AI agent with a wallet on NEAR testnet. Ask SeIn to pay. The real checks answer: a model in a NEAR AI Cloud enclave, the owner's secret rules and an OutLayer custody wallet. Test tokens only.</p>
+      <p class="cp-lead">This is SeIn's main job: guarding the wallet of an AI agent. Here you play the agent, on NEAR testnet. Ask SeIn to pay, and the real checks answer: a model in a NEAR AI Cloud enclave, the owner's secret rules and an OutLayer custody wallet. Test tokens only.</p>
       <ol class="how3"><li>Pick a request, or write your own</li><li>Ask SeIn to pay</li><li>See the verdict, the reasons and the receipt</li></ol>
       <p class="t-offline" id="t-offline" hidden>The live firewall goes online soon. Until then, <a href="/arena.html">watch the Arena</a> or <a href="/checkup">check up a wallet</a>.</p>
     </section>
@@ -80,7 +80,7 @@
       <section class="t-hero">
         <p class="cp-eyebrow"><span class="cp-live" aria-hidden="true"></span>Live · real chain data · nothing is sent</p>
         <h1 class="t-title">Check a payment before you send it.</h1>
-        <p class="cp-lead">About to pay someone on NEAR, or is your agent? Describe the payment. SeIn looks the receiver up on chain, compares it with the paying account's own history, and has a model inside a NEAR AI Cloud enclave read the message that asked for it. No wallet connection, no key, and nothing is kept.</p>
+        <p class="cp-lead">No AI agent needed. About to pay someone on NEAR? Describe the payment. SeIn looks the receiver up on chain, compares it with the paying account's own history, and has a model inside a NEAR AI Cloud enclave read the message that asked for it. No wallet connection, no key, and nothing is kept.</p>
       </section>
 
       <section class="t-grid">

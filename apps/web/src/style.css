@@ -606,3 +606,6 @@ header.top nav a:hover { transform: translateY(-1px); }
 .subnav a[aria-current="page"] { background: color-mix(in srgb, var(--cyan) 16%, var(--surface)); box-shadow: inset 0 0 0 1px var(--cyan); }
 .subnav + .eyebrow, .subnav + .page-title { margin-top: 26px; }
 @media (max-width: 640px) { .subnav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); } .subnav a { padding: 8px 10px; } }
+.ways-head { margin: 28px 0 0; font-family: inherit; font-size: 15px; font-weight: 600; letter-spacing: 0.01em; color: var(--muted); }
+.ways-head + .cards.two { margin-top: 10px; }
+.hero-note { margin: -8px 0 16px; font-size: 14.5px; color: var(--muted); }
