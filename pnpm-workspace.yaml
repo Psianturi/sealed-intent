@@ -1,3 +1,7 @@
 packages:
   - "packages/*"
   - "apps/*"
+
+# a patched build of a package the MCP SDK pulls in
+overrides:
+  "@hono/node-server": ">=2.1.6"
