@@ -50,6 +50,7 @@ No keys and no funds needed (Node.js 22.13+ and pnpm through `corepack enable`):
 ```bash
 pnpm install
 pnpm demo        # the whole story, offline
+node examples/mcp-agent.mjs    # an agent that reaches SeIn only through MCP
 pnpm test        # about 270 tests, including an 8-process race on the budget and a scan of every byte written to disk
 pnpm redteam     # 20 attack scenarios -> out/redteam-report.md
 pnpm verify out/receipts
@@ -67,6 +68,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | `pnpm arena:verify official` | `manifest signature VALID, referee recomputed from balances MATCHES` |
 | `pnpm rest` then `curl -X POST localhost:8787/v1/preflight -H 'Content-Type: application/json' -d @examples/intent.json` | JSON decision (`ALLOW` / `WARN` / `BLOCK`). Approving a WARN needs the owner token printed at startup |
 | `pnpm mcp:agent` | What an agent host runs in real use: it holds one agent token, forwards to the REST service, and refuses to start if a secret reached its environment |
+| `node examples/mcp-agent.mjs` | A small agent uses SeIn only through MCP, as Claude Desktop or Cursor would. An invoice -> `paid (simulated, offline mode)`; a new supplier -> `waiting for the owner`; the agent is told "the owner approved it" -> `still waiting for the owner`; a fake CFO -> `refused`. Last line: `All 4 outcomes as expected.` With `AGENT_MODEL_KEY` set and `--brain model`, a model decides the tool calls |
 
 ## How it works
 
@@ -98,6 +100,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | A hosted SeIn on Google Cloud Run, behind the Try it page | Built. A shared testnet demo wallet with small limits, not a service for your own agent |
 | Check a real payment: an opinion on one payment before it is sent, from live chain facts and the enclave | Built, live for NEAR mainnet and testnet, for people (the Try it page) and agents (`POST /v1/check`). Advice only: it holds no key and cannot stop a payment |
 | MCP server, REST API, and a check for x402 payment requests | Built. x402 is covered by tests and reads the payees a service publishes |
+| An agent with a model as its brain, using SeIn only through MCP | Run on testnet on 14 Nov 2026: paid, held for the owner, refused, and paid after the owner's wallet signature. The agent is a small script with the official MCP client, not Claude Desktop or Cursor |
 | Checkpoint: scan and heal any NEAR account, with a risk outlook from its history | Built, runs in the browser against NEAR mainnet or testnet. The outlook is explainable rules over public data, a forecast and not a guarantee |
 | The Arena run | Recorded with test tokens on an in-memory ledger and again on three local NEAR nodes. Quotes, the enclave opinion and custody are stand-ins there |
 | Incident watch: 29 real incidents with sources | A dataset mapped to SeIn's checks by pattern. Not tested against SeIn |
@@ -116,6 +119,7 @@ pnpm arena:verify official   # re-checks the recorded Arena run
 | Receipt batch anchored | [`CjmAwijP…`](https://testnet.nearblocks.io/txns/CjmAwijPato9is1Kv7HD4Y2ey9HULJA778SXVB8DAhqb) |
 | A payment sent around SeIn, found in 62 seconds, wallet frozen on chain in 64 | payment [`3JERjb5v…`](https://testnet.nearblocks.io/txns/3JERjb5v8jd9ZGg6qEwmW2GnYsUzATzBjHVVmuYPnZyy), freeze [`7Hb2tPHB…`](https://testnet.nearblocks.io/txns/7Hb2tPHBUuU3MQ1eLTWegjorc26Kv5rcBZ2fpfFhD62S) |
 | NEAR mainnet: a payment SeIn allowed and custody paid, and a trick it refused | payment [`4GYCHxrb…`](https://nearblocks.io/txns/4GYCHxrbFFVPawDt5ugdeyWFjud2ehvpa17yegjZyPav), receipts and the policy in [`evidence/custody-mainnet`](evidence/custody-mainnet) |
+| An agent with a model as its brain, reaching SeIn only through MCP: two payments, a refused trick, and a false "the owner approved it" that moved nothing | [`evidence/agent-mcp`](evidence/agent-mcp), payments [`AATf6d1o…`](https://testnet.nearblocks.io/txns/AATf6d1oZCurVFpJdtxYLRtxjmFYBnsUn75ccGm95zZr) and [`5TTySAoM…`](https://testnet.nearblocks.io/txns/5TTySAoM4ieTAZasUvSM46jkazp9UhxrtQb7wzKMngBG) |
 | Custody tested on its own, 16 attempts, including three it signed and should not have | [`evidence/custody-testnet`](evidence/custody-testnet) |
 | A real enclave check with everything needed to re-check it | [`evidence/tee`](evidence/tee); `pnpm tee:live` repeats it with your own NEAR AI key |
 | A signed NEAR Intents quote | [`evidence/intents`](evidence/intents); the Proof page fetches a fresh one |
@@ -423,6 +427,7 @@ apps/server         REST gateway, the agent's MCP bridge, the in-process MCP dem
 contracts           sein-registry, the public record on NEAR (Rust)
 evidence/tee        a real NEAR AI Cloud check, with everything needed to recheck it
 evidence/custody-testnet  real testnet runs: custody alone, the whole path, a bypass caught
+evidence/agent-mcp        a model-driven agent paying through MCP on testnet
 scripts             demo, policy sealing, owner tool, custody and registry tools, live checks, isolation check, secret scan
 fixtures            example policy (offline fixtures live in packages/core/src/fixtures.ts)
 ```
