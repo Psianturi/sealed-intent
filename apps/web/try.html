@@ -86,12 +86,6 @@
       <section class="t-grid">
         <form class="cp-panel t-form" id="pc-form" autocomplete="off">
           <h2>The payment</h2>
-          <div class="t-scenarios" role="group" aria-label="Your payment or an example">
-            <button type="button" data-example="own">My own payment</button>
-            <button type="button" data-example="usual">Example: a usual vendor</button>
-            <button type="button" data-example="like">Example: a look-alike name</button>
-            <button type="button" data-example="rush">Example: a stranger in a hurry</button>
-          </div>
           <p class="t-expect" id="pc-expect"></p>
           <label class="t-field">Paying account<input id="pc-from" spellcheck="false" placeholder="you.near" /></label>
           <label class="t-field">Pay to<input id="pc-to" spellcheck="false" placeholder="receiver.near" required /></label>
@@ -100,6 +94,7 @@
           <label class="t-field">Network<select id="pc-net"><option value="mainnet">NEAR mainnet</option><option value="testnet">NEAR testnet</option></select></label>
           <button class="cp-go t-send" id="pc-send" type="submit">Check this payment</button>
           <p class="t-quota" id="pc-quota"></p>
+          <p class="pc-demos">No NEAR account to hand? Use demo accounts SeIn made on testnet: <button type="button" data-example="usual">a usual vendor</button> · <button type="button" data-example="like">a look-alike name</button> · <button type="button" data-example="rush">a stranger in a hurry</button> <button type="button" data-example="own" id="pc-own" hidden>· back to my own payment</button></p>
         </form>
 
         <div class="t-side">
@@ -112,6 +107,7 @@
               <li><b>The message</b>Does it use pressure, secrecy or an order to ignore rules?</li>
             </ul>
             <p class="t-note">A pass needs a receiver the paying account has paid before. Anything SeIn cannot confirm is a warning, never a pass.</p>
+            <p class="pc-proof"><b>13 Nov 2026, NEAR mainnet.</b> The same checks stood in front of a custody wallet with real NEAR: a trick was refused and a 0.005 NEAR invoice was paid. <a href="/proof#mainnet">See it read from the chain</a></p>
           </div>
           <div class="t-verdict" id="pc-verdict" hidden aria-live="polite"></div>
         </div>
