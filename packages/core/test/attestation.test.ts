@@ -7,7 +7,7 @@ import { Quote } from "@phala/dcap-qvl";
 import { describe, expect, it } from "vitest";
 import { checkGpuEvidence, checkNearReport, dcapVerifier, replayRtmr3, type NearReport, type QuoteVerifier } from "../src/attestation";
 import { DEMO_POLICY } from "../src/fixtures";
-import { NearAiCloudChecker } from "../src/tee-check";
+import { NearAiCloudChecker, signerMatches } from "../src/tee-check";
 
 const fixture = JSON.parse(readFileSync(join(__dirname, "fixtures", "attestation.json"), "utf8")) as {
   nonce: string;
@@ -102,4 +102,14 @@ describe.skipIf(!live)("live: real Intel and NVIDIA verification", () => {
     expect(c.ok).toBe(true);
     expect((await checkGpuEvidence(model, fixture.nonce)).ok).toBe(true);
   }, 60_000);
+});
+
+describe("matching the answer's signer to the verified reports", () => {
+  const key = "0x3b753b4406613c5e70ae640508632b600424fa0c";
+  it("accepts the shared key of several enclaves, in any letter case, and nothing else", () => {
+    const reports = [1, 2, 3].map(() => ({ signing_address: key, signing_algo: "ecdsa" }));
+    expect(reports.filter((r) => signerMatches(r, key.toUpperCase().replace("0X", "0x"), "ecdsa"))).toHaveLength(3);
+    expect(reports.filter((r) => signerMatches(r, "0x" + "1".repeat(40), "ecdsa"))).toHaveLength(0);
+    expect(signerMatches({ signing_address: key, signing_algo: "ed25519" }, key, "ecdsa")).toBe(false);
+  });
 });

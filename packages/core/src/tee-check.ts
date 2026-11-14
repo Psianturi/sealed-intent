@@ -45,6 +45,12 @@ const lap = Object.assign((step: string) => {
 
 const SIGNAL_CODES = ["INTENT_QUOTE_MISMATCH", "SUSPICIOUS_TASK_TEXT", "SOCIAL_ENGINEERING", "POLICY_CONFLICT", "OTHER"];
 
+/** The signer of an answer must be the key of a report that passed every check. NEAR AI may run one model in several
+ * enclaves that share a key, so more than one verified report can carry it; every one of them was verified above. */
+export function signerMatches(report: { signing_address: string; signing_algo?: string }, signer: string, algo: string): boolean {
+  return report.signing_address.toLowerCase() === signer.toLowerCase() && report.signing_algo === algo;
+}
+
 export function buildTeePrompt(input: TeeCheckInput): { system: string; user: string } {
   const { intent, quote, policy, injectionCodes } = input;
   const system = [
@@ -114,7 +120,7 @@ export interface NearAiOptions {
  *  2. verify the gateway quote, that it binds this connection's certificate key, and every model report
  *     (Intel DCAP, nonce and signer binding, measurements, GPU evidence through NVIDIA NRAS); refuse before anything is sent otherwise
  *  3. send the completion over the same connection, keeping the exact bytes
- *  4. fetch the response signature and require a provider_tee signer that matches exactly one verified model report
+ *  4. fetch the response signature and require a provider_tee signer that matches verified model reports
  * The TLS binding reaches the gateway enclave. The model enclave is covered by its own report and signature.
  */
 export class NearAiCloudChecker implements TeeChecker {
@@ -225,12 +231,10 @@ export class NearAiCloudChecker implements TeeChecker {
     if (sig.signature_kind !== "provider_tee" && sig.signature_kind !== "gateway") throw new Error(`unknown signature_kind ${String(sig.signature_kind)}`);
     if (sig.signature_kind === "gateway" && !tee.allowGatewaySignature) throw new TeeUnverifiedError("response was signed by the gateway, not by the model enclave");
 
-    const signer = sig.signing_address.toLowerCase();
-    const signerMatches = (r: NearReport) => r.signing_address.toLowerCase() === signer && r.signing_algo === this.signingAlgo;
-    const matched = sig.signature_kind === "provider_tee" ? verifiedModels.filter((m) => signerMatches(m.report)) : [];
-    const gatewayMatched = sig.signature_kind === "gateway" && signerMatches(att.gateway_attestation);
-    const signingAddressMatched = matched.length === 1 || gatewayMatched;
-    if (!signingAddressMatched) throw new TeeUnverifiedError("response signer does not match exactly one verified attestation report");
+    const matched = sig.signature_kind === "provider_tee" ? verifiedModels.filter((m) => signerMatches(m.report, sig.signing_address!, this.signingAlgo)) : [];
+    const gatewayMatched = sig.signature_kind === "gateway" && signerMatches(att.gateway_attestation, sig.signing_address, this.signingAlgo);
+    const signingAddressMatched = matched.length > 0 || gatewayMatched;
+    if (!signingAddressMatched) throw new TeeUnverifiedError("response signer matches no verified attestation report");
     const bound = matched[0]?.check ?? gateway;
 
     const evidence: TeeEvidence = {
@@ -257,7 +261,7 @@ export class NearAiCloudChecker implements TeeChecker {
           ...gateway.checks.map((c) => ({ name: `gateway: ${c.name}`, ok: c.ok })),
           ...bound.checks.map((c) => ({ name: `model: ${c.name}`, ok: c.ok })),
           { name: "model: NVIDIA GPU evidence verified by NRAS", ok: matched[0]?.gpus !== undefined },
-          { name: "response signer matches exactly one verified report", ok: signingAddressMatched },
+          { name: `response signer matches ${matched.length === 1 ? "a verified report" : `${matched.length} verified reports, enclaves that share one key`}`, ok: signingAddressMatched },
           { name: "signed text = model:sha256(request bytes):sha256(response bytes)", ok: true },
           { name: "report and prompt sent over one TLS connection whose certificate key the gateway quote binds", ok: true },
         ],
