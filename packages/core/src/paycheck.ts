@@ -19,7 +19,9 @@ export interface PayFacts {
   reported?: string;
   /** what the instruction screen found in the message that asked for the payment */
   injectionCodes: string[];
-  enclave?: { signal: "allow" | "warn" | "block"; attested: boolean };
+  enclave?: { signal: "allow" | "warn" | "block"; attested: boolean; codes?: string[] };
+  /** the message is only a few words, so the model was not asked */
+  messageShort?: boolean;
   now: number;
 }
 
@@ -43,6 +45,14 @@ const median = (xs: number[]) => {
 };
 const near = (n: number) => `${Number(n.toFixed(n < 1 ? 4 : 2))} NEAR`;
 const times = (n: number) => (n === 1 ? "once" : `${n} times`);
+
+// the model's own reason, in plain words
+const WHY: Record<string, string> = {
+  INTENT_QUOTE_MISMATCH: "it does not clearly name this receiver or this amount",
+  SUSPICIOUS_TASK_TEXT: "its wording looks unusual",
+  SOCIAL_ENGINEERING: "it pushes, or claims authority",
+  POLICY_CONFLICT: "it asks for something the rules would not allow",
+};
 
 export function payCheck(f: PayFacts): PayCheck {
   const out: PayFinding[] = [];
@@ -94,9 +104,16 @@ export function payCheck(f: PayFacts): PayCheck {
   const tricks = f.injectionCodes.length > 0;
   if (tricks && f.enclave?.signal === "block") add("INSTRUCTION_TRICK", "block", "The message that asked for this reads like a trick: the screen flagged it, and the model in the enclave agrees.");
   else if (tricks) add("INSTRUCTION_SUSPICIOUS", "warn", "The message that asked for this uses the wording of a trick (pressure, secrecy, or an order to ignore rules).", 35);
-  else if (f.enclave?.signal === "block") add("ENCLAVE_OBJECTS", "warn", "The model in the enclave reads the message as unsafe.", 35);
-  else if (f.enclave?.signal === "warn") add("ENCLAVE_UNSURE", "warn", "The model in the enclave is not comfortable with the message.", 15);
-  else if (f.enclave?.signal === "allow") add("INSTRUCTION_PLAIN", "ok", `The message reads like an ordinary request${f.enclave.attested ? ", judged inside a verified enclave" : ""}.`);
+  else if (f.enclave && f.enclave.signal !== "allow") {
+    const reason = f.enclave.codes?.map((c) => WHY[c]).find(Boolean);
+    const why = reason ? `: ${reason}` : "";
+    // the model is one opinion: alone, it does not outweigh a receiver this account already pays, for a usual amount
+    const alone = before > 0 && !out.some((x) => x.level === "warn" || x.level === "block");
+    if (alone) add("ENCLAVE_NOTE", "info", `The model in the enclave is not sure about the message${why}. Nothing else about this payment looks wrong.`, 15);
+    else if (f.enclave.signal === "block") add("ENCLAVE_OBJECTS", "warn", `The model in the enclave reads the message as unsafe${why}.`, 35);
+    else add("ENCLAVE_UNSURE", "warn", `The model in the enclave is not comfortable with the message${why}.`, 15);
+  } else if (f.enclave?.signal === "allow") add("INSTRUCTION_PLAIN", "ok", `The message reads like an ordinary request${f.enclave.attested ? ", judged inside a verified enclave" : ""}.`);
+  else if (f.messageShort) add("MESSAGE_SHORT", "info", "The message is too short to judge, so SeIn looked at the receiver, the history and the amount only.");
 
   const blocked = out.some((x) => x.level === "block");
   const order = { block: 0, warn: 1, info: 2, ok: 3 } as const;

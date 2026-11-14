@@ -41,7 +41,9 @@ describe("pay check", () => {
   it("needs both the screen and the enclave to call a message a trick outright; one alone is a warning", () => {
     expect(payCheck({ ...base, injectionCodes: ["URGENCY"], enclave: { signal: "block", attested: true } }).verdict).toBe("BLOCK");
     expect(payCheck({ ...base, injectionCodes: ["URGENCY"], enclave: { signal: "allow", attested: true } }).verdict).toBe("WARN");
-    expect(payCheck({ ...base, enclave: { signal: "block", attested: true } }).verdict).toBe("WARN");
+    const stranger = payCheck({ ...base, to: "dave.near", enclave: { signal: "block", attested: true, codes: ["SOCIAL_ENGINEERING"] } });
+    expect(stranger.verdict).toBe("WARN");
+    expect(stranger.findings.find((x) => x.code === "ENCLAVE_OBJECTS")!.text).toContain("claims authority");
   });
 
   it("says what it could not see instead of guessing", () => {
@@ -51,5 +53,21 @@ describe("pay check", () => {
     expect(codes({ ...base, paidBefore: undefined })).toContain("HISTORY_UNREAD");
     expect(payCheck({ ...base, paidBefore: undefined }).verdict).toBe("WARN");
     expect(payCheck({ ...base, paidBefore: {} }).findings.map((x) => x.code)).toContain("NO_HISTORY");
+  });
+
+  it("does not let the model's doubt alone outweigh a receiver the payer already pays", () => {
+    const r = payCheck({ ...base, enclave: { signal: "block", attested: true, codes: ["INTENT_QUOTE_MISMATCH"] } });
+    expect(r.verdict).toBe("ALLOW");
+    expect(r.risk).toBe(15);
+    expect(r.findings.find((x) => x.code === "ENCLAVE_NOTE")).toMatchObject({ level: "info" });
+    expect(r.findings.find((x) => x.code === "ENCLAVE_NOTE")!.text).toContain("does not clearly name");
+    // with anything else wrong, the same doubt counts in full
+    expect(payCheck({ ...base, amountNear: 30, enclave: { signal: "block", attested: true } }).findings.map((x) => x.code)).toContain("ENCLAVE_OBJECTS");
+  });
+
+  it("says a few words are too short to judge instead of guessing", () => {
+    const r = payCheck({ ...base, messageShort: true, enclave: undefined });
+    expect(r.verdict).toBe("ALLOW");
+    expect(r.findings.map((x) => x.code)).toContain("MESSAGE_SHORT");
   });
 });
